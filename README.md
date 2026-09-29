@@ -1,1 +1,64 @@
 # TechChallengeApi
+
+Back-end monolítico (MVP) do sistema de atendimento e execução de serviços da oficina — FIAP SOAT, Tech Challenge Fase 1.
+
+> Este README está em construção; as seções abaixo cobrem o banco de dados e a execução local.
+
+## Pré-requisitos
+
+- Java 21
+- Docker e Docker Compose
+
+## Configuração
+
+```bash
+cp .env.example .env   # ajuste os valores, principalmente DB_PASSWORD
+```
+
+O `.env` fica fora do versionamento (`.gitignore`). Ele é lido pelo `docker-compose` e, quando a aplicação roda fora do Docker, também pelo Spring (`spring.config.import`).
+
+## Executando
+
+**Tudo no Docker (banco + aplicação):**
+
+```bash
+docker compose up -d --build
+```
+
+**Aplicação local + banco no Docker:**
+
+```bash
+docker compose up -d db
+cd oficina
+./mvnw spring-boot:run
+```
+
+- API: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui.html
+
+## Testes
+
+Os testes de integração sobem um PostgreSQL descartável via Testcontainers (requer Docker em execução):
+
+```bash
+cd oficina
+./mvnw test
+```
+
+## Banco de dados
+
+**PostgreSQL 17**, acessado via Spring Data JPA/Hibernate, com schema versionado pelo **Flyway**.
+
+**Por que PostgreSQL:**
+
+- O domínio é fortemente relacional (cliente → veículo → ordem de serviço → serviços/peças) e exige integridade referencial.
+- Transações ACID são necessárias em fluxos como aprovação do orçamento e baixa de estoque de peças.
+- Suporta restrições e índices únicos (CPF/CNPJ, placa), consultas agregadas (tempo médio de execução) e tipos como `uuid` e `timestamptz`.
+- Open source, com imagem oficial leve para o `docker-compose`.
+
+**Como evoluir o schema:**
+
+- Cada feature adiciona sua migration em `oficina/src/main/resources/db/migration/` (`V<n>__descricao.sql`). Convenções em `V1__baseline.sql`.
+- `spring.jpa.hibernate.ddl-auto=validate`: o Hibernate só confere o mapeamento, nunca altera o schema.
+- Entidades devem estender `shared.persistence.BaseEntity` (id UUID, `created_at`, `updated_at` e `version` para concorrência otimista).
+- Testes de integração usam `@Import(PostgresTestConfiguration.class)`.

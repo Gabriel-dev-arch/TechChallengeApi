@@ -1,3 +1,36 @@
 spring:
   application:
     name: oficina
+
+  # Carrega o .env (raiz do repositório ou pasta oficina/) quando existir, para rodar fora do Docker.
+  # Variáveis de ambiente do sistema continuam tendo precedência sobre o arquivo.
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../.env[.properties]
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:oficina}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      pool-name: oficina-pool
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+
+  jpa:
+    # O schema é responsabilidade do Flyway; o Hibernate apenas valida o mapeamento.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
