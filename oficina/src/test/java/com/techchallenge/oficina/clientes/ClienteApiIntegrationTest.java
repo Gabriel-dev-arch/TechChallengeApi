@@ -65,6 +65,8 @@ class ClienteApiIntegrationTest {
 				.andExpect(jsonPath("$.fullName").value("Maria Silva"))
 				.andExpect(jsonPath("$.documento").value("52998224725"))
 				.andExpect(jsonPath("$.tipoDocumento").value("CPF"))
+				.andExpect(jsonPath("$.createdAt").value(org.hamcrest.Matchers.endsWith("-03:00")))
+				.andExpect(jsonPath("$.updatedAt").value(org.hamcrest.Matchers.endsWith("-03:00")))
 				.andReturn();
 		String location = criado.getResponse().getHeader("Location");
 		assertThat(repository.count()).isEqualTo(1);
@@ -111,6 +113,23 @@ class ClienteApiIntegrationTest {
 				.andExpect(jsonPath("$.errors[?(@.campo=='email')]").exists())
 				.andExpect(jsonPath("$.errors[?(@.campo=='documento')].mensagem").value("CPF ou CNPJ inválido"));
 		assertThat(repository.count()).isZero();
+	}
+
+	@Test
+	void listagemPaginadaIgnoraSortLivreEValidaPageESize() throws Exception {
+		criar(json("Ana", "Zeta", "ana@email.com", CPF, null));
+		criar(json("Bia", "Alfa", "bia@email.com", "111.444.777-35", null));
+
+		// o Swagger UI envia sort=string / ["desc"]: não pode virar 500
+		mockMvc.perform(get("/clientes").param("page", "0").param("size", "20").param("sort", "string"))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].fullName").value("Ana Zeta"));
+		mockMvc.perform(get("/clientes").param("sort", "[\"desc\"]")).andExpect(status().isOk());
+		mockMvc.perform(get("/clientes").param("size", "1").param("page", "1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].fullName").value("Bia Alfa"));
+		mockMvc.perform(get("/clientes").param("size", "0")).andExpect(status().isBadRequest());
+		mockMvc.perform(get("/clientes").param("size", "101")).andExpect(status().isBadRequest());
+		mockMvc.perform(get("/clientes").param("page", "-1")).andExpect(status().isBadRequest());
 	}
 
 	@Test
