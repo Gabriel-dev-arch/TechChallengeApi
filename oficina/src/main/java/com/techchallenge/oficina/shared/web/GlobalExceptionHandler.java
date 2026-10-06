@@ -1,7 +1,8 @@
 package com.techchallenge.oficina.shared.web;
 
-import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
-import com.techchallenge.oficina.clientes.dominio.DocumentoJaCadastradoException;
+import com.techchallenge.oficina.shared.excecoes.ConflitoException;
+import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
+import com.techchallenge.oficina.shared.excecoes.RegraInvalidaException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,21 +20,36 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.List;
 import java.util.Map;
 
-/** Converte exceções em respostas {@code application/problem+json} (RFC 9457). */
+/**
+ * Converte exceções em respostas {@code application/problem+json} (RFC 9457).
+ *
+ * <p>As exceções de domínio de cada módulo estendem uma das bases de {@code shared.excecoes}
+ * ({@link RecursoNaoEncontradoException}, {@link ConflitoException} ou {@link RegraInvalidaException}),
+ * então módulos novos não precisam alterar esta classe.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-	@ExceptionHandler(ClienteNaoEncontradoException.class)
-	ProblemDetail naoEncontrado(ClienteNaoEncontradoException ex) {
+	@ExceptionHandler(RecursoNaoEncontradoException.class)
+	ProblemDetail naoEncontrado(RecursoNaoEncontradoException ex) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
-	@ExceptionHandler({DocumentoJaCadastradoException.class, DataIntegrityViolationException.class,
-			ObjectOptimisticLockingFailureException.class})
-	ProblemDetail conflito(Exception ex) {
-		String detalhe = ex instanceof DocumentoJaCadastradoException ? ex.getMessage()
-				: "A operação conflita com o estado atual dos dados. Tente novamente.";
-		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detalhe);
+	@ExceptionHandler(ConflitoException.class)
+	ProblemDetail conflito(ConflitoException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
+	@ExceptionHandler(RegraInvalidaException.class)
+	ProblemDetail regraInvalida(RegraInvalidaException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
+	/** Violação de constraint no banco ou concorrência (lock otimista): mensagem genérica, sem detalhes internos. */
+	@ExceptionHandler({DataIntegrityViolationException.class, ObjectOptimisticLockingFailureException.class})
+	ProblemDetail conflitoDeDados(Exception ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+				"A operação conflita com o estado atual dos dados. Tente novamente.");
 	}
 
 	@Override
