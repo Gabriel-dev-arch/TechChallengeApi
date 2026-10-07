@@ -61,7 +61,7 @@ public class PecaInsumo extends BaseEntity {
         if(precoUnitario.signum() < 0){
             throw new PrecoInvalidoException("Preço não pode ser menor que zero");
         }
-        this.codigo = codigo.strip().toUpperCase(Locale.ROOT);
+        this.codigo = normalizarCodigo(codigo);
         this.nome = nome.strip();
         if (descricao == null || descricao.isBlank()) {
             this.descricao = null;
@@ -69,6 +69,10 @@ public class PecaInsumo extends BaseEntity {
             this.descricao = descricao.strip();
         }
         this.precoUnitario = precoUnitario;
+    }
+
+    public static String normalizarCodigo(String codigo){
+        return codigo.strip().toUpperCase(Locale.ROOT);
     }
 
     public BigDecimal getQuantidadeDisponivel(){
@@ -80,6 +84,17 @@ public class PecaInsumo extends BaseEntity {
         validarQuantidade(quantidade);
 
         this.quantidadeTotal = quantidadeTotal.add(quantidade);
+    }
+
+    public void registrarSaida(BigDecimal quantidade){
+        exigirAtivo();
+        validarQuantidade(quantidade);
+
+        if(getQuantidadeDisponivel().compareTo(quantidade) < 0){
+            throw new EstoqueInsuficienteException(getId(), quantidade, this.getQuantidadeDisponivel());
+        }
+
+        this.quantidadeTotal = quantidadeTotal.subtract(quantidade);
     }
 
     public void reservar(BigDecimal quantidade){
