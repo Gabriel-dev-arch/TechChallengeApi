@@ -2,4 +2,4 @@ target/
 .idea/
 .mvn/wrapper/maven-wrapper.jar
 *.md
-.env
+../.env
