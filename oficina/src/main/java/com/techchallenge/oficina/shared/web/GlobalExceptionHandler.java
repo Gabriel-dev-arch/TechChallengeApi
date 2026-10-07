@@ -2,6 +2,7 @@ package com.techchallenge.oficina.shared.web;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
 import com.techchallenge.oficina.clientes.dominio.DocumentoJaCadastradoException;
+import com.techchallenge.oficina.shared.excecoes.NaoAutenticadoException;
 import com.techchallenge.oficina.veiculos.dominio.PlacaJaCadastradaException;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoNaoEncontradoException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,6 +12,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -42,6 +46,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				? ex.getMessage()
 				: "A operação conflita com o estado atual dos dados. Tente novamente.";
 		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detalhe);
+	}
+
+	@ExceptionHandler(NaoAutenticadoException.class)
+	ProblemDetail naoAutenticado(NaoAutenticadoException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+	}
+
+	/** Token ausente ou inválido/expirado; chega aqui pelo entry point configurado no SecurityConfig. */
+	@ExceptionHandler(AuthenticationException.class)
+	ProblemDetail tokenAusenteOuInvalido(AuthenticationException ex) {
+		String detalhe = ex instanceof OAuth2AuthenticationException
+				? "Token inválido ou expirado. Faça login novamente em POST /auth/login."
+				: "Autenticação necessária. Envie o header 'Authorization: Bearer <token>' obtido em POST /auth/login.";
+		return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, detalhe);
+	}
+
+	/** Token válido, mas sem o perfil exigido; chega aqui pelo access denied handler configurado no SecurityConfig. */
+	@ExceptionHandler(AccessDeniedException.class)
+	ProblemDetail acessoNegado(AccessDeniedException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,
+				"Seu perfil não tem permissão para acessar este recurso.");
 	}
 
 	@Override

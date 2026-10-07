@@ -2,6 +2,7 @@ package com.techchallenge.oficina.veiculos;
 
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
+import com.techchallenge.oficina.support.AdminAutenticadoTestConfiguration;
 import com.techchallenge.oficina.support.PostgresTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(PostgresTestConfiguration.class)
+@Import({PostgresTestConfiguration.class, AdminAutenticadoTestConfiguration.class})
 class VeiculoApiIntegrationTest {
 
 	@Autowired

@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.clientes;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteRepository;
+import com.techchallenge.oficina.support.AdminAutenticadoTestConfiguration;
 import com.techchallenge.oficina.support.PostgresTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(PostgresTestConfiguration.class)
+@Import({PostgresTestConfiguration.class, AdminAutenticadoTestConfiguration.class})
 class ClienteApiIntegrationTest {
 
 	private static final String CPF = "529.982.247-25";

@@ -34,3 +34,14 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+app:
+  seguranca:
+    jwt:
+      # Chave HS256 (mínimo de 32 caracteres; sem ela a aplicação não sobe) e validade do token em minutos.
+      segredo: ${JWT_SECRET:}
+      expiracao-minutos: ${JWT_EXPIRACAO_MINUTOS:60}
+    # Administrador criado na inicialização, apenas se a tabela de usuários estiver vazia.
+    admin:
+      username: ${ADMIN_USERNAME:}
+      senha: ${ADMIN_PASSWORD:}
