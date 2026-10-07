@@ -58,8 +58,17 @@ oficina/src/main/java/com/techchallenge/oficina/
 │   ├── remover/      DELETE /clientes/{id}
 │   ├── dominio/      ClienteRepository, ClienteResponse, validação CPF/CNPJ, exceções
 │   └── entidades/    Cliente
+├── pecasinsumos/
+│   ├── cadastrar/    POST   /pecas-insumos
+│   ├── consultar/    GET    /pecas-insumos, /pecas-insumos/{id}
+│   ├── atualizar/    PUT    /pecas-insumos/{id}
+│   ├── repor/        POST   /pecas-insumos/{id}/entradas
+│   ├── baixar/       POST   /pecas-insumos/{id}/saidas
+│   ├── remover/      DELETE /pecas-insumos/{id}
+│   ├── dominio/      PecaInsumoRepository, PecaInsumoResponse, TipoItem, UnidadeMedida, exceções
+│   └── entidades/    PecaInsumo (regras de estoque)
 ├── config/           JPA e segurança
-└── shared/           BaseEntity (persistência) e tratamento global de erros (web)
+└── shared/           BaseEntity (persistência), exceções base (excecoes) e tratamento global de erros (web)
 ```
 
 ## API de Clientes
@@ -80,6 +89,30 @@ curl -i -X POST http://localhost:8080/clientes -H "Content-Type: application/jso
 ```
 
 > A autenticação JWT das APIs administrativas ainda não foi implementada; por enquanto a API está aberta.
+
+## API de Peças e Insumos
+
+| Operação | Endpoint | Sucesso | Erros |
+|---|---|---|---|
+| Criar | `POST /pecas-insumos` | `201` + header `Location` | `400` dados inválidos, `409` código já cadastrado |
+| Listar | `GET /pecas-insumos?tipo=&nome=&page=&size=` | `200` (paginado, ordenado por nome, só itens ativos; `tipo` filtra por `PECA`/`INSUMO` e `nome` busca por trecho, sem diferenciar maiúsculas) | `400` |
+| Detalhar | `GET /pecas-insumos/{id}` | `200` (inclusive item removido, com `ativo: false`) | `400` id inválido, `404` |
+| Atualizar | `PUT /pecas-insumos/{id}` | `200` (código, nome, descrição e preço; tipo, unidade e saldo não mudam) | `400`, `404`, `409` código já cadastrado |
+| Entrada de estoque | `POST /pecas-insumos/{id}/entradas` | `200` | `400`, `404`, `409` item removido |
+| Saída de estoque | `POST /pecas-insumos/{id}/saidas` | `200` | `400`, `404`, `409` estoque insuficiente ou item removido |
+| Remover | `DELETE /pecas-insumos/{id}` | `204` (remoção lógica: o item fica inativo) | `400`, `404`, `409` item já removido ou com reserva |
+
+Campos: `tipo` (`PECA` ou `INSUMO`), `codigo` (único, gravado em maiúsculas), `nome`, `descricao` (opcional), `unidadeMedida` (`UN`, `JOGO`, `L`, `ML`, `KG` ou `G`), `precoUnitario` (até 2 casas decimais) e `quantidadeInicial` (opcional, até 3 casas decimais). Entradas e saídas recebem `{"quantidade": ...}`, também com até 3 casas decimais.
+
+**Controle de estoque:** cada item tem `quantidadeTotal`, `quantidadeReservada` e `quantidadeDisponivel` (total menos reservada). Saídas só podem usar o disponível, e `UN` e `JOGO` não aceitam quantidades fracionadas. Reservar, liberar e consumir quantidades reservadas são regras da entidade sem endpoint próprio: quem vai usá-las é a Ordem de Serviço, por exemplo para reservar as peças de um orçamento aprovado.
+
+```bash
+curl -i -X POST http://localhost:8080/pecas-insumos -H "Content-Type: application/json" \
+  -d '{"tipo":"INSUMO","codigo":"OLEO-5W30","nome":"Óleo 5W30","unidadeMedida":"L","precoUnitario":45.90,"quantidadeInicial":20}'
+
+curl -i -X POST http://localhost:8080/pecas-insumos/{id}/saidas -H "Content-Type: application/json" \
+  -d '{"quantidade":2.5}'
+```
 
 ## Banco de dados
 
