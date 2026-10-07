@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,7 +17,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.exc.InvalidFormatException;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +65,42 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				.map(this::erro).toList();
 		problema.setProperty("errors", erros);
 		return handleExceptionInternal(ex, problema, headers, status, request);
+	}
+
+	@Override
+	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+																  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+		ProblemDetail problema;
+		if (ex.getCause() instanceof InvalidFormatException formato) {
+			String campo = nomeDoCampo(formato);
+			problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+					"Valor inválido para o campo '" + campo + "'");
+			problema.setProperty("errors", List.of(Map.of("campo", campo, "mensagem", mensagemDeFormato(formato))));
+		} else {
+			problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "JSON malformado ou ilegível");
+		}
+		return handleExceptionInternal(ex, problema, headers, status, request);
+	}
+
+	/** Caminho do campo no JSON, ex.: "tipo" ou "itens.quantidade" em objetos aninhados. */
+	private String nomeDoCampo(InvalidFormatException ex) {
+		return ex.getPath().stream()
+				.map(JacksonException.Reference::getPropertyName)
+				.filter(Objects::nonNull)
+				.collect(Collectors.joining("."));
+	}
+
+	/** Para enums, lista os valores aceitos; para outros tipos (número, data…), só aponta o valor recebido. */
+	private String mensagemDeFormato(InvalidFormatException ex) {
+		String valor = String.valueOf(ex.getValue());
+		Class<?> tipo = ex.getTargetType();
+		if (tipo.isEnum()) {
+			String aceitos = Arrays.stream(tipo.getEnumConstants())
+					.map(Object::toString)
+					.collect(Collectors.joining(", "));
+			return "valor '" + valor + "' não é aceito. Valores aceitos: " + aceitos;
+		}
+		return "valor '" + valor + "' não é válido para este campo";
 	}
 
 	private Map<String, String> erro(FieldError e) {
