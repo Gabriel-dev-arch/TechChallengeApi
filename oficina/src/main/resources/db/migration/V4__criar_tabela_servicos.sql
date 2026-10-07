@@ -3,7 +3,7 @@ CREATE TABLE servicos (
 	id uuid NOT NULL,
 	veiculo_id uuid NOT NULL,
 	cliente_id uuid NOT NULL,
-	status int2 NOT NULL,
+	status varchar(35) NOT NULL,
 	created_at timestamptz(6) NOT NULL,
 	orcamento_decidido_em timestamptz(6) NULL,
 	updated_at timestamptz(6) NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE servicos (
 	codigo_acompanhamento uuid NOT NULL,
 	diagnostico varchar(255) NOT NULL,
 	orcamento_total numeric(38, 2) NULL,
-	delivered_at numeric(38, 2) null,
+	delivered_at timestamptz(6) NOT NULL,
 	
 	CONSTRAINT servicos_cliente_id_key UNIQUE (cliente_id),
 	CONSTRAINT servicos_pkey PRIMARY KEY (id),

@@ -9,6 +9,8 @@ import com.techchallenge.oficina.shared.persistence.BaseEntity;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -29,12 +31,12 @@ public class Servico extends BaseEntity {
 	@OneToOne
 	private Cliente cliente;
 	//private Funcionario funcionario;
-	
+	@Enumerated(EnumType.STRING)
 	private StatusServico status;
 	private String diagnostico;
 	private BigDecimal orcamentoTotal;
 	private Instant orcamentoDecididoEm;
-	private BigDecimal delivered_at;
+	private Instant delivered_at;
 	private UUID codigoAcompanhamento;
 	
 	//codigo_acompanhamento · UQ

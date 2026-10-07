@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-@Tag(name = "Remover Veiculos")
+@Tag(name = "Veiculos", description = "Remover Veiculos")
 @RestController
 @RequestMapping("/veiculos")
 public class RemoverVeiculoController {

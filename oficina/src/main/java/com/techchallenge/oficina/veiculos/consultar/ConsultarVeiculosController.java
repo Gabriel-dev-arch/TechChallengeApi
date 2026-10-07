@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-@Tag(name = "Consultar Veiculos")
+@Tag(name = "Veiculos", description = "Consultar Veiculos")
 @RestController
 @RequestMapping("/veiculos")
 public class ConsultarVeiculosController {

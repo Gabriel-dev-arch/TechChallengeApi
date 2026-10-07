@@ -12,7 +12,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-@Tag(name = "Criar Veiculos")
+@Tag(name = "Veiculos", description = "Criar Veiculos")
 @RestController
 @RequestMapping("/veiculos")
 public class CadastrarVeiculoController {
