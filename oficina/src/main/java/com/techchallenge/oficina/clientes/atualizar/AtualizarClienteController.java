@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-@Tag(name = "Atualizar Clientes")
+@Tag(name = "Clientes", description = "Atualizar Clientes")
 @RestController
 @RequestMapping("/clientes")
 public class AtualizarClienteController {

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-@Tag(name = "Remover Clientes")
+@Tag(name = "Clientes", description = "Remover Clientes")
 @RestController
 @RequestMapping("/clientes")
 public class RemoverClienteController {

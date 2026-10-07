@@ -2,6 +2,7 @@ package com.techchallenge.oficina.clientes.cadastrar;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-@Tag(name = "Criar Clientes")
+@Tag(name = "Clientes", description = "Cria Clientes")
 @RestController
 @RequestMapping("/clientes")
 public class CadastrarClienteController {
@@ -23,6 +24,8 @@ public class CadastrarClienteController {
 		this.service = service;
 	}
 
+
+	@Operation(summary = "Cadastra Clientes", description = "Cadastra Clientes")
 	@PostMapping
 	public ResponseEntity<ClienteResponse> cadastrar(@Valid @RequestBody CadastrarClienteRequest request) {
 		ClienteResponse cliente = service.cadastrar(request);
