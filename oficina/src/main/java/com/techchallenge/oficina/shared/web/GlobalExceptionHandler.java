@@ -2,6 +2,8 @@ package com.techchallenge.oficina.shared.web;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
 import com.techchallenge.oficina.clientes.dominio.DocumentoJaCadastradoException;
+import com.techchallenge.oficina.veiculos.dominio.PlacaJaCadastradaException;
+import com.techchallenge.oficina.veiculos.dominio.VeiculoNaoEncontradoException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,10 +30,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
-	@ExceptionHandler({DocumentoJaCadastradoException.class, DataIntegrityViolationException.class,
-			ObjectOptimisticLockingFailureException.class})
+	@ExceptionHandler(VeiculoNaoEncontradoException.class)
+	ProblemDetail naoEncontrado(VeiculoNaoEncontradoException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler({DocumentoJaCadastradoException.class, PlacaJaCadastradaException.class,
+			DataIntegrityViolationException.class, ObjectOptimisticLockingFailureException.class})
 	ProblemDetail conflito(Exception ex) {
-		String detalhe = ex instanceof DocumentoJaCadastradoException ? ex.getMessage()
+		String detalhe = ex instanceof DocumentoJaCadastradoException || ex instanceof PlacaJaCadastradaException
+				? ex.getMessage()
 				: "A operação conflita com o estado atual dos dados. Tente novamente.";
 		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detalhe);
 	}
