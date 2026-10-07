@@ -11,6 +11,7 @@ import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -26,9 +27,11 @@ public class Servico extends BaseEntity {
 	
 	
 	@OneToOne
+	@JoinColumn(name = "veiculo_id")
 	private Veiculo veiculo;
 	
 	@OneToOne
+	@JoinColumn(name = "cliente_id")
 	private Cliente cliente;
 	//private Funcionario funcionario;
 	@Enumerated(EnumType.STRING)
