@@ -3,6 +3,7 @@ package com.techchallenge.oficina.pecasinsumos;
 import com.techchallenge.oficina.pecasinsumos.dominio.EstoqueInsuficienteException;
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoComReservaException;
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoInativoException;
+import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoJaAtivoException;
 import com.techchallenge.oficina.pecasinsumos.dominio.PrecoInvalidoException;
 import com.techchallenge.oficina.pecasinsumos.dominio.QuantidadeInvalidaException;
 import com.techchallenge.oficina.pecasinsumos.dominio.ReservaInsuficienteException;
@@ -433,6 +434,30 @@ class PecaInsumoTest {
             item.desativar();
 
             assertThatThrownBy(item::desativar).isInstanceOf(PecaInsumoInativoException.class);
+        }
+    }
+
+    @Nested
+    class Reativacao {
+
+        @Test
+        void reativaComOSaldoQueTinhaEVoltaAAceitarMovimentacao() {
+            PecaInsumo item = oleo("20");
+            item.desativar();
+
+            item.reativar();
+            item.registrarEntrada(bd("5"));
+
+            assertThat(item.isAtivo()).isTrue();
+            assertSaldo(item, "25", "0", "25");
+        }
+
+        @Test
+        void itemJaAtivoFalha() {
+            PecaInsumo item = oleo("20");
+
+            assertThatThrownBy(item::reativar).isInstanceOf(PecaInsumoJaAtivoException.class);
+            assertThat(item.isAtivo()).isTrue();
         }
     }
 

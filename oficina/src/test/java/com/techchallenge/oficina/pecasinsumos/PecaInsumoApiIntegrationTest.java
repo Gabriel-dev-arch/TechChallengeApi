@@ -3,6 +3,7 @@ package com.techchallenge.oficina.pecasinsumos;
 import com.jayway.jsonpath.JsonPath;
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoRepository;
 import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
+import com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.support.PostgresTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
@@ -303,6 +306,87 @@ class PecaInsumoApiIntegrationTest {
     }
 
     @Test
+    void codigoDeItemRemovidoFicaLivreParaNovoCadastro() throws Exception {
+        UUID antigo = cadastrarPeca("FILTRO", "1");
+        mockMvc.perform(delete("/pecas-insumos/{id}", antigo)).andExpect(status().isNoContent());
+
+        UUID novo = cadastrarPeca("filtro", "3");
+
+        assertThat(novo).isNotEqualTo(antigo);
+        assertThat(repository.count()).isEqualTo(2);
+        assertThat(repository.findById(antigo).orElseThrow().isAtivo()).isFalse();
+        assertThat(repository.findById(novo).orElseThrow().isAtivo()).isTrue();
+    }
+
+    @Test
+    void reativaItemRemovidoComOSaldoQueTinha() throws Exception {
+        UUID id = cadastrarPeca("FILTRO", "4");
+        mockMvc.perform(delete("/pecas-insumos/{id}", id)).andExpect(status().isNoContent());
+
+        mockMvc.perform(post("/pecas-insumos/{id}/reativacao", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(jsonPath("$.quantidadeTotal").value(4.0));
+        mockMvc.perform(get("/pecas-insumos")).andExpect(jsonPath("$.content", hasSize(1)));
+        mockMvc.perform(post("/pecas-insumos/{id}/entradas", id).contentType(MediaType.APPLICATION_JSON)
+                .content(quantidade("1"))).andExpect(status().isOk());
+        assertSaldoNoBanco(id, "5", "0");
+    }
+
+    @Test
+    void naoReativaEnquantoOCodigoEstiverEmUsoPorOutroItemAtivo() throws Exception {
+        UUID antigo = cadastrarPeca("FILTRO", "1");
+        mockMvc.perform(delete("/pecas-insumos/{id}", antigo)).andExpect(status().isNoContent());
+        UUID novo = cadastrarPeca("FILTRO", "1");
+
+        mockMvc.perform(post("/pecas-insumos/{id}/reativacao", antigo))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.detail").value("Já existe uma peça/insumo ativa com o código FILTRO"));
+        assertThat(repository.findById(antigo).orElseThrow().isAtivo()).isFalse();
+
+        // removido o item que ocupava o código, o antigo pode voltar
+        mockMvc.perform(delete("/pecas-insumos/{id}", novo)).andExpect(status().isNoContent());
+        mockMvc.perform(post("/pecas-insumos/{id}/reativacao", antigo)).andExpect(status().isOk());
+    }
+
+    @Test
+    void reativarItemAtivoRetorna409() throws Exception {
+        UUID id = cadastrarPeca("FILTRO", "1");
+
+        mockMvc.perform(post("/pecas-insumos/{id}/reativacao", id))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(containsString("já está ativo")));
+    }
+
+    @Test
+    void editaItemRemovidoMesmoComOCodigoUsadoPorOutroItemAtivo() throws Exception {
+        UUID antigo = cadastrarPeca("FILTRO", "1");
+        mockMvc.perform(delete("/pecas-insumos/{id}", antigo)).andExpect(status().isNoContent());
+        cadastrarPeca("FILTRO", "1");
+
+        mockMvc.perform(put("/pecas-insumos/{id}", antigo).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"codigo\":\"FILTRO\",\"nome\":\"Filtro antigo\",\"precoUnitario\":5}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Filtro antigo"));
+    }
+
+    @Test
+    void bancoImpedeDoisItensAtivosComOMesmoCodigo() {
+        PecaInsumo removido = new PecaInsumo(TipoItem.PECA, "FILTRO", "Filtro", null, UnidadeMedida.UN,
+                BigDecimal.ONE, null);
+        removido.desativar();
+        repository.saveAndFlush(removido);
+        repository.saveAndFlush(new PecaInsumo(TipoItem.PECA, "FILTRO", "Filtro", null, UnidadeMedida.UN,
+                BigDecimal.ONE, null));
+
+        assertThatThrownBy(() -> repository.saveAndFlush(new PecaInsumo(TipoItem.PECA, "FILTRO", "Outro", null,
+                UnidadeMedida.UN, BigDecimal.ONE, null)))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThat(repository.count()).isEqualTo(2);
+    }
+
+    @Test
     void idInexistenteRetorna404EIdMalformadoRetorna400() throws Exception {
         String inexistente = "/pecas-insumos/00000000-0000-0000-0000-000000000000";
 
@@ -315,6 +399,7 @@ class PecaInsumoApiIntegrationTest {
                 .content(quantidade("1"))).andExpect(status().isNotFound());
         mockMvc.perform(post(inexistente + "/saidas").contentType(MediaType.APPLICATION_JSON)
                 .content(quantidade("1"))).andExpect(status().isNotFound());
+        mockMvc.perform(post(inexistente + "/reativacao")).andExpect(status().isNotFound());
         mockMvc.perform(get("/pecas-insumos/abc")).andExpect(status().isBadRequest());
     }
 }

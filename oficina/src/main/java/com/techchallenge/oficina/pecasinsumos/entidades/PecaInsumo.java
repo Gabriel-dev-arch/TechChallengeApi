@@ -131,6 +131,15 @@ public class PecaInsumo extends BaseEntity {
         this.ativo = false;
     }
 
+    /** Quem chama confere antes se o código não está em uso por outro item ativo. */
+    public void reativar(){
+        if (ativo){
+            throw new PecaInsumoJaAtivoException(getId());
+        }
+
+        this.ativo = true;
+    }
+
     private void validarUnidade(BigDecimal quantidade) {
         if(!unidadeMedida.aceita(quantidade)){
             throw new QuantidadeInvalidaException("A unidade: " + unidadeMedida + " não aceita ser fracionada");
