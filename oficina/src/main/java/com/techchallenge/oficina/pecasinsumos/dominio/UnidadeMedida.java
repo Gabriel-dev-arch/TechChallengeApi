@@ -26,8 +26,8 @@ public enum UnidadeMedida {
         return fracionavel;
     }
 
-    public boolean aceita(BigDecimal quantiadde){
-        return fracionavel || quantiadde.stripTrailingZeros().scale() <= 0;
+    public boolean aceita(BigDecimal quantidade){
+        return fracionavel || quantidade.stripTrailingZeros().scale() <= 0;
     }
 
 }

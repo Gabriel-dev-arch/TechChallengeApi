@@ -20,6 +20,10 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PecaInsumo extends BaseEntity {
 
+    // Mesmas casas decimais das colunas numeric(12,2) e numeric(12,3): os valores ficam iguais em memória e no banco
+    private static final int CASAS_PRECO = 2;
+    private static final int CASAS_QUANTIDADE = 3;
+
     @Enumerated(EnumType.STRING)
     private TipoItem tipo;
 
@@ -47,10 +51,11 @@ public class PecaInsumo extends BaseEntity {
         if (inicial.signum() < 0) {
             throw new QuantidadeInvalidaException("quantidade inicial não pode ser negativa");
         }
+        validarCasasDecimais(inicial);
         validarUnidade(inicial);
 
-        this.quantidadeTotal = inicial;
-        this.quantidadeReservada = BigDecimal.ZERO;
+        this.quantidadeTotal = inicial.setScale(CASAS_QUANTIDADE);
+        this.quantidadeReservada = BigDecimal.ZERO.setScale(CASAS_QUANTIDADE);
         this.ativo = true;
     }
 
@@ -61,6 +66,9 @@ public class PecaInsumo extends BaseEntity {
         if(precoUnitario.signum() < 0){
             throw new PrecoInvalidoException("Preço não pode ser menor que zero");
         }
+        if(casasDecimais(precoUnitario) > CASAS_PRECO){
+            throw new PrecoInvalidoException("Preço deve ter no máximo " + CASAS_PRECO + " casas decimais");
+        }
         this.codigo = normalizarCodigo(codigo);
         this.nome = nome.strip();
         if (descricao == null || descricao.isBlank()) {
@@ -68,7 +76,7 @@ public class PecaInsumo extends BaseEntity {
         } else{
             this.descricao = descricao.strip();
         }
-        this.precoUnitario = precoUnitario;
+        this.precoUnitario = precoUnitario.setScale(CASAS_PRECO);
     }
 
     public static String normalizarCodigo(String codigo){
@@ -153,7 +161,19 @@ public class PecaInsumo extends BaseEntity {
         if (quantidade.signum() <= 0){
             throw new QuantidadeInvalidaException("A quantidade não pode ser menor ou igual a zero");
         }
+        validarCasasDecimais(quantidade);
         validarUnidade(quantidade);
+    }
+
+    private void validarCasasDecimais(BigDecimal quantidade) {
+        if (casasDecimais(quantidade) > CASAS_QUANTIDADE) {
+            throw new QuantidadeInvalidaException("A quantidade deve ter no máximo " + CASAS_QUANTIDADE + " casas decimais");
+        }
+    }
+
+    /** Casas decimais significativas: 10.500 tem 1, e 10 tem 0. */
+    private static int casasDecimais(BigDecimal valor) {
+        return Math.max(valor.stripTrailingZeros().scale(), 0);
     }
 
     private void exigirAtivo(){
