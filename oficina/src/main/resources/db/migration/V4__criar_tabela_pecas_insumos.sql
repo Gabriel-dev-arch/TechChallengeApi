@@ -12,6 +12,8 @@ CREATE TABLE pecas_insumos (
     ativo                 boolean       NOT NULL DEFAULT true,
     created_at            timestamptz   NOT NULL,
     updated_at            timestamptz   NOT NULL,
-    version               bigint        NOT NULL,
-    CONSTRAINT uk_pecas_insumos_codigo UNIQUE (codigo)
+    version               bigint        NOT NULL
 );
+
+-- O código é único só entre os itens ativos: ao remover (desativar) um item, o código fica livre para um novo cadastro.
+CREATE UNIQUE INDEX uk_pecas_insumos_codigo_ativo ON pecas_insumos (codigo) WHERE ativo;

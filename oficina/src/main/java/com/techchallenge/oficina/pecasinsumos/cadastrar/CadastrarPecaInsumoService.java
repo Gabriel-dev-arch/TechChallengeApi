@@ -22,7 +22,7 @@ public class CadastrarPecaInsumoService {
                 request.descricao(), request.unidadeMedida(), request.precoUnitario(),
                 request.quantidadeInicial());
 
-        if (pecaInsumoRepository.existsByCodigo(item.getCodigo())) {
+        if (pecaInsumoRepository.existsByCodigoAndAtivoTrue(item.getCodigo())) {
             throw new CodigoJaCadastradoException(item.getCodigo());
         }
 

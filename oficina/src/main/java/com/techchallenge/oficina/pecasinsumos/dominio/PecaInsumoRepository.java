@@ -11,9 +11,10 @@ import java.util.UUID;
 
 public interface PecaInsumoRepository extends JpaRepository<PecaInsumo, UUID> {
 
-    boolean existsByCodigo(String codigo);
+    // O código é único só entre os itens ativos; itens removidos não o ocupam.
+    boolean existsByCodigoAndAtivoTrue(String codigo);
 
-    boolean existsByCodigoAndIdNot(String codigo, UUID id);
+    boolean existsByCodigoAndAtivoTrueAndIdNot(String codigo, UUID id);
 
     @Query("""
         SELECT p FROM PecaInsumo p

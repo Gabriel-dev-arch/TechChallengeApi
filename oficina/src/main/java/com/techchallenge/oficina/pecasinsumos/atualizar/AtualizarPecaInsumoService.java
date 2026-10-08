@@ -23,8 +23,9 @@ public class AtualizarPecaInsumoService {
     public PecaInsumoResponse atualizar(UUID id, AtualizarPecaInsumoRequest request){
         PecaInsumo pecaInsumo = pecaInsumoRepository.findById(id).orElseThrow(() -> new PecaInsumoNaoEncontradoException(id));
 
+        // Um item removido não ocupa o código; a checagem volta a valer se ele for reativado.
         String novoCodigo = PecaInsumo.normalizarCodigo(request.codigo());
-        if (pecaInsumoRepository.existsByCodigoAndIdNot(novoCodigo, id)) {
+        if (pecaInsumo.isAtivo() && pecaInsumoRepository.existsByCodigoAndAtivoTrueAndIdNot(novoCodigo, id)) {
             throw new CodigoJaCadastradoException(novoCodigo);
         }
 
