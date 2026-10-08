@@ -8,6 +8,7 @@ import java.util.UUID;
 public class ReservaInsuficienteException extends ConflitoException {
     public ReservaInsuficienteException(UUID id, BigDecimal solicitado, BigDecimal reservado) {
         super("Reserva insuficiente para a peça/insumo %s: solicitado %s, reservado %s"
-                .formatted(id, solicitado.toPlainString(), reservado.toPlainString()));
+                .formatted(id, solicitado.stripTrailingZeros().toPlainString(),
+                        reservado.stripTrailingZeros().toPlainString()));
     }
 }

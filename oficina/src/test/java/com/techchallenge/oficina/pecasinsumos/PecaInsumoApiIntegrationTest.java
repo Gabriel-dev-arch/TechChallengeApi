@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -100,6 +101,9 @@ class PecaInsumoApiIntegrationTest {
                 .andExpect(jsonPath("$.nome").value("Óleo 5W30"))
                 .andExpect(jsonPath("$.ativo").value(true))
                 .andExpect(jsonPath("$.createdAt").value(endsWith("-03:00")))
+                // a resposta do cadastro já sai com as casas decimais do banco, igual à consulta
+                .andExpect(content().string(containsString("\"precoUnitario\":45.90")))
+                .andExpect(content().string(containsString("\"quantidadeTotal\":20.000")))
                 .andReturn();
         String location = criado.getResponse().getHeader("Location");
         UUID id = UUID.fromString(JsonPath.read(criado.getResponse().getContentAsString(), "$.id"));
@@ -108,7 +112,9 @@ class PecaInsumoApiIntegrationTest {
         // Read (id e lista)
         mockMvc.perform(get(location)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.unidadeMedida").value("L"))
-                .andExpect(jsonPath("$.quantidadeDisponivel").value(20.0));
+                .andExpect(jsonPath("$.quantidadeDisponivel").value(20.0))
+                .andExpect(content().string(containsString("\"precoUnitario\":45.90")))
+                .andExpect(content().string(containsString("\"quantidadeTotal\":20.000")));
         mockMvc.perform(get("/pecas-insumos")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.page.totalElements").value(1));
@@ -154,7 +160,8 @@ class PecaInsumoApiIntegrationTest {
                         .content(quantidade("11")))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.detail").value(containsString("Estoque insuficiente")));
+                .andExpect(jsonPath("$.detail").value(containsString("Estoque insuficiente")))
+                .andExpect(jsonPath("$.detail").value(endsWith("solicitado 11, disponível 10")));
         assertSaldoNoBanco(id, "10", "0");
     }
 
@@ -230,10 +237,14 @@ class PecaInsumoApiIntegrationTest {
 
     @Test
     void dadosInvalidosRetornam400ComErrosPorCampo() throws Exception {
-        mockMvc.perform(post("/pecas-insumos").contentType(MediaType.APPLICATION_JSON).content("{}"))
+        // mensagens do Bean Validation em português (spring.web.locale: pt_BR), mesmo pedindo inglês
+        mockMvc.perform(post("/pecas-insumos").contentType(MediaType.APPLICATION_JSON).content("{}")
+                        .header(HttpHeaders.ACCEPT_LANGUAGE, "en-US"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.errors", hasSize(5)));
+                .andExpect(jsonPath("$.errors", hasSize(5)))
+                .andExpect(jsonPath("$.errors[?(@.campo=='tipo')].mensagem").value("não deve ser nulo"))
+                .andExpect(jsonPath("$.errors[?(@.campo=='codigo')].mensagem").value("não deve estar em branco"));
         mockMvc.perform(post("/pecas-insumos").contentType(MediaType.APPLICATION_JSON)
                         .content(json("PNEU", "P1", "Peça", "UN", "1", "0")))
                 .andExpect(status().isBadRequest())

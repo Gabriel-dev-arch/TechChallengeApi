@@ -125,6 +125,46 @@ class PecaInsumoTest {
 
             assertThat(item.getPrecoUnitario()).isEqualByComparingTo("0");
         }
+
+        @Test
+        void normalizaPrecoComDuasCasasEQuantidadesComTres() {
+            PecaInsumo item = new PecaInsumo(TipoItem.INSUMO, "OLEO", "Óleo", null, UnidadeMedida.L, bd("45.9"), bd("20"));
+            item.registrarEntrada(bd("5"));
+
+            assertThat(item.getPrecoUnitario().toPlainString()).isEqualTo("45.90");
+            assertThat(item.getQuantidadeTotal().toPlainString()).isEqualTo("25.000");
+            assertThat(item.getQuantidadeReservada().toPlainString()).isEqualTo("0.000");
+            assertThat(item.getQuantidadeDisponivel().toPlainString()).isEqualTo("25.000");
+        }
+
+        @Test
+        void precoComMaisDeDuasCasasFalha() {
+            assertThatThrownBy(() -> new PecaInsumo(TipoItem.PECA, "X", "X", null, UnidadeMedida.UN, bd("10.999"), null))
+                    .isInstanceOf(PrecoInvalidoException.class)
+                    .hasMessageContaining("no máximo 2 casas decimais");
+            assertThatThrownBy(() -> oleo("1").atualizarDados("OLEO", "Óleo", null, bd("1.001")))
+                    .isInstanceOf(PrecoInvalidoException.class);
+        }
+
+        @Test
+        void quantidadeComMaisDeTresCasasFalha() {
+            assertThatThrownBy(() -> oleo("1.2345"))
+                    .isInstanceOf(QuantidadeInvalidaException.class)
+                    .hasMessageContaining("no máximo 3 casas decimais");
+            assertThatThrownBy(() -> oleo("1").registrarEntrada(bd("0.0001")))
+                    .isInstanceOf(QuantidadeInvalidaException.class);
+            assertThatThrownBy(() -> oleo("1").reservar(bd("0.0001")))
+                    .isInstanceOf(QuantidadeInvalidaException.class);
+        }
+
+        @Test
+        void zerosNaoContamComoCasasDecimais() {
+            PecaInsumo item = new PecaInsumo(TipoItem.INSUMO, "OLEO", "Óleo", null, UnidadeMedida.L,
+                    bd("45.9000"), bd("2.500000"));
+
+            assertThat(item.getPrecoUnitario().toPlainString()).isEqualTo("45.90");
+            assertThat(item.getQuantidadeTotal().toPlainString()).isEqualTo("2.500");
+        }
     }
 
     @Nested
@@ -253,8 +293,7 @@ class PecaInsumoTest {
 
             assertThatThrownBy(() -> item.reservar(bd("5")))
                     .isInstanceOf(EstoqueInsuficienteException.class)
-                    .hasMessageContaining("solicitado 5")
-                    .hasMessageContaining("disponível 2");
+                    .hasMessageEndingWith("solicitado 5, disponível 2");
             assertSaldo(item, "10", "8", "2");
         }
 

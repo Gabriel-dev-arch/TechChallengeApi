@@ -9,6 +9,7 @@ public class EstoqueInsuficienteException extends ConflitoException {
 
     public EstoqueInsuficienteException(UUID id, BigDecimal quantidadeSolicitada, BigDecimal quantidadeDisponivel) {
         super("Estoque insuficiente para a peça/insumo %s: solicitado %s, disponível %s"
-                .formatted(id, quantidadeSolicitada.toPlainString(), quantidadeDisponivel.toPlainString()));
+                .formatted(id, quantidadeSolicitada.stripTrailingZeros().toPlainString(),
+                        quantidadeDisponivel.stripTrailingZeros().toPlainString()));
     }
 }
