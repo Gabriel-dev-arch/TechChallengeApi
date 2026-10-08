@@ -45,6 +45,17 @@ cd oficina
 ./mvnw test
 ```
 
+**Cobertura (JaCoCo):** para rodar os testes e gerar o relatório de cobertura, use `verify`:
+
+```bash
+cd oficina
+./mvnw verify
+```
+
+- O relatório fica em `oficina/target/site/jacoco/index.html` (abra no navegador).
+- O build falha se a cobertura de linhas ficar abaixo de **80%** (regra `check` do JaCoCo no `pom.xml`).
+- O `./mvnw test` sozinho não gera o relatório nem aplica a regra dos 80%.
+
 ## Arquitetura
 
 Monolito em **Vertical Slice**: o código é organizado por funcionalidade, e cada operação (fatia) concentra seu controller, request e service. O que é comum ao módulo fica em `dominio/` (repositório, DTO de resposta, regras/exceções) e `entidades/`.
