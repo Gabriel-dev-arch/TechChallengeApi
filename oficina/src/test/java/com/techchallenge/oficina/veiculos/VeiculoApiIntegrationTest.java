@@ -1,5 +1,7 @@
 package com.techchallenge.oficina.veiculos;
 
+import com.techchallenge.oficina.clientes.dominio.ClienteRepository;
+import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 import com.techchallenge.oficina.support.PostgresTestConfiguration;
@@ -13,7 +15,10 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -40,14 +45,30 @@ class VeiculoApiIntegrationTest {
 	@Autowired
 	VeiculoRepository repository;
 
+	@Autowired
+	ClienteRepository clienteRepository;
+
+	@Autowired
+	JdbcTemplate jdbcTemplate;
+
+	private Cliente cliente;
+
 	@BeforeEach
 	void limparBanco() {
 		repository.deleteAll();
+		clienteRepository.deleteAll();
+		cliente = clienteRepository.saveAndFlush(new Cliente("Maria", "Silva", "maria@email.com", "52998224725", null));
 	}
 
-	private static String json(String placa, String marca, String modelo, Integer ano) {
+	private String json(String placa, String marca, String modelo, Integer ano) {
+		return json(placa, marca, modelo, ano, cliente.getId());
+	}
+
+	private static String json(String placa, String marca, String modelo, Integer ano, UUID clienteId) {
+		String identificador = clienteId == null ? "null" : "\"" + clienteId + "\"";
 		return """
-				{"placa":"%s","marca":"%s","modelo":"%s","ano":%s}""".formatted(placa, marca, modelo, ano);
+				{"placa":"%s","marca":"%s","modelo":"%s","ano":%s,"clienteId":%s}"""
+				.formatted(placa, marca, modelo, ano, identificador);
 	}
 
 	private String criar(String placa) throws Exception {
@@ -66,28 +87,34 @@ class VeiculoApiIntegrationTest {
 				.andExpect(jsonPath("$.marca").value("Fiat"))
 				.andExpect(jsonPath("$.modelo").value("Uno"))
 				.andExpect(jsonPath("$.ano").value(2010))
+				.andExpect(jsonPath("$.clienteId").value(cliente.getId().toString()))
 				.andExpect(jsonPath("$.createdAt").value(endsWith("-03:00")))
 				.andExpect(jsonPath("$.updatedAt").value(endsWith("-03:00"))).andReturn();
 		String location = criado.getResponse().getHeader("Location");
 		assertThat(repository.findByPlaca("ABC1234")).isPresent();
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(jsonPath("$.modelo").value("Uno"));
+		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(jsonPath("$.modelo").value("Uno"))
+				.andExpect(jsonPath("$.clienteId").value(cliente.getId().toString()));
 		mockMvc.perform(get("/veiculos")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.page.totalElements").value(1));
+				.andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.page.totalElements").value(1))
+				.andExpect(jsonPath("$.content[0].clienteId").value(cliente.getId().toString()));
 		mockMvc.perform(get("/veiculos").param("placa", "abc-1234")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].placa").value("ABC1234"));
+				.andExpect(jsonPath("$.content[0].placa").value("ABC1234"))
+				.andExpect(jsonPath("$.content[0].clienteId").value(cliente.getId().toString()));
 		mockMvc.perform(get("/veiculos").param("placa", "DEF5678")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(0)));
 
 		mockMvc.perform(put(location).contentType(MediaType.APPLICATION_JSON)
 				.content(json("abc1d23", " Ford ", " Ka ", 2020))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.placa").value("ABC1D23")).andExpect(jsonPath("$.marca").value("Ford"))
-				.andExpect(jsonPath("$.modelo").value("Ka")).andExpect(jsonPath("$.ano").value(2020));
+				.andExpect(jsonPath("$.modelo").value("Ka")).andExpect(jsonPath("$.ano").value(2020))
+				.andExpect(jsonPath("$.clienteId").value(cliente.getId().toString()));
 		assertThat(repository.findByPlaca("ABC1D23")).isPresent();
 		assertThat(repository.findByPlaca("ABC1234")).isEmpty();
 
 		mockMvc.perform(delete(location)).andExpect(status().isNoContent()).andExpect(content().string(""));
 		assertThat(repository.count()).isZero();
+		assertThat(clienteRepository.existsById(cliente.getId())).isTrue();
 		mockMvc.perform(get(location)).andExpect(status().isNotFound());
 		mockMvc.perform(delete(location)).andExpect(status().isNotFound());
 	}
@@ -116,7 +143,7 @@ class VeiculoApiIntegrationTest {
 			"{\"placa\":\"\",\"marca\":\"\",\"modelo\":\"\",\"ano\":null}"})
 	void camposObrigatoriosAusentesRetornam400(String body) throws Exception {
 		mockMvc.perform(post("/veiculos").contentType(MediaType.APPLICATION_JSON).content(body))
-				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors", hasSize(4)));
+				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors", hasSize(5)));
 		assertThat(repository.count()).isZero();
 	}
 
@@ -159,7 +186,7 @@ class VeiculoApiIntegrationTest {
 	@Test
 	void bancoImpedePlacaDuplicada() throws Exception {
 		criar("ABC1234");
-		assertThatThrownBy(() -> repository.saveAndFlush(new Veiculo("ABC1234", "Ford", "Ka", 2020)))
+		assertThatThrownBy(() -> repository.saveAndFlush(new Veiculo("ABC1234", "Ford", "Ka", 2020, cliente)))
 				.isInstanceOf(DataIntegrityViolationException.class);
 		assertThat(repository.count()).isEqualTo(1);
 	}
@@ -191,5 +218,58 @@ class VeiculoApiIntegrationTest {
 	void jsonMalformadoRetorna400() throws Exception {
 		mockMvc.perform(post("/veiculos").contentType(MediaType.APPLICATION_JSON).content("{nao-json"))
 				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void clienteInexistenteRetorna404SemSalvarVeiculo() throws Exception {
+		UUID id = UUID.randomUUID();
+		mockMvc.perform(post("/veiculos").contentType(MediaType.APPLICATION_JSON)
+				.content(json("ABC1234", "Fiat", "Uno", 2010, id)))
+				.andExpect(status().isNotFound())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+				.andExpect(jsonPath("$.detail").value("Cliente não encontrado: " + id));
+		assertThat(repository.count()).isZero();
+	}
+
+	@Test
+	void clienteIdObrigatorioNoCadastro() throws Exception {
+		mockMvc.perform(post("/veiculos").contentType(MediaType.APPLICATION_JSON)
+				.content(json("ABC1234", "Fiat", "Uno", 2010, null)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errors[?(@.campo=='clienteId')]").exists());
+		mockMvc.perform(post("/veiculos").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"placa\":\"ABC1234\",\"marca\":\"Fiat\",\"modelo\":\"Uno\",\"ano\":2010}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errors[?(@.campo=='clienteId')]").exists());
+		assertThat(repository.count()).isZero();
+	}
+
+	@Test
+	void clientePodePossuirVariosVeiculos() throws Exception {
+		criar("ABC1234");
+		criar("DEF5678");
+		mockMvc.perform(get("/veiculos")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(2)))
+				.andExpect(jsonPath("$.content[0].clienteId").value(cliente.getId().toString()))
+				.andExpect(jsonPath("$.content[1].clienteId").value(cliente.getId().toString()));
+		assertThat(clienteRepository.count()).isEqualTo(1);
+	}
+
+	@Test
+	void bancoExigeClienteExistenteParaVeiculo() throws Exception {
+		criar("ABC1234");
+		assertThatThrownBy(() -> jdbcTemplate.update("update veiculos set cliente_id = ? where placa = ?",
+				UUID.randomUUID(), "ABC1234")).isInstanceOf(DataIntegrityViolationException.class);
+		assertThatThrownBy(() -> jdbcTemplate.update("update veiculos set cliente_id = null where placa = ?", "ABC1234"))
+				.isInstanceOf(DataIntegrityViolationException.class);
+		assertThat(clienteRepository.existsById(cliente.getId())).isTrue();
+	}
+
+	@Test
+	void removerClienteComVeiculoRetornaConflito() throws Exception {
+		criar("ABC1234");
+		mockMvc.perform(delete("/clientes/" + cliente.getId())).andExpect(status().isConflict());
+		assertThat(clienteRepository.existsById(cliente.getId())).isTrue();
+		assertThat(repository.findByPlaca("ABC1234")).isPresent();
 	}
 }

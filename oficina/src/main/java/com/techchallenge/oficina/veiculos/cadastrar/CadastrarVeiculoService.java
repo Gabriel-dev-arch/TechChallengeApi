@@ -1,5 +1,8 @@
 package com.techchallenge.oficina.veiculos.cadastrar;
 
+import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
+import com.techchallenge.oficina.clientes.dominio.ClienteRepository;
+import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoResponse;
 import com.techchallenge.oficina.veiculos.dominio.PlacaValidator;
@@ -13,8 +16,11 @@ public class CadastrarVeiculoService {
 
 	private final VeiculoRepository repository;
 
-	public CadastrarVeiculoService(VeiculoRepository repository) {
+	private final ClienteRepository clienteRepository;
+
+	public CadastrarVeiculoService(VeiculoRepository repository, ClienteRepository clienteRepository) {
 		this.repository = repository;
+		this.clienteRepository = clienteRepository;
 	}
 
 	@Transactional
@@ -23,8 +29,10 @@ public class CadastrarVeiculoService {
 		if (repository.existsByPlaca(placa)) {
 			throw new PlacaJaCadastradaException(placa);
 		}
+		Cliente cliente = clienteRepository.findById(request.clienteId())
+				.orElseThrow(() -> new ClienteNaoEncontradoException(request.clienteId()));
 		Veiculo veiculo = new Veiculo(placa, request.marca().trim(),
-				request.modelo().trim(), request.ano());
+				request.modelo().trim(), request.ano(), cliente);
 		return VeiculoResponse.from(repository.saveAndFlush(veiculo));
 	}
 }
