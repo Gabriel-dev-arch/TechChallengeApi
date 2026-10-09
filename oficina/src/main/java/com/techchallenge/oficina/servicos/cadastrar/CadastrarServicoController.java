@@ -27,8 +27,8 @@ public class CadastrarServicoController {
 
 	@PostMapping
 	public ResponseEntity<ServicoResponse> cadastrar(@Valid @RequestBody CadastrarServicoRequest request) {
-		//ServicoResponse servico = service.cadastrar(request);
+		ServicoResponse servico = service.cadastrar(request);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(1);
-		return ResponseEntity.created(location).body(ServicoResponse.from(null));
+		return ResponseEntity.created(location).body(servico);
 	}
 }

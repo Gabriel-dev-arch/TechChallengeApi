@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.servicos.consultar;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -26,9 +27,14 @@ public class ConsultarServicoController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ServicoResponse> cadastrar(@PathVariable String id) {
+	public ResponseEntity<ServicoResponse> consultar(@PathVariable String id) {
 		ServicoResponse servico = service.listar(UUID.fromString(id));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(servico.id());
 		return ResponseEntity.created(location).body(servico);
+	}
+
+	@GetMapping
+	public ResponseEntity<List<ServicoResponse>> cadastrar() {
+		return ResponseEntity.ok(service.listarTodos());
 	}
 }

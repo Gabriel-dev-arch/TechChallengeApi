@@ -1,37 +1,31 @@
-INSERT INTO public.clientes (id,first_name,last_name,full_name,email,documento,telefone,created_at,updated_at,"version") VALUES
-	 ('2481edbc-0e55-4f03-ba49-fbfd8e01b63e'::uuid,'Carlos','Silva','Carlos Silva','carlos.silva@email.com','12345678901','+5511988887777','2026-09-27 19:25:43.8978-03','2026-09-27 19:25:43.8978-03',1),
-	 ('46d292a2-02ca-4fd4-8e75-17d821451061'::uuid,'Ana','Souza','Ana Souza','ana.souza@email.com','23456789012','+5521977776666','2026-09-28 19:25:43.8978-03','2026-09-29 19:25:43.8978-03',2),
-	 ('3fb772e3-e927-4581-9629-01e85d3f961c'::uuid,'Marcos','Oliveira','Marcos Oliveira','marcos.oliveira@email.com','34567890123','+5531966665555','2026-09-29 19:25:43.8978-03','2026-09-29 19:25:43.8978-03',1),
-	 ('e67054cf-df2f-4c28-b9e0-c11520da8906'::uuid,'Beatriz','Lima','Beatriz Lima','beatriz.lima@email.com','45678901234','+5541955554444','2026-09-30 19:25:43.8978-03','2026-10-02 19:25:43.8978-03',2),
-	 ('d2339bfb-877d-402d-9538-74c782f692cc'::uuid,'Lucas','Ferreira','Lucas Ferreira','lucas.ferreira@email.com','56789012345','+5551944443333','2026-10-01 19:25:43.8978-03','2026-10-01 19:25:43.8978-03',1),
-	 ('70aabf7e-2080-44b3-b09e-d5af7a4bde21'::uuid,'Juliana','Costa','Juliana Costa','juliana.costa@email.com','67890123456','+5561933332222','2026-10-02 19:25:43.8978-03','2026-10-05 19:25:43.8978-03',3),
-	 ('e3baa544-13ea-4060-ad04-5eed421d81b2'::uuid,'Gabriel','Almeida','Gabriel Almeida','gabriel.almeida@email.com','78901234567','+5571922221111','2026-10-03 19:25:43.8978-03','2026-10-03 19:25:43.8978-03',1),
-	 ('aff56e9f-f8bf-44ab-b158-c880f2ca4acd'::uuid,'Mariana','Ribeiro','Mariana Ribeiro','mariana.ribeiro@email.com','89012345678','+5581911110000','2026-10-04 19:25:43.8978-03','2026-10-06 19:25:43.8978-03',2),
-	 ('1ebff2f7-ec95-4187-af00-21f5c1c63bb2'::uuid,'Thiago','Martins','Thiago Martins','thiago.martins@email.com','90123456789','+5511900001111','2026-10-05 19:25:43.8978-03','2026-10-05 19:25:43.8978-03',1),
-	 ('72913652-c41b-48d8-8a22-cbe135b7fb7d'::uuid,'Camila','Barbosa','Camila Barbosa','camila.barbosa@email.com','01234567890','+5521999998888','2026-10-06 19:25:43.8978-03','2026-10-07 19:25:43.8978-03',1);
-
-	 
-INSERT INTO public.veiculos (id,placa,marca,modelo,ano,created_at,updated_at,"version") VALUES
-	 ('e657a52d-4e1c-469c-88ce-13af6aac17c4'::uuid,'ABC1D23','Volkswagen','Polo TSI',2022,'2026-09-27 19:25:43.90239-03','2026-09-27 19:25:43.90239-03',1),
-	 ('90c1f823-beb9-433a-84c3-6a45ada36508'::uuid,'XYZ9W87','Chevrolet','Onix Plus',2023,'2026-09-28 19:25:43.90239-03','2026-09-29 19:25:43.90239-03',2),
-	 ('17d33df0-5d7e-45a4-8bff-1c3030504d35'::uuid,'BRA2E44','Fiat','Argo Drive',2021,'2026-09-29 19:25:43.90239-03','2026-09-29 19:25:43.90239-03',1),
-	 ('b157d4f9-1c78-45b4-8cc5-4bba92a9bdec'::uuid,'JHS4F56','Toyota','Corolla XEI',2020,'2026-09-30 19:25:43.90239-03','2026-10-02 19:25:43.90239-03',2),
-	 ('a53f6c0d-66d7-4e63-bbf6-46143c0d676a'::uuid,'MNO5G89','Hyundai','HB20 Evolution',2023,'2026-10-01 19:25:43.90239-03','2026-10-01 19:25:43.90239-03',1),
-	 ('ec89e0e4-7b3f-4941-91fe-c1c157d29b3f'::uuid,'PRT3H12','Jeep','Renegade Longitude',2022,'2026-10-02 19:25:43.90239-03','2026-10-05 19:25:43.90239-03',3),
-	 ('f85a2745-adb3-4d11-864f-d82854e32a44'::uuid,'RIO8J99','Honda','Civic Touring',2021,'2026-10-03 19:25:43.90239-03','2026-10-03 19:25:43.90239-03',1),
-	 ('c0094edf-54e4-4a94-baf2-968553659247'::uuid,'SPX7K65','Nissan','Kicks Advance',2023,'2026-10-04 19:25:43.90239-03','2026-10-06 19:25:43.90239-03',2),
-	 ('328588f0-f322-4a9e-b0ab-9e0869a6f9eb'::uuid,'RSQ6L33','Renault','Kwid Outsider',2020,'2026-10-05 19:25:43.90239-03','2026-10-05 19:25:43.90239-03',1),
-	 ('077d541b-d7c6-4828-beaa-e00749fd655c'::uuid,'DFW1M00','Volkswagen','T-Cross Comfortline',2024,'2026-10-06 19:25:43.90239-03','2026-10-07 19:25:43.90239-03',1);
-
-	 
-INSERT INTO public.servicos (id,veiculo_id,cliente_id,status,created_at,orcamento_decidido_em,updated_at,"version",codigo_acompanhamento,diagnostico,orcamento_total,delivered_at) VALUES
-	 ('1cb298e1-cef1-4944-be9c-a5333a394262'::uuid,'e657a52d-4e1c-469c-88ce-13af6aac17c4'::uuid,'2481edbc-0e55-4f03-ba49-fbfd8e01b63e'::uuid,'RECEBIDA','2026-09-27 19:28:38.393501-03','2026-09-28 19:28:38.393501-03','2026-09-29 19:28:38.393501-03',1,'7c07ec01-ca60-4560-b348-2c2c036b1adc'::uuid,'Revisão geral de 30.000 km e alinhamento',680.00,'2026-09-29 19:28:38.393501-03'),
-	 ('251a58ab-c55d-4f22-b54f-01698b64b831'::uuid,'90c1f823-beb9-433a-84c3-6a45ada36508'::uuid,'46d292a2-02ca-4fd4-8e75-17d821451061'::uuid,'EM_DIAGNOSTICO','2026-09-28 19:28:38.393501-03','2026-09-29 19:28:38.393501-03','2026-09-30 19:28:38.393501-03',2,'b6b83104-c8a1-4d96-bfa9-0d1294534973'::uuid,'Troca de óleo, filtro de ar e filtro de óleo',340.00,'2026-09-30 19:28:38.393501-03'),
-	 ('3f397b17-092a-4185-b17d-8b5a4e5b10a9'::uuid,'17d33df0-5d7e-45a4-8bff-1c3030504d35'::uuid,'3fb772e3-e927-4581-9629-01e85d3f961c'::uuid,'AGUARDANDO_APROVACAO','2026-09-29 19:28:38.393501-03','2026-09-30 19:28:38.393501-03','2026-10-02 19:28:38.393501-03',1,'2f41ad16-1aaf-4695-9729-e01b86ef26d5'::uuid,'Substituição do kit de pastilhas e discos de freio',890.00,'2026-10-02 19:28:38.393501-03'),
-	 ('073472ee-f96b-4d81-9976-e869812f9abc'::uuid,'b157d4f9-1c78-45b4-8cc5-4bba92a9bdec'::uuid,'e67054cf-df2f-4c28-b9e0-c11520da8906'::uuid,'EM_EXECUCAO','2026-09-30 19:28:38.393501-03','2026-10-01 19:28:38.393501-03','2026-10-03 19:28:38.393501-03',3,'e7115b21-7179-4477-bda9-14cf9ecbbf9e'::uuid,'Troca da correia dentada e tensor',1200.00,'2026-10-03 19:28:38.393501-03'),
-	 ('6ba5a0a5-ae1a-439a-9794-1d6b63b4ab2a'::uuid,'a53f6c0d-66d7-4e63-bbf6-46143c0d676a'::uuid,'d2339bfb-877d-402d-9538-74c782f692cc'::uuid,'FINALIZADA','2026-10-01 19:28:38.393501-03','2026-10-02 19:28:38.393501-03','2026-10-04 19:28:38.393501-03',1,'34ef8447-eafc-4e3e-a738-c487df818fc4'::uuid,'Substituição da bateria e teste do alternador',750.00,'2026-10-04 19:28:38.393501-03'),
-	 ('181e37f9-d02c-4560-8ca4-afa58a75b3e2'::uuid,'ec89e0e4-7b3f-4941-91fe-c1c157d29b3f'::uuid,'70aabf7e-2080-44b3-b09e-d5af7a4bde21'::uuid,'ENTREGUE','2026-10-02 19:28:38.393501-03','2026-10-03 19:28:38.393501-03','2026-10-05 19:28:38.393501-03',2,'e8b9827a-0298-40f1-8223-fcba988040dd'::uuid,'Reparo no sistema de suspensão traseira',950.00,'2026-10-05 19:28:38.393501-03'),
-	 ('f1e2af60-95e1-49f1-b90b-2e1f96625ae6'::uuid,'f85a2745-adb3-4d11-864f-d82854e32a44'::uuid,'e3baa544-13ea-4060-ad04-5eed421d81b2'::uuid,'AGUARDANDO_APROVACAO','2026-10-03 19:28:38.393501-03','2026-10-04 19:28:38.393501-03','2026-10-06 19:28:38.393501-03',1,'bf8a7e2a-3bd5-4d99-87a0-6fe9c31b0e9c'::uuid,'Higienização do ar-condicionado e troca de filtro de cabine',250.00,'2026-10-06 19:28:38.393501-03'),
-	 ('a12a10be-3469-4b60-b1e2-13333eedf6d5'::uuid,'c0094edf-54e4-4a94-baf2-968553659247'::uuid,'aff56e9f-f8bf-44ab-b158-c880f2ca4acd'::uuid,'RECEBIDA','2026-10-04 19:28:38.393501-03','2026-10-05 19:28:38.393501-03','2026-10-07 19:28:38.393501-03',1,'6d783adb-cbf3-4cff-8d30-c92da5bf05a0'::uuid,'Diagnóstico de falha eletrônica e limpeza de bicos',520.00,'2026-10-07 19:28:38.393501-03'),
-	 ('5f4969d6-3096-48b6-b158-95555b734e19'::uuid,'328588f0-f322-4a9e-b0ab-9e0869a6f9eb'::uuid,'1ebff2f7-ec95-4187-af00-21f5c1c63bb2'::uuid,'FINALIZADA','2026-10-05 19:28:38.393501-03','2026-10-06 19:28:38.393501-03','2026-10-07 19:28:38.393501-03',2,'1a0c7531-2c25-44c8-b74a-7a40f0fcf1e4'::uuid,'Troca de fluido de freio e sangria do sistema',290.00,'2026-10-07 19:28:38.393501-03'),
-	 ('27c0b0ed-9b05-4757-a486-d734159c7d12'::uuid,'077d541b-d7c6-4828-beaa-e00749fd655c'::uuid,'72913652-c41b-48d8-8a22-cbe135b7fb7d'::uuid,'RECEBIDA','2026-10-06 19:28:38.393501-03','2026-10-07 19:28:38.393501-03','2026-10-07 19:28:38.393501-03',1,'a2ea4e9e-e6e9-46b6-882f-4746be45b584'::uuid,'Substituição do kit de embreagem completo',1650.00,'2026-10-07 19:28:38.393501-03');
+INSERT INTO public.servicos (id,created_at,updated_at,"version",descricao,valor) VALUES
+	 ('f68111c6-4b84-492f-b876-7ccb1c297617'::uuid,'2026-09-09 12:47:14.187338-03','2026-09-09 12:47:14.187338-03',1,'Troca de Óleo e Filtro de Óleo',180.00),
+	 ('dd97a8a6-7ec9-4a10-b8bc-77bacae9da9d'::uuid,'2026-09-10 12:47:14.187338-03','2026-09-11 12:47:14.187338-03',2,'Alinhamento e Balanceamento 4 Rodas',120.00),
+	 ('65440c8f-0ec0-4fb7-89e5-f56d9fa5aedd'::uuid,'2026-09-11 12:47:14.187338-03','2026-09-11 12:47:14.187338-03',1,'Substituição das Pastilhas de Freio Dianteiras',250.00),
+	 ('26253cf2-0f32-4a7b-b227-a1bd9bf3805e'::uuid,'2026-09-12 12:47:14.187338-03','2026-09-14 12:47:14.187338-03',2,'Revisão Preventiva Completa (10.000km)',650.00),
+	 ('44f5ed95-8f76-4af6-ab10-a6b5e2c46ee1'::uuid,'2026-09-13 12:47:14.187338-03','2026-09-13 12:47:14.187338-03',1,'Troca do Kit de Embreagem',850.00),
+	 ('7b7988d1-23d7-4182-9e35-7bb2fa4371ee'::uuid,'2026-09-14 12:47:14.187338-03','2026-09-15 12:47:14.187338-03',2,'Higienização do Ar-Condicionado e Troca de Filtro',160.00),
+	 ('92f6d585-e3a0-4c5e-b8fe-2632afffc559'::uuid,'2026-09-15 12:47:14.187338-03','2026-09-15 12:47:14.187338-03',1,'Diagnóstico Eletrônico por Scanner',150.00),
+	 ('c44e74b3-42ec-459b-b626-f32563c2f1a5'::uuid,'2026-09-16 12:47:14.187338-03','2026-09-19 12:47:14.187338-03',3,'Retífica Parcial de Motor',2800.00),
+	 ('374abb07-28e7-4f7d-9bee-596fe5f4162c'::uuid,'2026-09-17 12:47:14.187338-03','2026-09-17 12:47:14.187338-03',1,'Troca de Amortecedores Dianteiros e Traseiros',950.00),
+	 ('916e329f-c6be-4818-9529-3e7f2459b217'::uuid,'2026-09-18 12:47:14.187338-03','2026-09-18 12:47:14.187338-03',1,'Regulagem de Faróis e Troca de Lâmpadas',80.00),
+	 ('79e9b50f-7023-4822-8030-26fbc1e228f1'::uuid,'2026-09-19 12:47:14.187338-03','2026-09-20 12:47:14.187338-03',2,'Limpeza de Bicos Injetores',220.00),
+	 ('b98e73eb-31de-464e-a9ce-18b8e0aa9e22'::uuid,'2026-09-20 12:47:14.187338-03','2026-09-20 12:47:14.187338-03',1,'Substituição da Correia Dentada e Tensor',480.00),
+	 ('985adfa9-1484-4b48-8324-83599661a57d'::uuid,'2026-09-21 12:47:14.187338-03','2026-09-24 12:47:14.187338-03',2,'Reparo no Sistema de Arrefecimento (Troca de aditivo e válvula)',310.00),
+	 ('fe72afcd-a665-4a5d-ab34-3c7499ab9b42'::uuid,'2026-09-22 12:47:14.187338-03','2026-09-22 12:47:14.187338-03',1,'Troca de Velas de Ignição e Cabos',190.00),
+	 ('97cb6dd0-9a8d-4894-951e-bcb0ddd85417'::uuid,'2026-09-23 12:47:14.187338-03','2026-09-23 12:47:14.187338-03',1,'Troca de Pneu (Serviço de montagem)',50.00),
+	 ('c25aec88-f8ee-433c-a054-250c1fe67572'::uuid,'2026-09-24 12:47:14.187338-03','2026-09-25 12:47:14.187338-03',2,'Reparo de Furo em Pneu (Vulcanição)',45.00),
+	 ('f47987cf-d474-4f85-a4f7-0444e32b4a81'::uuid,'2026-09-25 12:47:14.187338-03','2026-09-25 12:47:14.187338-03',1,'Substituição de Discos de Freio Dianteiros',400.00),
+	 ('24bb68cf-ac1e-4358-bf7c-1487eb6e3d96'::uuid,'2026-09-26 12:47:14.187338-03','2026-09-27 12:47:14.187338-03',2,'Troca do Fluído de Freio',140.00),
+	 ('54565ff8-d8fa-4ea9-9711-5af97701a35b'::uuid,'2026-09-27 12:47:14.187338-03','2026-09-27 12:47:14.187338-03',1,'Substituição de Pivôs e Terminais de Direção',280.00),
+	 ('03c908e1-75e2-4668-9d24-57cc8f4e9902'::uuid,'2026-09-28 12:47:14.187338-03','2026-09-29 12:47:14.187338-03',2,'Regulagem de Freio de Mão',90.00),
+	 ('6994844c-bdfc-47f0-87f3-1768a72abfdf'::uuid,'2026-09-29 12:47:14.187338-03','2026-09-29 12:47:14.187338-03',1,'Troca da Bomba de Combustível',350.00),
+	 ('fe8b4cd9-8295-476d-b29c-e0510e19a007'::uuid,'2026-09-30 12:47:14.187338-03','2026-10-01 12:47:14.187338-03',2,'Reparo no Sistema de Escapamento (Troca de silenciador)',320.00),
+	 ('0bd1cc60-6d7c-427c-a031-5201829aa5a4'::uuid,'2026-10-01 12:47:14.187338-03','2026-10-01 12:47:14.187338-03',1,'Carga de Gás do Ar-Condicionado',250.00),
+	 ('dc2c1b34-d99d-41ce-bb33-a043db0aafc7'::uuid,'2026-10-02 12:47:14.187338-03','2026-10-02 12:47:14.187338-03',1,'Substituição da Bateria Automotiva',450.00),
+	 ('8a3efc2c-ae67-4b54-b345-fe9b9e5e600f'::uuid,'2026-10-03 12:47:14.187338-03','2026-10-04 12:47:14.187338-03',2,'Troca do Alternador',780.00),
+	 ('bf164109-b757-497b-9727-af37eff46321'::uuid,'2026-10-04 12:47:14.187338-03','2026-10-04 12:47:14.187338-03',1,'Substituição do Motor de Arranque',620.00),
+	 ('a234dc2e-f11f-4760-bc15-f0097316a4af'::uuid,'2026-10-05 12:47:14.187338-03','2026-10-06 12:47:14.187338-03',2,'Geometria Completa de Suspensão',180.00),
+	 ('c042950d-08b4-4e92-a3d1-cd35520f391d'::uuid,'2026-10-06 12:47:14.187338-03','2026-10-06 12:47:14.187338-03',1,'Troca de Junta do Cabeçote',1100.00),
+	 ('0f629f4a-703c-48e8-a82f-4eb49ec5de30'::uuid,'2026-10-07 12:47:14.187338-03','2026-10-08 12:47:14.187338-03',2,'Instalação de Kit Multimídia e Câmera de Ré',300.00),
+	 ('0bebeb45-bed5-4b82-801f-94d16d808a0d'::uuid,'2026-10-08 12:47:14.187338-03','2026-10-09 12:47:14.187338-03',1,'Polimento de Faróis (Par)',130.00);
