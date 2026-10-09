@@ -2,6 +2,7 @@ package com.techchallenge.oficina.shared.web;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
 import com.techchallenge.oficina.clientes.dominio.DocumentoJaCadastradoException;
+import com.techchallenge.oficina.servicos.dominio.ServicoNaoEncontradoException;
 import com.techchallenge.oficina.veiculos.dominio.PlacaJaCadastradaException;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoNaoEncontradoException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,6 +33,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(VeiculoNaoEncontradoException.class)
 	ProblemDetail naoEncontrado(VeiculoNaoEncontradoException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler(ServicoNaoEncontradoException.class)
+	ProblemDetail naoEncontrado(ServicoNaoEncontradoException ex) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 

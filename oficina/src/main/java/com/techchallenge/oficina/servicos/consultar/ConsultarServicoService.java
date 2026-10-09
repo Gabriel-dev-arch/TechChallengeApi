@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.techchallenge.oficina.servicos.entidades.Servico;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,5 +29,9 @@ public class ConsultarServicoService {
 
 	public List<ServicoResponse> listarTodos() {
 		return repository.findAll().stream().map(ServicoResponse::from).collect(Collectors.toUnmodifiableList());
+	}
+
+	public List<Servico> buscarPorDescricao(@NotBlank String descricao) {
+		return repository.findByDescricaoContaining(descricao);
 	}
 }

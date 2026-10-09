@@ -4,12 +4,11 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import com.techchallenge.oficina.servicos.cadastrar.CadastrarServicoRequest;
+import com.techchallenge.oficina.servicos.entidades.Servico;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.techchallenge.oficina.servicos.dominio.ServicoResponse;
@@ -39,5 +38,11 @@ public class ConsultarServicoController {
 	@Operation(summary = "Listar servicos", description = "Lista servicos")
 	public ResponseEntity<List<ServicoResponse>> listarTodos() {
 		return ResponseEntity.ok(service.listarTodos());
+	}
+
+	@GetMapping("/descricao")
+	@Operation(summary = "Listar servicos por palavra chave", description = "Listar servicos por palavra chave")
+	public ResponseEntity<List<Servico>> buscarPorDescricao(@RequestBody ConsultarPorDescricaoServicoRequest request) {
+		return ResponseEntity.ok(service.buscarPorDescricao(request.descricao()));
 	}
 }
