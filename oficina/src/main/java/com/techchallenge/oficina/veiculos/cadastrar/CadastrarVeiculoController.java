@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.veiculos.cadastrar;
 
 import com.techchallenge.oficina.veiculos.dominio.VeiculoResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,10 @@ public class CadastrarVeiculoController {
 	}
 
 	@PostMapping
+	@Operation(
+			summary = "Cadastrar novos Veiculos",
+			description = "Cadastra novos Veiculos"
+	)
 	public ResponseEntity<VeiculoResponse> cadastrar(@Valid @RequestBody CadastrarVeiculoRequest request) {
 		VeiculoResponse veiculo = service.cadastrar(request);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(veiculo.id());

@@ -2,6 +2,7 @@ package com.techchallenge.oficina.servicos.atualizar;
 
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,11 @@ public class AtualizarServicoController {
 	}
 
 	@PutMapping("/{id}")
-	public ServicoResponse cadastrar(@PathVariable UUID id, @Valid @RequestBody AtualizarServicoRequest request) {
+	@Operation(
+			summary = "Atualizar servico",
+			description = "Atualizar servico"
+	)
+	public ServicoResponse atualizar(@PathVariable UUID id, @Valid @RequestBody AtualizarServicoRequest request) {
 		return service.atualizar(id, request);
 	}
 }

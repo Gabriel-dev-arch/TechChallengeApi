@@ -2,6 +2,7 @@ package com.techchallenge.oficina.servicos.cadastrar;
 
 import java.net.URI;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,10 @@ public class CadastrarServicoController {
 	}
 
 	@PostMapping
+	@Operation(
+			summary = "Cadastrar servicos",
+			description = "Cadastrar servicos"
+	)
 	public ResponseEntity<ServicoResponse> cadastrar(@Valid @RequestBody CadastrarServicoRequest request) {
 		ServicoResponse servico = service.cadastrar(request);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(1);

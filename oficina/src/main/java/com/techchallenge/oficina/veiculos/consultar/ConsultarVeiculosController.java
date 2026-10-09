@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.veiculos.consultar;
 
 import com.techchallenge.oficina.veiculos.dominio.VeiculoResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -28,6 +29,10 @@ public class ConsultarVeiculosController {
 	}
 
 	@GetMapping
+	@Operation(
+			summary = "Consultar veiculos pela placa",
+			description = "Consultar veiculos pela placa"
+	)
 	public PagedModel<VeiculoResponse> listar(@RequestParam(required = false) String placa,
 			@RequestParam(defaultValue = "0") @Min(0) int page,
 			@RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
@@ -36,6 +41,10 @@ public class ConsultarVeiculosController {
 	}
 
 	@GetMapping("/{id}")
+	@Operation(
+			summary = "Consultar veiculos pelo ID",
+			description = "Consultar veiculos pelo ID"
+	)
 	public VeiculoResponse buscar(@PathVariable UUID id) {
 		return service.buscar(id);
 	}

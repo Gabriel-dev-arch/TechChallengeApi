@@ -24,9 +24,8 @@ public class CadastrarClienteController {
 		this.service = service;
 	}
 
-
-	@Operation(summary = "Cadastra Clientes", description = "Cadastra Clientes")
 	@PostMapping
+	@Operation(summary = "Cadastra Clientes", description = "Cadastra Clientes")
 	public ResponseEntity<ClienteResponse> cadastrar(@Valid @RequestBody CadastrarClienteRequest request) {
 		ClienteResponse cliente = service.cadastrar(request);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(cliente.id());

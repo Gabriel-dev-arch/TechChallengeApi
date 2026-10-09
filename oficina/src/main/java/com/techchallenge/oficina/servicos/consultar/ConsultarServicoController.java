@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,7 @@ public class ConsultarServicoController {
 	}
 
 	@GetMapping("/{id}")
+	@Operation(summary = "Busca servicos pelo ID", description = "Busca servicos pelo ID")
 	public ResponseEntity<ServicoResponse> consultar(@PathVariable String id) {
 		ServicoResponse servico = service.listar(UUID.fromString(id));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(servico.id());
@@ -34,7 +36,8 @@ public class ConsultarServicoController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<ServicoResponse>> cadastrar() {
+	@Operation(summary = "Listar servicos", description = "Lista servicos")
+	public ResponseEntity<List<ServicoResponse>> listarTodos() {
 		return ResponseEntity.ok(service.listarTodos());
 	}
 }
