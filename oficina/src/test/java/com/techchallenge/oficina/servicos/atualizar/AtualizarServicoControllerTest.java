@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,6 +73,9 @@ class AtualizarServicoControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.errors[*].campo", hasItems("descricao", "valor")))
-                .andExpect(jsonPath("$.errors[*].mensagem", hasItems("must not be blank", "must not be null")));
+                .andExpect(jsonPath("$.errors[*].mensagem", hasItems(
+                        anyOf(is("não deve estar em branco"), is("must not be blank")),
+                        anyOf(is("não deve ser nulo"), is("must not be null"))
+                )));
     }
 }
