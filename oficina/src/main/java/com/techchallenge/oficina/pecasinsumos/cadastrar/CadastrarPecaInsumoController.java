@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.pecasinsumos.cadastrar;
 
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-@Tag(name = "Criar Peças e Insumos")
+@Tag(name = "Peças e Insumos", description = "Cadastro, consulta e controle de estoque de peças e insumos")
 @RestController
 @RequestMapping("/pecas-insumos")
 public class CadastrarPecaInsumoController {
@@ -23,6 +24,7 @@ public class CadastrarPecaInsumoController {
         this.pecaInsumoService = pecaInsumoService;
     }
 
+    @Operation(summary = "Cadastrar peça ou insumo", description = "Cadastra uma nova peça ou insumo, com quantidade inicial opcional em estoque.")
     @PostMapping
     public ResponseEntity<PecaInsumoResponse> cadastrar(@Valid @RequestBody CadastrarPecaInsumoRequest request) {
         PecaInsumoResponse pecaInsumoResponse = pecaInsumoService.cadastrar(request);
