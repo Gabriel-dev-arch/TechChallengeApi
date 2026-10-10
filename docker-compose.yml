@@ -1,32 +1,56 @@
-version: '3.8'
-
 services:
-  postgres:
+  db:
     image: postgres:17-alpine
-    container_name: postgres_db
-    restart: always
-    environment:
-      POSTGRES_USER: oficina
-      POSTGRES_PASSWORD: oficina
-      POSTGRES_DB: oficina
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-  sonarqube:
-    image: sonarqube:latest
-    container_name: oficina-sonarqube
+    container_name: oficina-db
     restart: unless-stopped
     environment:
-      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonarqube
-      SONAR_JDBC_USERNAME: ${DB_USER}
-      SONAR_JDBC_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-oficina}
+      POSTGRES_USER: ${DB_USER:?defina DB_USER no .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
     ports:
-      - "9000:9000"
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - oficina-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ./oficina
+    container_name: oficina-app
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-oficina}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+
+  # Analise de qualidade de codigo (SonarQube). Sobe somente sob demanda:
+  #   docker compose --profile qualidade up -d sonarqube
+  # Usa o banco embutido do proprio SonarQube; nao depende do banco da aplicacao.
+  sonarqube:
+    image: sonarqube:community
+    container_name: oficina-sonarqube
+    profiles: ["qualidade"]
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
 
 volumes:
-  pgdata:
+  oficina-db-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
