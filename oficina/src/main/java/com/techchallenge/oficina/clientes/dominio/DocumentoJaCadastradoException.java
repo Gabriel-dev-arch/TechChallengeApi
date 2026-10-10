@@ -1,6 +1,8 @@
 package com.techchallenge.oficina.clientes.dominio;
 
-public class DocumentoJaCadastradoException extends RuntimeException {
+import com.techchallenge.oficina.shared.excecoes.ConflitoException;
+
+public class DocumentoJaCadastradoException extends ConflitoException {
 
 	public DocumentoJaCadastradoException(String documento) {
 		super("Já existe um cliente cadastrado com o documento " + documento);

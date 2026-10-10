@@ -13,6 +13,7 @@ public record VeiculoResponse(
 		String marca,
 		String modelo,
 		Integer ano,
+		UUID clienteId,
 		OffsetDateTime createdAt,
 		OffsetDateTime updatedAt) {
 
@@ -20,7 +21,8 @@ public record VeiculoResponse(
 
 	public static VeiculoResponse from(Veiculo veiculo) {
 		return new VeiculoResponse(veiculo.getId(), veiculo.getPlaca(), veiculo.getMarca(), veiculo.getModelo(),
-				veiculo.getAno(), paraFusoLocal(veiculo.getCreatedAt()), paraFusoLocal(veiculo.getUpdatedAt()));
+				veiculo.getAno(), veiculo.getCliente().getId(),
+				paraFusoLocal(veiculo.getCreatedAt()), paraFusoLocal(veiculo.getUpdatedAt()));
 	}
 
 	private static OffsetDateTime paraFusoLocal(Instant instante) {

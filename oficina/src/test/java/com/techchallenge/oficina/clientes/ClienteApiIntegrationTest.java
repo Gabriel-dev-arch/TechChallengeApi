@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.clientes;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteRepository;
+import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.support.PostgresTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,8 +38,12 @@ class ClienteApiIntegrationTest {
 	@Autowired
 	ClienteRepository repository;
 
+	@Autowired
+	VeiculoRepository veiculoRepository;
+
 	@BeforeEach
 	void limparBanco() {
+		veiculoRepository.deleteAll();
 		repository.deleteAll();
 	}
 

@@ -34,3 +34,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+  # Mensagens de validação em português (ex.: "não deve estar em branco"), independentemente do Accept-Language.
+  web:
+    locale: pt_BR
+    locale-resolver: fixed
