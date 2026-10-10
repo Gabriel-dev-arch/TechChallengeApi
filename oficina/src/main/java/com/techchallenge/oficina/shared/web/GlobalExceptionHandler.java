@@ -1,10 +1,6 @@
 package com.techchallenge.oficina.shared.web;
 
-import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
-import com.techchallenge.oficina.clientes.dominio.DocumentoJaCadastradoException;
 import com.techchallenge.oficina.servicos.dominio.ServicoNaoEncontradoException;
-import com.techchallenge.oficina.veiculos.dominio.PlacaJaCadastradaException;
-import com.techchallenge.oficina.veiculos.dominio.VeiculoNaoEncontradoException;
 import com.techchallenge.oficina.shared.excecoes.ConflitoException;
 import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
 import com.techchallenge.oficina.shared.excecoes.RegraInvalidaException;
@@ -55,72 +51,65 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
 	}
 
+	/** Violação de constraint no banco ou concorrência (lock otimista): mensagem genérica, sem detalhes internos. */
+	@ExceptionHandler({DataIntegrityViolationException.class, ObjectOptimisticLockingFailureException.class})
+	ProblemDetail conflitoDeDados(Exception ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+				"A operação conflita com o estado atual dos dados. Tente novamente.");
+	}
+
 	@ExceptionHandler(ServicoNaoEncontradoException.class)
 	ProblemDetail naoEncontrado(ServicoNaoEncontradoException ex) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
-	@ExceptionHandler({DocumentoJaCadastradoException.class, PlacaJaCadastradaException.class,
-			DataIntegrityViolationException.class, ObjectOptimisticLockingFailureException.class})
-	ProblemDetail conflito(Exception ex) {
-		String detalhe = ex instanceof DocumentoJaCadastradoException || ex instanceof PlacaJaCadastradaException
-				? ex.getMessage()
-				: "A operação conflita com o estado atual dos dados. Tente novamente.";
-		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detalhe);
-		/** Violação de constraint no banco ou concorrência (lock otimista): mensagem genérica, sem detalhes internos. */
-		@ExceptionHandler({DataIntegrityViolationException.class, ObjectOptimisticLockingFailureException.class})
-		ProblemDetail conflitoDeDados(Exception ex) {
-			return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
-					"A operação conflita com o estado atual dos dados. Tente novamente.");
-		}
-
-		@Override
-		protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-				HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-			ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Dados inválidos");
-			List<Map<String, String>> erros = ex.getBindingResult().getFieldErrors().stream()
-					.map(this::erro).toList();
-			problema.setProperty("errors", erros);
-			return handleExceptionInternal(ex, problema, headers, status, request);
-		}
-
-		@Override
-		protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-				HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-			ProblemDetail problema;
-			if (ex.getCause() instanceof InvalidFormatException formato) {
-				String campo = nomeDoCampo(formato);
-				problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-						"Valor inválido para o campo '" + campo + "'");
-				problema.setProperty("errors", List.of(Map.of("campo", campo, "mensagem", mensagemDeFormato(formato))));
-			} else {
-				problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "JSON malformado ou ilegível");
-			}
-			return handleExceptionInternal(ex, problema, headers, status, request);
-		}
-
-		/** Caminho do campo no JSON, ex.: "tipo" ou "itens.quantidade" em objetos aninhados. */
-		private String nomeDoCampo(InvalidFormatException ex) {
-			return ex.getPath().stream()
-					.map(JacksonException.Reference::getPropertyName)
-					.filter(Objects::nonNull)
-					.collect(Collectors.joining("."));
-		}
-
-		/** Para enums, lista os valores aceitos; para outros tipos (número, data…), só aponta o valor recebido. */
-		private String mensagemDeFormato(InvalidFormatException ex) {
-			String valor = String.valueOf(ex.getValue());
-			Class<?> tipo = ex.getTargetType();
-			if (tipo.isEnum()) {
-				String aceitos = Arrays.stream(tipo.getEnumConstants())
-						.map(Object::toString)
-						.collect(Collectors.joining(", "));
-				return "valor '" + valor + "' não é aceito. Valores aceitos: " + aceitos;
-			}
-			return "valor '" + valor + "' não é válido para este campo";
-		}
-
-		private Map<String, String> erro(FieldError e) {
-			return Map.of("campo", e.getField(), "mensagem", String.valueOf(e.getDefaultMessage()));
-		}
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+																  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+		ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Dados inválidos");
+		List<Map<String, String>> erros = ex.getBindingResult().getFieldErrors().stream()
+				.map(this::erro).toList();
+		problema.setProperty("errors", erros);
+		return handleExceptionInternal(ex, problema, headers, status, request);
 	}
+
+	@Override
+	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+																  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+		ProblemDetail problema;
+		if (ex.getCause() instanceof InvalidFormatException formato) {
+			String campo = nomeDoCampo(formato);
+			problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+					"Valor inválido para o campo '" + campo + "'");
+			problema.setProperty("errors", List.of(Map.of("campo", campo, "mensagem", mensagemDeFormato(formato))));
+		} else {
+			problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "JSON malformado ou ilegível");
+		}
+		return handleExceptionInternal(ex, problema, headers, status, request);
+	}
+
+	/** Caminho do campo no JSON, ex.: "tipo" ou "itens.quantidade" em objetos aninhados. */
+	private String nomeDoCampo(InvalidFormatException ex) {
+		return ex.getPath().stream()
+				.map(JacksonException.Reference::getPropertyName)
+				.filter(Objects::nonNull)
+				.collect(Collectors.joining("."));
+	}
+
+	/** Para enums, lista os valores aceitos; para outros tipos (número, data…), só aponta o valor recebido. */
+	private String mensagemDeFormato(InvalidFormatException ex) {
+		String valor = String.valueOf(ex.getValue());
+		Class<?> tipo = ex.getTargetType();
+		if (tipo.isEnum()) {
+			String aceitos = Arrays.stream(tipo.getEnumConstants())
+					.map(Object::toString)
+					.collect(Collectors.joining(", "));
+			return "valor '" + valor + "' não é aceito. Valores aceitos: " + aceitos;
+		}
+		return "valor '" + valor + "' não é válido para este campo";
+	}
+
+	private Map<String, String> erro(FieldError e) {
+		return Map.of("campo", e.getField(), "mensagem", String.valueOf(e.getDefaultMessage()));
+	}
+}
