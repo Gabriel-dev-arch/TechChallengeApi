@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.clientes.consultar;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-@Tag(name = "Consultar Clientes")
+@Tag(name = "Clientes", description = "Consultar Clientes")
 @RestController
 @RequestMapping("/clientes")
 public class ConsultarClientesController {
@@ -28,6 +29,7 @@ public class ConsultarClientesController {
 	}
 
 	@GetMapping
+	@Operation(summary = "Listar Clientes", description = "Listar Clientes")
 	public PagedModel<ClienteResponse> listar(@RequestParam(required = false) String documento,
 			@RequestParam(defaultValue = "0") @Min(0) int page,
 			@RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
@@ -36,6 +38,7 @@ public class ConsultarClientesController {
 	}
 
 	@GetMapping("/{id}")
+	@Operation(summary = "Buscar Clientes pelo ID", description = "Buscar Clientes pelo ID")
 	public ClienteResponse buscar(@PathVariable UUID id) {
 		return service.buscar(id);
 	}

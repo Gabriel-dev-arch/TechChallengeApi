@@ -1,5 +1,6 @@
 package com.techchallenge.oficina.shared.web;
 
+import com.techchallenge.oficina.servicos.dominio.ServicoNaoEncontradoException;
 import com.techchallenge.oficina.shared.excecoes.ConflitoException;
 import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
 import com.techchallenge.oficina.shared.excecoes.RegraInvalidaException;
@@ -57,9 +58,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				"A operação conflita com o estado atual dos dados. Tente novamente.");
 	}
 
+	@ExceptionHandler(ServicoNaoEncontradoException.class)
+	ProblemDetail naoEncontrado(ServicoNaoEncontradoException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-			HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+																  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 		ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Dados inválidos");
 		List<Map<String, String>> erros = ex.getBindingResult().getFieldErrors().stream()
 				.map(this::erro).toList();
