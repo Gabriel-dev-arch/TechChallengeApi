@@ -39,3 +39,17 @@ spring:
   web:
     locale: pt_BR
     locale-resolver: fixed
+
+# Autenticação JWT das APIs administrativas. Valores vêm do .env (ver .env.example).
+seguranca:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiracao-minutos: ${JWT_EXPIRACAO_MINUTOS:60}
+  admin:
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
+  # Cliente de demonstração: só acessa recursos do próprio CPF/CNPJ (proteção contra BOLA, ver ControleDeAcesso).
+  cliente:
+    username: ${CLIENTE_USERNAME}
+    password: ${CLIENTE_PASSWORD}
+    documento: ${CLIENTE_DOCUMENTO}
