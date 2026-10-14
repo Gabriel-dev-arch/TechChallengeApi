@@ -1,5 +1,4 @@
-# Valores fixos só para os testes, para não depender do .env.
-# Este arquivo é carregado junto com o application.yaml principal (classpath:/config/ tem precedência).
+# valores para os testes não dependerem do .env
 JWT_SECRET: chave-de-teste-com-pelo-menos-32-caracteres
 ADMIN_USERNAME: admin
 ADMIN_PASSWORD: admin123

@@ -7,22 +7,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
-/**
- * Autorização por dono do recurso, contra BOLA (OWASP API Security Top 10 2023 - API1: Broken Object Level
- * Authorization).
- *
- * <p>Ter um token válido não basta: um usuário CLIENTE só pode ver ou alterar recursos do próprio CPF/CNPJ,
- * que entra no token (claim {@code documento}) no login. ADMIN acessa qualquer recurso.
- * Todo endpoint liberado ao perfil CLIENTE deve chamar {@link #verificarDono(String)} com o documento do dono
- * do recurso antes de devolvê-lo ou alterá-lo (ex.: a OS consultada ou aprovada pelo cliente).
- * Na dúvida (sem autenticação, sem perfil, sem documento), o acesso é negado.
- */
+/** Evita BOLA (OWASP API1): o CLIENTE só acessa recursos do próprio documento; ADMIN acessa tudo. */
 @Component
 public class ControleDeAcesso {
 
 	public static final String CLAIM_DOCUMENTO = "documento";
 
-	/** @throws AccessDeniedException (HTTP 403) se o usuário não for ADMIN nem o dono do recurso */
 	public void verificarDono(String documentoDoDono) {
 		Authentication autenticacao = SecurityContextHolder.getContext().getAuthentication();
 		if (autenticacao == null) {

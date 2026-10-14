@@ -105,7 +105,6 @@ class AutenticacaoApiIntegrationTest {
 				.andExpect(status().isUnauthorized())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
 				.andExpect(jsonPath("$.detail").value("Usuário ou senha inválidos"));
-		// a senha de um usuário não vale para o outro
 		mockMvc.perform(post("/autenticacao/login").contentType(MediaType.APPLICATION_JSON)
 						.content(json(clienteUsername, adminPassword)))
 				.andExpect(status().isUnauthorized());

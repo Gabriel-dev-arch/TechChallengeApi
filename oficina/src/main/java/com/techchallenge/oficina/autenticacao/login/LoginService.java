@@ -15,11 +15,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Valida os usuários de demonstração (configurados no .env) e emite o token JWT com o perfil do usuário.
- * Versão inicial: um ADMIN e um CLIENTE, sem persistência em banco. O CLIENTE fica vinculado a um CPF/CNPJ,
- * que vai no token para o {@link ControleDeAcesso} restringir o acesso aos recursos desse documento.
- */
 @Service
 public class LoginService {
 

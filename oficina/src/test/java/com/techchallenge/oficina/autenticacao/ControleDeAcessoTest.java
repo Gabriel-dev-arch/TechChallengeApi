@@ -12,7 +12,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/** Proteção contra BOLA (OWASP API1): o cliente só acessa recursos do próprio CPF/CNPJ. */
 class ControleDeAcessoTest {
 
 	private static final String CPF_DO_CLIENTE = "52998224725";

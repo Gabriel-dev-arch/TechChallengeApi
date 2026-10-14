@@ -19,19 +19,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Autenticação JWT (HS256, chave simétrica do {@code JWT_SECRET}) com perfis ADMIN e CLIENTE.
- * O token é emitido por {@code POST /autenticacao/login} e enviado no header {@code Authorization: Bearer <token>}.
- *
- * <ul>
- *   <li>401: sem token, token inválido ou expirado (não autenticado).</li>
- *   <li>403: token válido, mas o perfil não tem permissão para a rota (não autorizado).</li>
- * </ul>
- */
 @Configuration
 public class SecurityConfig {
 
-	/** Rotas abertas: login, documentação da API e página de erro. */
 	private static final String[] ROTAS_PUBLICAS = {
 			"/autenticacao/login", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/error"};
 
@@ -52,8 +42,7 @@ public class SecurityConfig {
 				.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(a -> a
 						.requestMatchers(ROTAS_PUBLICAS).permitAll()
-						// Rotas liberadas ao CLIENTE (ex.: consulta da OS) devem ser declaradas aqui, antes do
-						// anyRequest, com hasAnyRole("ADMIN", "CLIENTE"), e chamar ControleDeAcesso.verificarDono.
+						// rotas do cliente: hasAnyRole("ADMIN", "CLIENTE") aqui + ControleDeAcesso.verificarDono no service
 						.anyRequest().hasRole(Perfil.ADMIN.name()))
 				.oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(conversorDePerfis())))
 				.build();
@@ -69,7 +58,6 @@ public class SecurityConfig {
 		return NimbusJwtDecoder.withSecretKey(chave).build();
 	}
 
-	/** Lê os perfis do claim "roles" do token como ROLE_ADMIN / ROLE_CLIENTE (usados em hasRole). */
 	private static JwtAuthenticationConverter conversorDePerfis() {
 		JwtGrantedAuthoritiesConverter perfis = new JwtGrantedAuthoritiesConverter();
 		perfis.setAuthoritiesClaimName(Perfil.CLAIM_JWT);
