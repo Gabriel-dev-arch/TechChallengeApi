@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -38,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(PostgresTestConfiguration.class)
+@WithMockUser(roles = "ADMIN")
 class PecaInsumoApiIntegrationTest {
 
     private static final String MENSAGEM_DIGITOS_PRECO = "deve ter no máximo 10 dígitos inteiros e 2 casas decimais";

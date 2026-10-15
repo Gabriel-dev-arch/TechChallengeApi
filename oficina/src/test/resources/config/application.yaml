@@ -1,0 +1,7 @@
+# valores para os testes não dependerem do .env
+JWT_SECRET: chave-de-teste-com-pelo-menos-32-caracteres
+ADMIN_USERNAME: admin
+ADMIN_PASSWORD: admin123
+CLIENTE_USERNAME: cliente
+CLIENTE_PASSWORD: cliente123
+CLIENTE_DOCUMENTO: 52998224725

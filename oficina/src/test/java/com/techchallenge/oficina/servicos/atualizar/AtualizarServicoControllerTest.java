@@ -5,6 +5,7 @@ import com.techchallenge.oficina.servicos.dominio.ServicoResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AtualizarServicoController.class)
 @Import(SecurityConfig.class)
+@WithMockUser(roles = "ADMIN")
 class AtualizarServicoControllerTest {
 
     private static final UUID ID = UUID.fromString("11111111-2222-3333-4444-555555666666");
