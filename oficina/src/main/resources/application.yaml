@@ -55,3 +55,14 @@ management:
   metrics:
     tags:
       application: oficina-app
+seguranca:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiracao-minutos: ${JWT_EXPIRACAO_MINUTOS:60}
+  admin:
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
+  cliente:
+    username: ${CLIENTE_USERNAME}
+    password: ${CLIENTE_PASSWORD}
+    documento: ${CLIENTE_DOCUMENTO}
