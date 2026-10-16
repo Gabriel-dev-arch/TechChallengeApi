@@ -35,6 +35,8 @@ cd oficina
 
 - API: http://localhost:8080
 - Swagger UI: http://localhost:8080/swagger-ui.html
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (usuário/senha padrão `admin/admin`)
 
 ## Testes
 

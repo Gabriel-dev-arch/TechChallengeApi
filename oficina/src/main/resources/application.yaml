@@ -40,6 +40,21 @@ spring:
     locale: pt_BR
     locale-resolver: fixed
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: oficina-app
 seguranca:
   jwt:
     secret: ${JWT_SECRET}
