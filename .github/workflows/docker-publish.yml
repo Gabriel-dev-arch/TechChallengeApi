@@ -41,12 +41,13 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Run Maven tests
+        working-directory: oficina
         run: mvn -B test
 
       - name: Build and push (branch and sha)
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./oficina
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }},ghcr.io/${{ github.repository }}:${{ github.sha }}
 
@@ -54,6 +55,6 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./oficina
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
