@@ -44,6 +44,10 @@ jobs:
         working-directory: oficina
         run: mvn -B test
 
+      - name: Run Sonar analysis (local)
+        working-directory: oficina
+        run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+
       - name: Set image tag and repo
         run: |
           if [ -n "$GITHUB_HEAD_REF" ]; then BRANCH="$GITHUB_HEAD_REF"; else BRANCH="${GITHUB_REF#refs/heads/}"; fi
