@@ -44,9 +44,23 @@ jobs:
         working-directory: oficina
         run: mvn -B test
 
-      - name: Run Sonar analysis (local)
+      - name: Run PMD report
         working-directory: oficina
-        run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        run: mvn -B pmd:pmd
+
+      - name: Run SpotBugs report
+        working-directory: oficina
+        run: mvn -B spotbugs:spotbugs
+
+      - name: Run Checkstyle report
+        working-directory: oficina
+        run: mvn -B checkstyle:checkstyle
+
+      - name: Upload static analysis reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-analysis-reports
+          path: oficina/target
 
       - name: Set image tag and repo
         run: |
