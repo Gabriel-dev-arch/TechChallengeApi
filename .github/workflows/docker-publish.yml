@@ -84,3 +84,32 @@ jobs:
           context: ./oficina
           push: true
           tags: ghcr.io/${{ env.IMAGE_REPO }}:latest
+
+      - name: Start SonarQube (Docker)
+        if: github.event_name != 'pull_request'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          docker pull sonarqube:lts-community
+          docker run -d --name sonarqube-ci --memory=4g --ulimit nofile=65536:65536 -p 9000:9000 sonarqube:lts-community
+          echo "Waiting for SonarQube (authenticated check)..."
+          status=""
+          for i in $(seq 1 120); do
+            status=$(curl -sS -u "${SONAR_TOKEN}:" http://127.0.0.1:9000/api/system/health || echo "")
+            echo "Waiting for Sonar... ($i/120) - $status"
+            echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"' && { echo "Sonar ready"; break; }
+            sleep 10
+          done
+          if ! echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"'; then
+            echo "Sonar did not become ready in time; dumping logs:";
+            docker logs --tail 200 sonarqube-ci || true
+            docker inspect sonarqube-ci || true
+            exit 1
+          fi
+          echo "SonarQube is ready (authenticated)."
+
+      - name: Stop SonarQube
+        if: github.event_name != 'pull_request'
+        run: |
+          docker stop sonarqube-ci || true
+          docker rm sonarqube-ci || true
