@@ -44,18 +44,20 @@ jobs:
         working-directory: oficina
         run: mvn -B test
 
-      - name: Set image tag
+      - name: Set image tag and repo
         run: |
           if [ -n "$GITHUB_HEAD_REF" ]; then BRANCH="$GITHUB_HEAD_REF"; else BRANCH="${GITHUB_REF#refs/heads/}"; fi
           TAG=$(echo "$BRANCH" | tr '/' '-')
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          REPO_LOWER=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_REPO=$REPO_LOWER" >> $GITHUB_ENV
 
       - name: Build and push (branch and sha)
         uses: docker/build-push-action@v4
         with:
           context: ./oficina
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ env.IMAGE_TAG }},ghcr.io/${{ github.repository }}:${{ github.sha }}
+          tags: ghcr.io/${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }},ghcr.io/${{ env.IMAGE_REPO }}:${{ github.sha }}
 
       - name: Push latest (main only)
         if: github.ref == 'refs/heads/main'
@@ -63,4 +65,4 @@ jobs:
         with:
           context: ./oficina
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/${{ env.IMAGE_REPO }}:latest
