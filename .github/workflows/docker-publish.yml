@@ -3,6 +3,8 @@ name: Build and Push to GHCR
 on:
   push:
     branches: [ main, develop, 'release/**' ]
+  pull_request:
+    branches: [ main, develop, 'release/**' ]
 
 permissions:
   contents: read
