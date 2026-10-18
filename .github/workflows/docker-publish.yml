@@ -1,0 +1,115 @@
+name: Build and Push to GHCR
+
+on:
+  push:
+    branches: [ main, develop, 'release/**' ]
+  pull_request:
+    branches: [ main, develop, 'release/**' ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache Maven local repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Run Maven tests
+        working-directory: oficina
+        run: mvn -B test
+
+      - name: Run PMD report
+        working-directory: oficina
+        run: mvn -B pmd:pmd
+
+      - name: Run SpotBugs report
+        working-directory: oficina
+        run: mvn -B spotbugs:spotbugs
+
+      - name: Run Checkstyle report
+        working-directory: oficina
+        run: mvn -B checkstyle:checkstyle
+
+      - name: Upload static analysis reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-analysis-reports
+          path: oficina/target
+
+      - name: Set image tag and repo
+        run: |
+          if [ -n "$GITHUB_HEAD_REF" ]; then BRANCH="$GITHUB_HEAD_REF"; else BRANCH="${GITHUB_REF#refs/heads/}"; fi
+          TAG=$(echo "$BRANCH" | tr '/' '-')
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          REPO_LOWER=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_REPO=$REPO_LOWER" >> $GITHUB_ENV
+
+      - name: Build and push (branch and sha)
+        uses: docker/build-push-action@v4
+        with:
+          context: ./oficina
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }},ghcr.io/${{ env.IMAGE_REPO }}:${{ github.sha }}
+
+      - name: Push latest (main only)
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v4
+        with:
+          context: ./oficina
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_REPO }}:latest
+
+      - name: Start SonarQube (Docker)
+        if: github.event_name != 'pull_request'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          docker pull sonarqube:lts-community
+          docker run -d --name sonarqube-ci --memory=4g --ulimit nofile=65536:65536 -p 9000:9000 sonarqube:lts-community
+          echo "Waiting for SonarQube (authenticated check)..."
+          status=""
+          for i in $(seq 1 120); do
+            status=$(curl -sS -u "${SONAR_TOKEN}:" http://127.0.0.1:9000/api/system/health || echo "")
+            echo "Waiting for Sonar... ($i/120) - $status"
+            echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"' && { echo "Sonar ready"; break; }
+            sleep 10
+          done
+          if ! echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"'; then
+            echo "Sonar did not become ready in time; dumping logs:";
+            docker logs --tail 200 sonarqube-ci || true
+            docker inspect sonarqube-ci || true
+            exit 1
+          fi
+          echo "SonarQube is ready (authenticated)."
+
+      - name: Stop SonarQube
+        if: github.event_name != 'pull_request'
+        run: |
+          docker stop sonarqube-ci || true
+          docker rm sonarqube-ci || true
