@@ -94,21 +94,26 @@ jobs:
           status=""
           http_code=""
           for i in $(seq 1 12); do
-            # perform anonymous health-check and capture HTTP status code
+            # anonymous health-check
             http_code=$(curl -sS -o /tmp/sonar_health -w "%{http_code}" http://127.0.0.1:9000/api/system/health || echo "000")
             status=$(cat /tmp/sonar_health 2>/dev/null || echo "")
+            # admin-auth status check (use default admin:admin to validate readiness even when anon is blocked)
+            admin_code=$(curl -sS -o /tmp/sonar_admin_status -w "%{http_code}" -u admin:admin http://127.0.0.1:9000/api/system/status || echo "000")
+            admin_status=$(cat /tmp/sonar_admin_status 2>/dev/null || echo "")
 
-            echo "Waiting for Sonar... ($i/120) - HTTP $http_code - $status"
+            echo "Waiting for Sonar... ($i/12) - anon HTTP $http_code - admin HTTP $admin_code"
+            echo "Anonymous: $status"
+            echo "Admin: $admin_status"
 
-            if [ "$http_code" = "200" ] && echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"'; then
-              echo "Sonar ready"
+            if { [ "$http_code" = "200" ] && echo "$status" | grep -qE '\"status\":\"GREEN\"|\"status\":\"UP\"'; } || { [ "$admin_code" = "200" ] && echo "$admin_status" | grep -qE '\"status\":\"GREEN\"|\"status\":\"UP\"'; }; then
+              echo "Sonar ready (detected via anon or admin check)"
               break
             fi
 
             sleep 5
           done
 
-          if ! [ "$http_code" = "200" ] || ! echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"'; then
+          if ! { [ "$http_code" = "200" ] && echo "$status" | grep -qE '\"status\":\"GREEN\"|\"status\":\"UP\"'; } && ! { [ "$admin_code" = "200" ] && echo "$admin_status" | grep -qE '\"status\":\"GREEN\"|\"status\":\"UP\"'; }; then
             echo "Sonar did not become ready in time; dumping logs:";
             docker logs --tail 200 sonarqube-ci || true
             docker inspect sonarqube-ci || true
@@ -129,8 +134,10 @@ jobs:
             resp=$(curl -sS -u admin:admin -X POST "http://127.0.0.1:9000/api/user_tokens/generate?name=${token_name}")
             token=$(echo "$resp" | python3 -c "import sys, json; print(json.load(sys.stdin).get('token',''))") || token=""
             if [ -n "$token" ]; then
+              # Persist token to subsequent steps
+              echo "SONAR_TOKEN=$token" >> $GITHUB_ENV
               export SONAR_TOKEN="$token"
-              echo "Temporary SONAR token created."
+              echo "Temporary SONAR token created and written to GITHUB_ENV."
             else
               echo "Failed to create temporary SONAR token; response: $resp"
             fi
@@ -138,8 +145,6 @@ jobs:
 
       - name: Sonar debug checks
         if: always()
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           echo "SONAR_TOKEN set? $(if [ -n "${SONAR_TOKEN}" ]; then echo yes; else echo no; fi)"
           echo "------ Anonymous HEAD (headers) ------"
