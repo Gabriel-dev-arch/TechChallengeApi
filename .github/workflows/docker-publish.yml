@@ -122,6 +122,29 @@ jobs:
 
           echo "SonarQube is ready."
 
+      - name: Sonar debug checks
+        if: always()
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          echo "SONAR_TOKEN set? $(if [ -n "${SONAR_TOKEN}" ]; then echo yes; else echo no; fi)"
+          echo "------ Anonymous HEAD (headers) ------"
+          curl -sS -I http://127.0.0.1:9000/api/system/health || true
+          echo "------ Anonymous body ------"
+          curl -sS http://127.0.0.1:9000/api/system/health || true
+          if [ -n "${SONAR_TOKEN}" ]; then
+            echo "------ Authenticated health check (body only; token not printed) ------"
+            auth_code=$(curl -sS -o /tmp/sonar_auth_health -w "%{http_code}" -u "${SONAR_TOKEN}:" http://127.0.0.1:9000/api/system/health || echo "000")
+            cat /tmp/sonar_auth_health || true
+            echo "Authenticated HTTP code: $auth_code"
+          else
+            echo "SONAR_TOKEN not set; skipping authenticated check"
+          fi
+          echo "------ Docker logs (tail 500) ------"
+          docker logs --tail 500 sonarqube-ci || true
+          echo "------ Docker inspect ------"
+          docker inspect sonarqube-ci || true
+
       - name: Stop SonarQube
         run: |
           docker stop sonarqube-ci || true
