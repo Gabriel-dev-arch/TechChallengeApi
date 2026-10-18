@@ -53,6 +53,10 @@ services:
     container_name: oficina-sonarqube
     profiles: ["qualidade"]
     restart: unless-stopped
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/${DB_NAME:-oficina}
+      SONAR_JDBC_USERNAME: ${DB_USER}
+      SONAR_JDBC_PASSWORD: ${DB_PASSWORD}
     ports:
       - "9000:9000"
     networks:

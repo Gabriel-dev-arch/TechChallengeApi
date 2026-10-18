@@ -2,7 +2,6 @@ name: Build and Push to GHCR
 
 on:
   push:
-    branches: [ main, develop, 'release/**' ]
   pull_request:
     branches: [ main, develop, 'release/**' ]
 
@@ -86,7 +85,6 @@ jobs:
           tags: ghcr.io/${{ env.IMAGE_REPO }}:latest
 
       - name: Start SonarQube (Docker)
-        if: github.event_name != 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -94,36 +92,79 @@ jobs:
           docker run -d --name sonarqube-ci --memory=4g --ulimit nofile=65536:65536 -p 9000:9000 sonarqube:lts-community
           echo "Waiting for SonarQube (health check)..."
           status=""
-          for i in $(seq 1 120); do
-            # try anonymous health-check first
-            status=$(curl -sS http://127.0.0.1:9000/api/system/health || echo "")
+          http_code=""
+          for i in $(seq 1 12); do
+            # anonymous health-check
+            http_code=$(curl -sS -o /tmp/sonar_health -w "%{http_code}" http://127.0.0.1:9000/api/system/health || echo "000")
+            status=$(cat /tmp/sonar_health 2>/dev/null || echo "")
+            # admin-auth status check (use default admin:admin to validate readiness even when anon is blocked)
+            admin_code=$(curl -sS -o /tmp/sonar_admin_status -w "%{http_code}" -u admin:admin http://127.0.0.1:9000/api/system/status || echo "000")
+            admin_status=$(cat /tmp/sonar_admin_status 2>/dev/null || echo "")
 
-            # if anonymous check failed or returned an error, try authenticated check only if token is set
-            if [ -z "$status" ] || echo "$status" | grep -q '"errors"'; then
-              if [ -n "${SONAR_TOKEN}" ]; then
-                status=$(curl -sS -u "${SONAR_TOKEN}:" http://127.0.0.1:9000/api/system/health || echo "")
-              fi
+            echo "Waiting for Sonar... ($i/12) - anon HTTP $http_code - admin HTTP $admin_code"
+            echo "Anonymous: $status"
+            echo "Admin: $admin_status"
+
+            if { [ "$http_code" = "200" ] && echo "$status" | grep -qE '\"status\":\"GREEN\"|\"status\":\"UP\"'; } || { [ "$admin_code" = "200" ] && echo "$admin_status" | grep -qE '\"status\":\"GREEN\"|\"status\":\"UP\"'; }; then
+              echo "Sonar ready (detected via anon or admin check)"
+              break
             fi
 
-            echo "Waiting for Sonar... ($i/120) - $status"
-            echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"' && { echo "Sonar ready"; break; }
-            sleep 10
+            sleep 5
           done
-          if ! echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"'; then
+
+          if ! { [ "$http_code" = "200" ] && echo "$status" | grep -qE '\"status\":\"GREEN\"|\"status\":\"UP\"'; } && ! { [ "$admin_code" = "200" ] && echo "$admin_status" | grep -qE '\"status\":\"GREEN\"|\"status\":\"UP\"'; }; then
             echo "Sonar did not become ready in time; dumping logs:";
             docker logs --tail 200 sonarqube-ci || true
             docker inspect sonarqube-ci || true
             if [ -z "${SONAR_TOKEN}" ]; then
               echo "SONAR_TOKEN is not set in the runner environment."
             else
-              echo "SONAR_TOKEN is set (not revealing its value). It may not be valid for the Sonar instance started in the container."
+              echo "SONAR_TOKEN is set but was NOT used for health-check. Token may not be valid for this ephemeral Sonar instance."
             fi
             exit 1
           fi
+
           echo "SonarQube is ready."
 
+          # If SONAR_TOKEN is not provided, create a temporary token using default admin credentials
+          if [ -z "${SONAR_TOKEN}" ]; then
+            echo "SONAR_TOKEN not provided — creating temporary token using default admin:admin"
+            token_name="gh-actions-$(date +%s)"
+            resp=$(curl -sS -u admin:admin -X POST "http://127.0.0.1:9000/api/user_tokens/generate?name=${token_name}")
+            token=$(echo "$resp" | python3 -c "import sys, json; print(json.load(sys.stdin).get('token',''))") || token=""
+            if [ -n "$token" ]; then
+              # Persist token to subsequent steps
+              echo "SONAR_TOKEN=$token" >> $GITHUB_ENV
+              export SONAR_TOKEN="$token"
+              echo "Temporary SONAR token created and written to GITHUB_ENV."
+            else
+              echo "Failed to create temporary SONAR token; response: $resp"
+            fi
+          fi
+
+      - name: Sonar debug checks
+        if: always()
+        run: |
+          echo "SONAR_TOKEN set? $(if [ -n "${SONAR_TOKEN}" ]; then echo yes; else echo no; fi)"
+          echo "------ Anonymous HEAD (headers) ------"
+          curl -sS -I http://127.0.0.1:9000/api/system/health || true
+          echo "------ Anonymous body ------"
+          curl -sS http://127.0.0.1:9000/api/system/health || true
+          if [ -n "${SONAR_TOKEN}" ]; then
+            echo "------ Authenticated health check (body only; token not printed) ------"
+            auth_code=$(curl -sS -o /tmp/sonar_auth_health -w "%{http_code}" -u "${SONAR_TOKEN}:" http://127.0.0.1:9000/api/system/health || echo "000")
+            cat /tmp/sonar_auth_health || true
+            echo "Authenticated HTTP code: $auth_code"
+          else
+            echo "SONAR_TOKEN not set; skipping authenticated check"
+          fi
+          echo "------ Docker logs (tail 500) ------"
+          docker logs --tail 500 sonarqube-ci || true
+          echo "------ Docker inspect ------"
+          docker inspect sonarqube-ci || true
+
       - name: Stop SonarQube
-        if: github.event_name != 'pull_request'
         run: |
           docker stop sonarqube-ci || true
           docker rm sonarqube-ci || true
