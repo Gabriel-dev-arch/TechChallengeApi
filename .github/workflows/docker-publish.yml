@@ -122,6 +122,20 @@ jobs:
 
           echo "SonarQube is ready."
 
+          # If SONAR_TOKEN is not provided, create a temporary token using default admin credentials
+          if [ -z "${SONAR_TOKEN}" ]; then
+            echo "SONAR_TOKEN not provided — creating temporary token using default admin:admin"
+            token_name="gh-actions-$(date +%s)"
+            resp=$(curl -sS -u admin:admin -X POST "http://127.0.0.1:9000/api/user_tokens/generate?name=${token_name}")
+            token=$(echo "$resp" | python3 -c "import sys, json; print(json.load(sys.stdin).get('token',''))") || token=""
+            if [ -n "$token" ]; then
+              export SONAR_TOKEN="$token"
+              echo "Temporary SONAR token created."
+            else
+              echo "Failed to create temporary SONAR token; response: $resp"
+            fi
+          fi
+
       - name: Sonar debug checks
         if: always()
         env:
