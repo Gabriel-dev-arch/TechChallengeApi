@@ -1,6 +1,6 @@
-package com.techchallenge.oficina.servicos.entidades;
+package com.techchallenge.oficina.ordem_servico.entidades;
 
-public enum StatusServico {
+public enum StatusOS {
 
 	RECEBIDA,
 	EM_DIAGNOSTICO,
