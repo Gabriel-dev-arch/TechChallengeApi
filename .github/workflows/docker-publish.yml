@@ -94,32 +94,34 @@ jobs:
           docker run -d --name sonarqube-ci --memory=4g --ulimit nofile=65536:65536 -p 9000:9000 sonarqube:lts-community
           echo "Waiting for SonarQube (health check)..."
           status=""
+          http_code=""
           for i in $(seq 1 120); do
-            # try anonymous health-check first
-            status=$(curl -sS http://127.0.0.1:9000/api/system/health || echo "")
+            # perform anonymous health-check and capture HTTP status code
+            http_code=$(curl -sS -o /tmp/sonar_health -w "%{http_code}" http://127.0.0.1:9000/api/system/health || echo "000")
+            status=$(cat /tmp/sonar_health 2>/dev/null || echo "")
 
-            # if anonymous check failed or returned an error, try authenticated check only if token is set
-            if [ -z "$status" ] || echo "$status" | grep -q '"errors"'; then
-              if [ -n "${SONAR_TOKEN}" ]; then
-                status=$(curl -sS -u "${SONAR_TOKEN}:" http://127.0.0.1:9000/api/system/health || echo "")
-              fi
+            echo "Waiting for Sonar... ($i/120) - HTTP $http_code - $status"
+
+            if [ "$http_code" = "200" ] && echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"'; then
+              echo "Sonar ready"
+              break
             fi
 
-            echo "Waiting for Sonar... ($i/120) - $status"
-            echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"' && { echo "Sonar ready"; break; }
             sleep 10
           done
-          if ! echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"'; then
+
+          if ! [ "$http_code" = "200" ] || ! echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"'; then
             echo "Sonar did not become ready in time; dumping logs:";
             docker logs --tail 200 sonarqube-ci || true
             docker inspect sonarqube-ci || true
             if [ -z "${SONAR_TOKEN}" ]; then
               echo "SONAR_TOKEN is not set in the runner environment."
             else
-              echo "SONAR_TOKEN is set (not revealing its value). It may not be valid for the Sonar instance started in the container."
+              echo "SONAR_TOKEN is set but was NOT used for health-check. Token may not be valid for this ephemeral Sonar instance."
             fi
             exit 1
           fi
+
           echo "SonarQube is ready."
 
       - name: Stop SonarQube
