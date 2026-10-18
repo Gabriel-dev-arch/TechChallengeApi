@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.clientes;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteRepository;
+import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.support.PostgresTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(PostgresTestConfiguration.class)
+@WithMockUser(roles = "ADMIN")
 class ClienteApiIntegrationTest {
 
 	private static final String CPF = "529.982.247-25";
@@ -37,8 +40,12 @@ class ClienteApiIntegrationTest {
 	@Autowired
 	ClienteRepository repository;
 
+	@Autowired
+	VeiculoRepository veiculoRepository;
+
 	@BeforeEach
 	void limparBanco() {
+		veiculoRepository.deleteAll();
 		repository.deleteAll();
 	}
 

@@ -9,6 +9,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
     ports:
       - "${DB_PORT:-5432}:5432"
+    networks:
+      - oficina-net
     volumes:
       - oficina-db-data:/var/lib/postgresql/data
     healthcheck:
@@ -31,12 +33,25 @@ services:
       DB_NAME: ${DB_NAME:-oficina}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      JWT_EXPIRACAO_MINUTOS: ${JWT_EXPIRACAO_MINUTOS:-60}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:?defina ADMIN_USERNAME no .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD no .env}
+      CLIENTE_USERNAME: ${CLIENTE_USERNAME:?defina CLIENTE_USERNAME no .env}
+      CLIENTE_PASSWORD: ${CLIENTE_PASSWORD:?defina CLIENTE_PASSWORD no .env}
+      CLIENTE_DOCUMENTO: ${CLIENTE_DOCUMENTO:?defina CLIENTE_DOCUMENTO no .env}
     ports:
       - "${APP_PORT:-8080}:8080"
+    networks:
+      - oficina-net
 
+  # Analise de qualidade de codigo (SonarQube). Sobe somente sob demanda:
+  #   docker compose --profile qualidade up -d sonarqube
+  # Usa o banco embutido do proprio SonarQube; nao depende do banco da aplicacao.
   sonarqube:
-    image: sonarqube:latest
+    image: sonarqube:community
     container_name: oficina-sonarqube
+    profiles: ["qualidade"]
     restart: unless-stopped
     environment:
       SONAR_JDBC_URL: jdbc:postgresql://db:5432/${DB_NAME:-oficina}
@@ -44,9 +59,48 @@ services:
       SONAR_JDBC_PASSWORD: ${DB_PASSWORD}
     ports:
       - "9000:9000"
-    depends_on:
-      db:
-        condition: service_healthy
+    networks:
+      - oficina-net
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+
+  # Monitoramento e observabilidade (Prometheus + Grafana)
+  #   docker compose --profile observabilidade up -d
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: oficina-prometheus
+    profiles: ["observabilidade"]
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - oficina-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: oficina-grafana
+    profiles: ["observabilidade"]
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - oficina-net
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./oficina/src/main/resources/grafana:/etc/grafana/provisioning
 
 volumes:
   oficina-db-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  oficina-net:
+    driver: bridge
