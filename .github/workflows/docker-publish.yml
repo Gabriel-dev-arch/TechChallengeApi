@@ -2,7 +2,6 @@ name: Build and Push to GHCR
 
 on:
   push:
-    branches: [ main, develop, 'release/**' ]
   pull_request:
     branches: [ main, develop, 'release/**' ]
 
@@ -86,7 +85,6 @@ jobs:
           tags: ghcr.io/${{ env.IMAGE_REPO }}:latest
 
       - name: Start SonarQube (Docker)
-        if: github.event_name != 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -125,7 +123,6 @@ jobs:
           echo "SonarQube is ready."
 
       - name: Stop SonarQube
-        if: github.event_name != 'pull_request'
         run: |
           docker stop sonarqube-ci || true
           docker rm sonarqube-ci || true
