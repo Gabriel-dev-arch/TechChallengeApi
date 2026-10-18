@@ -92,10 +92,19 @@ jobs:
         run: |
           docker pull sonarqube:lts-community
           docker run -d --name sonarqube-ci --memory=4g --ulimit nofile=65536:65536 -p 9000:9000 sonarqube:lts-community
-          echo "Waiting for SonarQube (authenticated check)..."
+          echo "Waiting for SonarQube (health check)..."
           status=""
           for i in $(seq 1 120); do
-            status=$(curl -sS -u "${SONAR_TOKEN}:" http://127.0.0.1:9000/api/system/health || echo "")
+            # try anonymous health-check first
+            status=$(curl -sS http://127.0.0.1:9000/api/system/health || echo "")
+
+            # if anonymous check failed or returned an error, try authenticated check only if token is set
+            if [ -z "$status" ] || echo "$status" | grep -q '"errors"'; then
+              if [ -n "${SONAR_TOKEN}" ]; then
+                status=$(curl -sS -u "${SONAR_TOKEN}:" http://127.0.0.1:9000/api/system/health || echo "")
+              fi
+            fi
+
             echo "Waiting for Sonar... ($i/120) - $status"
             echo "$status" | grep -qE '"status":"GREEN"|"status":"UP"' && { echo "Sonar ready"; break; }
             sleep 10
@@ -104,9 +113,14 @@ jobs:
             echo "Sonar did not become ready in time; dumping logs:";
             docker logs --tail 200 sonarqube-ci || true
             docker inspect sonarqube-ci || true
+            if [ -z "${SONAR_TOKEN}" ]; then
+              echo "SONAR_TOKEN is not set in the runner environment."
+            else
+              echo "SONAR_TOKEN is set (not revealing its value). It may not be valid for the Sonar instance started in the container."
+            fi
             exit 1
           fi
-          echo "SonarQube is ready (authenticated)."
+          echo "SonarQube is ready."
 
       - name: Stop SonarQube
         if: github.event_name != 'pull_request'
