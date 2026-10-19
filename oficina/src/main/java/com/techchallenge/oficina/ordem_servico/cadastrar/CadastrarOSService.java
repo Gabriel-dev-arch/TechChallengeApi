@@ -1,8 +1,9 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
-import com.techchallenge.oficina.ordem_servico.dominio.*;
+import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoEmAbertoException;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.VeiculoNaoEncontradoException;
+import com.techchallenge.oficina.ordem_servico.dominio.response.CalculoOrcamento;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
@@ -49,7 +50,7 @@ public class CadastrarOSService {
 		List<PecaInsumo> itens = pecaInsumoRepository.findAllById(request.itens().stream().map(ItemQuantidade::itens).collect(Collectors.toList()));
 
 		OrdemServico ordemServico = new OrdemServico(StatusOS.RECEBIDA,
-				CalculoOrcamento.calculaOrcamento(itens, servicos),
+				CalculoOrcamento.realizaCalculoTotal(itens, request.itens(), servicos),
 				servicos,
 				itens,
 				request.diagnostico(),

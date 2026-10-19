@@ -5,5 +5,5 @@ import java.util.UUID;
 
 public record ItemQuantidade(
         UUID itens,
-        BigDecimal valor){
+        BigDecimal quantidade){
 }

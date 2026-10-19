@@ -1,10 +1,8 @@
 package com.techchallenge.oficina.ordem_servico.dominio.response;
 
-import com.techchallenge.oficina.ordem_servico.dominio.CalculoOrcamento;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
+import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 
 public record OrdemServicoResponse(
@@ -18,10 +16,7 @@ public record OrdemServicoResponse(
 
 	public static OrdemServicoResponse from(OrdemServico ordemServico) {
 
-		OrcamentoResponse orcamento = OrcamentoResponse.from(
-				CalculoOrcamento.calculaOrcamento(ordemServico.getItens(), ordemServico.getServicos()),
-				ordemServico.getStatus());
-
+		var orcamento = OrcamentoResponse.from(ordemServico.getOrcamento(), StatusOS.RECEBIDA);
 		var clienteResponse 	= ClienteResponse.from(ordemServico.getCliente());
 		var veiculoResponse 	= VeiculoResponse.from(ordemServico.getVeiculo());
 		var pecaInsumoResponse 	= PecaInsumoResponse.from(ordemServico.getItens());

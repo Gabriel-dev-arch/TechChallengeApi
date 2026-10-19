@@ -1,7 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
-import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoException;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +33,6 @@ public class ConsultarOSService {
 	public OrdemServicoResponse buscar(String placa) {
 
 		 return repository.buscarPorPlaca(placa).stream().findFirst().map(OrdemServicoResponse::from)
-				 .orElseThrow(() -> new OrdemServicoException(placa));
+				 .orElseThrow(() -> new OrdemServicoNaoEncontradaException(placa));
 	}
 }
