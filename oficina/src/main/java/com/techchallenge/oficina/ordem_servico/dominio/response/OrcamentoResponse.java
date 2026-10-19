@@ -7,10 +7,10 @@ import java.math.BigDecimal;
 
 public record OrcamentoResponse(
         BigDecimal total,
-        StatusOS status) {
+        String status) {
 
     public static OrcamentoResponse from(BigDecimal valorOrcamento, StatusOS status) {
 
-        return new OrcamentoResponse(valorOrcamento, status);
+        return new OrcamentoResponse(valorOrcamento, status.getDescricao());
     }
 }

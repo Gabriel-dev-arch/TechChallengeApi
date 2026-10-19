@@ -4,10 +4,10 @@ import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
 
 import java.util.UUID;
 
-public class OrdemServicoException extends RecursoNaoEncontradoException {
+public class OrdemServicoException extends RuntimeException {
 
 	public OrdemServicoException(UUID id) {
-		super("Cliente não encontrado: " + id);
+		super("Ordem de serviço não encontrado pelo id: " + id);
 	}
 
 	public OrdemServicoException(String placa) {

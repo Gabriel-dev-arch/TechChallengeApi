@@ -4,7 +4,7 @@ import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
 
 import java.util.UUID;
 
-public class VeiculoNaoEncontradoException extends RecursoNaoEncontradoException {
+public class VeiculoNaoEncontradoException extends RuntimeException {
 
 	public VeiculoNaoEncontradoException(UUID id) {
 		super("Veículo não encontrado: " + id);

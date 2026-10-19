@@ -17,7 +17,7 @@ public record CalculoOrcamento() {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal valorPecaInsumos = itens.stream()
-                .map(PecaInsumo::getPrecoUnitario)
+                .map(item -> item.getPrecoUnitario().multiply(item.getQuantidadeReservada()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return valorServico.add(valorPecaInsumos);

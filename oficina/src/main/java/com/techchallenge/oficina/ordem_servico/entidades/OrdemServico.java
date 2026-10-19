@@ -11,6 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Getter
@@ -48,5 +51,13 @@ public class OrdemServico extends BaseEntity {
         this.diagnostico = diagnostico;
         this.veiculo = veiculo;
         this.cliente = cliente;
+    }
+
+    public String formatDate(){
+
+        if(this.getCreatedAt() != null){
+            return this.getCreatedAt().atOffset(ZoneOffset.of("-03:00")).format(DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm"));
+        }
+        return null;
     }
 }

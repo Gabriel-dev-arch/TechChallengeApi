@@ -1,11 +1,23 @@
 package com.techchallenge.oficina.ordem_servico.entidades;
 
+import java.math.BigDecimal;
+
 public enum StatusOS {
 
-	RECEBIDA,
-	EM_DIAGNOSTICO,
-	AGUARDANDO_APROVACAO,
-	EM_EXECUCAO,
-	FINALIZADA,
-	ENTREGUE
+	RECEBIDA("Recebida"),
+	EM_DIAGNOSTICO("Em diagnóstico"),
+	AGUARDANDO_APROVACAO("Aguardando aprovação"),
+	EM_EXECUCAO("Em execução"),
+	FINALIZADA("Finalizada"),
+	ENTREGUE("Entregue");
+
+	private final String descricao;
+
+	StatusOS(String descricao) {
+		this.descricao = descricao;
+	}
+
+	public String getDescricao() {
+		return descricao;
+	}
 }
