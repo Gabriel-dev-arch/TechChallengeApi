@@ -19,18 +19,34 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrdemServico extends BaseEntity {
 
-    private String firstName;
-    private String lastName;
-    @OneToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "veiculo_id")
     private Veiculo veiculo;
     private String diagnostico;
-    @OneToMany
+    @ManyToMany
+    @JoinTable(name = "ordem_servico_itens",
+            joinColumns = @JoinColumn(name = "ordem_servico_id"),
+            inverseJoinColumns = @JoinColumn(name = "itens_id"))
     private List<PecaInsumo> itens;
-    @OneToMany
+    @ManyToMany
+    @JoinTable(name = "ordem_servico_servicos",
+            joinColumns = @JoinColumn(name = "ordem_servico_id"),
+            inverseJoinColumns = @JoinColumn(name = "servicos_id"))
     private List<Servico> servicos;
     private BigDecimal orcamento;
     @Enumerated(value = EnumType.STRING)
     private StatusOS status;
+
+    public OrdemServico(StatusOS status, BigDecimal orcamento, List<Servico> servicos, List<PecaInsumo> itens, String diagnostico, Veiculo veiculo, Cliente cliente) {
+        this.status = status;
+        this.orcamento = orcamento;
+        this.servicos = servicos;
+        this.itens = itens;
+        this.diagnostico = diagnostico;
+        this.veiculo = veiculo;
+        this.cliente = cliente;
+    }
 }

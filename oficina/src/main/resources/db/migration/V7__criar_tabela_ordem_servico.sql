@@ -10,9 +10,7 @@ CREATE TABLE public.ordem_servico (
 	first_name                  varchar(255)   NULL,
 	last_name                   varchar(255) NULL,
 	status                      varchar(255) NULL,
-	CONSTRAINT ordem_servico_cliente_id_key UNIQUE (cliente_id),
-	CONSTRAINT ordem_servico_pkey PRIMARY KEY (id),
-    CONSTRAINT ordem_servico_veiculo_id_key UNIQUE (veiculo_id)
+	CONSTRAINT ordem_servico_pkey PRIMARY KEY (id)
 );
 
 
@@ -27,7 +25,7 @@ ALTER TABLE public.ordem_servico ADD CONSTRAINT fk_os_veiculo FOREIGN KEY (veicu
 CREATE TABLE public.ordem_servico_itens (
 	itens_id         uuid NOT NULL,
 	ordem_servico_id uuid NOT NULL,
-	CONSTRAINT ordem_servico_itens_itens_id_key UNIQUE (itens_id)
+	CONSTRAINT ordem_servico_itens_pkey PRIMARY KEY (ordem_servico_id, itens_id)
 );
 
 
@@ -41,7 +39,7 @@ ALTER TABLE public.ordem_servico_itens ADD CONSTRAINT fk_ordem_servicos FOREIGN 
 CREATE TABLE public.ordem_servico_servicos (
 	ordem_servico_id uuid NOT NULL,
 	servicos_id      uuid NOT NULL,
-	CONSTRAINT ordem_servico_servicos_servicos_id_key UNIQUE (servicos_id)
+	CONSTRAINT ordem_servico_servicos_pkey PRIMARY KEY (ordem_servico_id, servicos_id)
 );
 
 
