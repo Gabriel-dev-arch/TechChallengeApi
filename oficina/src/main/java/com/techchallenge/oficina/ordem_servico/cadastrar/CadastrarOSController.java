@@ -1,7 +1,6 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
-import com.techchallenge.oficina.clientes.dominio.ClienteResponse;
-import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoResponse;
+import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

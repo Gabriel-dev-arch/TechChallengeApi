@@ -1,22 +1,21 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
 import com.techchallenge.oficina.ordem_servico.dominio.*;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoEmAbertoException;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.VeiculoNaoEncontradoException;
+import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoRepository;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.dominio.ServicoRepository;
 import com.techchallenge.oficina.servicos.entidades.Servico;
-import com.techchallenge.oficina.veiculos.dominio.PlacaJaCadastradaException;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class CadastrarOSService {
@@ -49,7 +48,7 @@ public class CadastrarOSService {
 		List<PecaInsumo> itens = pecaInsumoRepository.findAllById(request.itens());
 
 		OrdemServico ordemServico = new OrdemServico(StatusOS.RECEBIDA,
-				Orcamento.from(itens, servicos),
+				CalculoOrcamento.calculaOrcamento(itens, servicos),
 				servicos,
 				itens,
 				request.diagnostico(),

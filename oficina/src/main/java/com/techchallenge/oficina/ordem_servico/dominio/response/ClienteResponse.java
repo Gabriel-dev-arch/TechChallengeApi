@@ -1,11 +1,10 @@
-package com.techchallenge.oficina.ordem_servico.dominio;
+package com.techchallenge.oficina.ordem_servico.dominio.response;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.UUID;
 
 public record ClienteResponse(
 		String fullName,

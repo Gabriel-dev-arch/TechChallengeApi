@@ -1,6 +1,6 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
-import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoResponse;
+import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;

@@ -1,17 +1,9 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
-import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
-import com.techchallenge.oficina.clientes.dominio.ClienteRepository;
-import com.techchallenge.oficina.clientes.dominio.ClienteResponse;
-import com.techchallenge.oficina.clientes.dominio.CpfCnpjValidator;
-import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoException;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoException;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
-import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoResponse;
-import com.techchallenge.oficina.ordem_servico.dominio.VeiculoNaoEncontradoException;
+import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
-import com.techchallenge.oficina.veiculos.dominio.VeiculoResponse;
-import com.techchallenge.oficina.veiculos.entidades.Veiculo;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

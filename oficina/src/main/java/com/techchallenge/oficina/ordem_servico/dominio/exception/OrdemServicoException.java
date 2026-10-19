@@ -1,4 +1,4 @@
-package com.techchallenge.oficina.ordem_servico.dominio;
+package com.techchallenge.oficina.ordem_servico.dominio.exception;
 
 import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
 

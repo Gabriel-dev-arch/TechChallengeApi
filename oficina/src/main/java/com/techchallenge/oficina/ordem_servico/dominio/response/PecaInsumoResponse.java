@@ -1,4 +1,4 @@
-package com.techchallenge.oficina.ordem_servico.dominio;
+package com.techchallenge.oficina.ordem_servico.dominio.response;
 
 import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
 import com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida;
@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public record PecaInsumoResponse(
