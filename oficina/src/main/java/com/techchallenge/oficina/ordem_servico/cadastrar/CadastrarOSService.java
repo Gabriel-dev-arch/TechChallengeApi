@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CadastrarOSService {
@@ -45,7 +46,7 @@ public class CadastrarOSService {
 		Veiculo veiculo = veiculoRepository.findByPlaca(request.placa()).orElseThrow(() -> new VeiculoNaoEncontradoException(request.placa()));
 
 		List<Servico> servicos = servicoRepository.findAllById(request.servicos());
-		List<PecaInsumo> itens = pecaInsumoRepository.findAllById(request.itens());
+		List<PecaInsumo> itens = pecaInsumoRepository.findAllById(request.itens().stream().map(ItemQuantidade::itens).collect(Collectors.toList()));
 
 		OrdemServico ordemServico = new OrdemServico(StatusOS.RECEBIDA,
 				CalculoOrcamento.calculaOrcamento(itens, servicos),

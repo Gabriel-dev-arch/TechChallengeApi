@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record CadastrarOSRequest(
 		List<UUID> servicos,
-		List<UUID> itens,
+		List<ItemQuantidade> itens,
 		String diagnostico,
 		String placa) {
 }
