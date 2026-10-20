@@ -17,11 +17,9 @@ import java.util.UUID;
 public class ConsultarOSService {
 
 	private final OrdemServicoRepository repository;
-	private final VeiculoRepository veiculoRepository;
 
-	public ConsultarOSService(OrdemServicoRepository repository, VeiculoRepository veiculoRepository) {
+	public ConsultarOSService(OrdemServicoRepository repository) {
 		this.repository = repository;
-        this.veiculoRepository = veiculoRepository;
     }
 
 	public PageImpl<OrdemServicoResponse> listar(UUID uid, Pageable pageable) {
