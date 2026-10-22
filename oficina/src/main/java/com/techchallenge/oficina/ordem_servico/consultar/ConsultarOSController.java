@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Ordem de Serviço", description = "Consultar Ordem de Sefrviço")
@@ -26,11 +27,8 @@ public class ConsultarOSController {
 
 	@GetMapping
 	@Operation(summary = "Listar Ordem de Serviço", description = "Listar Ordem de Serviço")
-	public PagedModel<OrdemServicoResponse> listar(@RequestParam(required = false) UUID uid,
-			@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("fullName"));
-		return new PagedModel<>(service.listar(uid, pageable));
+	public List<OrdemServicoResponse> listar(@RequestParam(required = false) UUID id) {
+		return service.listar(id);
 	}
 
 	@GetMapping("/{placa}")

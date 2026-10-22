@@ -9,8 +9,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +44,9 @@ public class OrdemServico extends BaseEntity {
     private BigDecimal orcamento;
     @Enumerated(value = EnumType.STRING)
     private StatusOS status;
+
+    @LastModifiedDate
+    private Instant updatedAt;
 
     public OrdemServico(StatusOS status, BigDecimal orcamento, List<Servico> servicos, List<PecaInsumo> itens, String diagnostico, Veiculo veiculo, Cliente cliente) {
         this.status = status;

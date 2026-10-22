@@ -22,10 +22,10 @@ public class ConsultarOSService {
 		this.repository = repository;
     }
 
-	public PageImpl<OrdemServicoResponse> listar(UUID uid, Pageable pageable) {
+	public List<OrdemServicoResponse> listar(UUID uid) {
 			List<OrdemServicoResponse> encontrado = repository.findById(uid)
 					.map(OrdemServicoResponse::from).stream().toList();
-			return new PageImpl<>(encontrado, pageable, encontrado.size());
+			return encontrado;
 	}
 
 	public OrdemServicoResponse buscar(String placa) {
