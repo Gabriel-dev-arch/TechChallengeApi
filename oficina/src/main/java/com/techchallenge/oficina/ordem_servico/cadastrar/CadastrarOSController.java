@@ -15,7 +15,7 @@ import java.net.URI;
 
 @Tag(name = "Ordem de Serviço", description = "Cadastra Ordem de serviço")
 @RestController
-@RequestMapping("/os")
+@RequestMapping("/ordens-servico")
 public class CadastrarOSController {
 
 	private final CadastrarOSService service;

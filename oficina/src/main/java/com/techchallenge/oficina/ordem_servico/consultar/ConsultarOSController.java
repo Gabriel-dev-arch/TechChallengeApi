@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
+import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 @Tag(name = "Ordem de Serviço", description = "Consultar Ordem de Sefrviço")
 @RestController
-@RequestMapping("/os")
+@RequestMapping("/ordens-servico")
 public class ConsultarOSController {
 
 	private final ConsultarOSService service;
@@ -26,14 +27,17 @@ public class ConsultarOSController {
 	}
 
 	@GetMapping
-	@Operation(summary = "Listar Ordem de Serviço", description = "Listar Ordem de Serviço")
-	public List<OrdemServicoResponse> listar(@RequestParam(required = false) UUID id) {
-		return service.listar(id);
+	@Operation(summary = "Buscar Ordens de Serviço pelo Status", description = "Buscar Ordens de Serviço pelo Status")
+	public PagedModel<OrdemServicoResponse> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
+												   @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
+												   @RequestParam(required = true) String status) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt"));
+		return new PagedModel<>(service.listarOrdemServicoEmAberto(StatusOS.valueOf(status), pageable));
 	}
 
-	@GetMapping("/{placa}")
-	@Operation(summary = "Buscar Ordem de Serviço pela placa", description = "Buscar Ordem de Serviço pela placa")
-	public OrdemServicoResponse buscar(@PathVariable String placa) {
-		return service.buscar(placa);
+	@GetMapping("/{id}")
+	@Operation(summary = "Buscar Ordem de Serviço pelo id", description = "Buscar Ordem de Serviço pelo id")
+	public OrdemServicoResponse buscarOSPeloID(@PathVariable UUID id) {
+		return service.buscarOSPeloID(id);
 	}
 }
