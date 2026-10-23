@@ -1,6 +1,9 @@
 spring:
   application:
     name: oficina
+  sql:
+    init:
+      mode: never
 
   # Carrega o .env (raiz do repositório ou pasta oficina/) quando existir, para rodar fora do Docker.
   # Variáveis de ambiente do sistema continuam tendo precedência sobre o arquivo.

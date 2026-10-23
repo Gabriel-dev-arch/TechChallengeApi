@@ -17,8 +17,11 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,15 +39,11 @@ public class OrdemServico extends BaseEntity {
     @JoinColumn(name = "veiculo_id")
     private Veiculo veiculo;
     private String diagnostico;
+    @ElementCollection
+    @CollectionTable(name = "ordem_servico_itens", joinColumns = @JoinColumn(name = "ordem_servico_id"))
+    private List<OrdemServicoItem> itensQuantidade = new ArrayList<>();
     @ManyToMany
-    @JoinTable(name = "ordem_servico_itens",
-            joinColumns = @JoinColumn(name = "ordem_servico_id"),
-            inverseJoinColumns = @JoinColumn(name = "itens_id"))
-    private List<PecaInsumo> itens;
-    @ManyToMany
-    @JoinTable(name = "ordem_servico_servicos",
-            joinColumns = @JoinColumn(name = "ordem_servico_id"),
-            inverseJoinColumns = @JoinColumn(name = "servicos_id"))
+    @JoinTable(name = "ordem_servico_servicos", joinColumns = @JoinColumn(name = "ordem_servico_id"), inverseJoinColumns = @JoinColumn(name = "servicos_id"))
     private List<Servico> servicos;
     private BigDecimal orcamento;
     @Enumerated(value = EnumType.STRING)
@@ -53,26 +52,44 @@ public class OrdemServico extends BaseEntity {
     @LastModifiedDate
     private Instant updatedAt;
 
-    public OrdemServico(StatusOS status, BigDecimal orcamento, List<Servico> servicos, List<PecaInsumo> itens, String diagnostico, Veiculo veiculo, Cliente cliente) {
+    public OrdemServico(StatusOS status, BigDecimal orcamento, List<Servico> servicos,
+            List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itensQuantidade,
+            String diagnostico, Veiculo veiculo, Cliente cliente) {
         this.status = status;
         this.orcamento = orcamento;
         this.servicos = servicos;
-        this.itens = itens;
+        this.itensQuantidade = criarItens(pecasInsumos, itensQuantidade);
         this.diagnostico = diagnostico;
         this.veiculo = veiculo;
         this.cliente = cliente;
     }
 
-    public String formatDate(){
+    public String formatDate() {
 
-        if(this.getCreatedAt() != null){
-            return this.getCreatedAt().atOffset(ZoneOffset.of("-03:00")).format(DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm"));
+        if (this.getCreatedAt() != null) {
+            return this.getCreatedAt().atOffset(ZoneOffset.of("-03:00"))
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm"));
         }
         return null;
     }
 
     public void incluirPecaInsumos(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens) {
-        this.itens.addAll(pecasInsumos);
+        Map<UUID, PecaInsumo> pecasPorId = pecasInsumos.stream()
+                .collect(Collectors.toMap(PecaInsumo::getId, Function.identity()));
+
+        for (ItemQuantidade itemQuantidade : itens) {
+            PecaInsumo peca = Objects.requireNonNull(pecasPorId.get(itemQuantidade.itens()),
+                    "Peça ou insumo não encontrado: " + itemQuantidade.itens());
+            OrdemServicoItem itemExistente = this.itensQuantidade.stream()
+                    .filter(item -> item.getItem().getId().equals(itemQuantidade.itens()))
+                    .findFirst()
+                    .orElse(null);
+            if (itemExistente == null) {
+                this.itensQuantidade.add(new OrdemServicoItem(peca, itemQuantidade.quantidade()));
+            } else {
+                itemExistente.adicionarQuantidade(itemQuantidade.quantidade());
+            }
+        }
         this.realizaCalculoItensInsumosOrcamento(pecasInsumos, itens);
     }
 
@@ -81,9 +98,10 @@ public class OrdemServico extends BaseEntity {
         this.realizaCalculoServicos(servicos);
     }
 
-    private void realizaCalculoItensInsumosOrcamento(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens){
+    private void realizaCalculoItensInsumosOrcamento(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens) {
 
-        Map<UUID, PecaInsumo> pecasPorId = this.itens.stream()
+        Map<UUID, PecaInsumo> pecasPorId = this.itensQuantidade.stream()
+                .map(OrdemServicoItem::getItem)
                 .collect(Collectors.toMap(PecaInsumo::getId,
                         Function.identity(),
                         (existente, substituto) -> existente));
@@ -97,7 +115,32 @@ public class OrdemServico extends BaseEntity {
         this.orcamento = valorTotalPecasInsumos;
     }
 
-    private void realizaCalculoServicos(List<Servico> servicos){
+    public List<PecaInsumo> getItens() {
+        return itensQuantidade.stream().map(OrdemServicoItem::getItem).toList();
+    }
+
+    private static List<OrdemServicoItem> criarItens(List<PecaInsumo> pecasInsumos,
+            List<ItemQuantidade> itensQuantidade) {
+        Map<UUID, PecaInsumo> pecasPorId = pecasInsumos.stream()
+                .collect(Collectors.toMap(PecaInsumo::getId, Function.identity()));
+
+        Map<UUID, OrdemServicoItem> itensPorId = new LinkedHashMap<>();
+
+        for (ItemQuantidade itemQuantidade : itensQuantidade) {
+
+            OrdemServicoItem itemExistente = itensPorId.get(itemQuantidade.itens());
+
+            if (itemExistente == null) {
+                itensPorId.put(itemQuantidade.itens(),
+                        new OrdemServicoItem(pecasPorId.get(itemQuantidade.itens()), itemQuantidade.quantidade()));
+            } else {
+                itemExistente.adicionarQuantidade(itemQuantidade.quantidade());
+            }
+        }
+        return new ArrayList<>(itensPorId.values());
+    }
+
+    private void realizaCalculoServicos(List<Servico> servicos) {
 
         var valorTotalServicos = servicos.stream()
                 .map(Servico::getValor)

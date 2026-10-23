@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public record PecaInsumoResponse(
         TipoItem tipo,
@@ -25,11 +23,6 @@ public record PecaInsumoResponse(
         return new PecaInsumoResponse(item.getTipo(), item.getCodigo(),
                                       item.getNome(), item.getDescricao(), item.getUnidadeMedida(),
                                       item.getPrecoUnitario());
-    }
-
-    public static List<PecaInsumoResponse> from(List<PecaInsumo> itens) {
-
-        return itens.stream().map(PecaInsumoResponse::from).collect(Collectors.toList());
     }
 
     /** Converte o instante (UTC) para o horário de Brasília; null enquanto a entidade não foi persistida. */

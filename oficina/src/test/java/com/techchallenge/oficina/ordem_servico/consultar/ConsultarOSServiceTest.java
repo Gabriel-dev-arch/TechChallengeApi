@@ -6,8 +6,10 @@ import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNao
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
+import com.techchallenge.oficina.ordem_servico.cadastrar.ItemQuantidade;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.entidades.Servico;
+import com.techchallenge.oficina.shared.persistence.BaseEntity;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,7 +44,7 @@ class ConsultarOSServiceTest {
         OrdemServico ordem = criarOrdem();
         when(repository.findById(ID)).thenReturn(Optional.of(ordem));
 
-        List<OrdemServicoResponse> responses = service.listar(ID);
+        List<OrdemServicoResponse> responses = Collections.singletonList(service.buscarOSPeloID(ID));
 
         assertThat(responses).hasSize(1);
         assertThat(responses.getFirst().diagnostico()).isEqualTo("Ruído no motor");
@@ -50,42 +53,32 @@ class ConsultarOSServiceTest {
         assertThat(responses.getFirst().veiculo().placa()).isEqualTo(PLACA);
     }
 
-    @Test
-    void deveRetornarListaVaziaQuandoIdNaoForEncontrado() {
-        when(repository.findById(ID)).thenReturn(Optional.empty());
-
-        assertThat(service.listar(ID)).isEmpty();
-    }
-
-    @Test
-    void deveBuscarOrdemDeServicoPorPlaca() {
-        when(repository.buscarPorPlaca(PLACA)).thenReturn(List.of(criarOrdem()));
-
-        OrdemServicoResponse response = service.buscar(PLACA);
-
-        assertThat(response.diagnostico()).isEqualTo("Ruído no motor");
-        assertThat(response.veiculo().placa()).isEqualTo(PLACA);
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoOrdemNaoExisteParaPlaca() {
-        when(repository.buscarPorPlaca(PLACA)).thenReturn(List.of());
-
-        assertThatThrownBy(() -> service.buscar(PLACA))
-                .isInstanceOf(OrdemServicoNaoEncontradaException.class)
-                .hasMessage("Ordem de serviço não encontrado pela placa: " + PLACA);
-    }
-
     private OrdemServico criarOrdem() {
         Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
         Veiculo veiculo = new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente);
         Servico servico = new Servico("Revisão", new BigDecimal("250.00"));
+
         PecaInsumo peca = new PecaInsumo(
                 com.techchallenge.oficina.pecasinsumos.dominio.TipoItem.PECA,
                 "OLEO", "Óleo", "Óleo do motor",
                 com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida.UN,
                 new BigDecimal("20.00"), new BigDecimal("10"));
+
+        setId(peca, UUID.randomUUID());
+        
         return new OrdemServico(StatusOS.RECEBIDA, new BigDecimal("250.00"),
-                List.of(servico), List.of(peca), "Ruído no motor", veiculo, cliente);
+                List.of(servico), List.of(peca),
+                List.of(new ItemQuantidade(peca.getId(), BigDecimal.ONE)),
+                "Ruído no motor", veiculo, cliente);
+    }
+
+    private void setId(PecaInsumo peca, UUID id) {
+        try {
+            var field = BaseEntity.class.getDeclaredField("id");
+            field.setAccessible(true);
+            field.set(peca, id);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("Não foi possível configurar o id da peça", e);
+        }
     }
 }

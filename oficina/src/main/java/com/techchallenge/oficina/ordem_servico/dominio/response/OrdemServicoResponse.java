@@ -3,7 +3,6 @@ package com.techchallenge.oficina.ordem_servico.dominio.response;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 
-import java.rmi.server.UID;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ public record OrdemServicoResponse(
 		String abertaEm,
 		ClienteResponse cliente,
         VeiculoResponse veiculo,
-        List<PecaInsumoResponse> itens,
+        List<OrdemServicoItemResponse> itens,
         List<ServicoResponse> servicos) {
 
 	public static OrdemServicoResponse from(OrdemServico ordemServico) {
@@ -22,9 +21,11 @@ public record OrdemServicoResponse(
 		var orcamento = OrcamentoResponse.from(ordemServico.getOrcamento(), StatusOS.RECEBIDA);
 		var clienteResponse 	= ClienteResponse.from(ordemServico.getCliente());
 		var veiculoResponse 	= VeiculoResponse.from(ordemServico.getVeiculo());
-		var pecaInsumoResponse 	= PecaInsumoResponse.from(ordemServico.getItens());
+		var itensResponse 	= ordemServico.getItensQuantidade().stream()
+				.map(OrdemServicoItemResponse::from)
+				.toList();
 		var servicosResponse 	= ServicoResponse.from(ordemServico.getServicos());
 
-		return new OrdemServicoResponse(ordemServico.getId(), orcamento, ordemServico.getDiagnostico(), ordemServico.formatDate(), clienteResponse, veiculoResponse, pecaInsumoResponse,servicosResponse);
+		return new OrdemServicoResponse(ordemServico.getId(), orcamento, ordemServico.getDiagnostico(), ordemServico.formatDate(), clienteResponse, veiculoResponse, itensResponse,servicosResponse);
 	}
 }

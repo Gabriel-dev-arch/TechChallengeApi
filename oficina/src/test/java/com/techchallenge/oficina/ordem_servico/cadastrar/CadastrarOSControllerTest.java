@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -39,7 +40,7 @@ class CadastrarOSControllerTest {
 
     @Test
     void deveCadastrarOrdemDeServicoComSucesso() throws Exception {
-        OrdemServicoResponse response = new OrdemServicoResponse(
+        OrdemServicoResponse response = new OrdemServicoResponse(UUID.randomUUID(),
                 new OrcamentoResponse(new BigDecimal("150.00"), "Recebida"),
                 "Revisão preventiva",
                 null,
@@ -49,7 +50,7 @@ class CadastrarOSControllerTest {
                 List.of());
         when(service.cadastrar(any(CadastrarOSRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post("/os")
+        mockMvc.perform(post("/ordens-servico")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -60,7 +61,7 @@ class CadastrarOSControllerTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/os/ABC1234")))
+                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/ordens-servico/ABC1234")))
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.diagnostico").value("Revisão preventiva"))
                 .andExpect(jsonPath("$.orcamento.total").value(150.00))

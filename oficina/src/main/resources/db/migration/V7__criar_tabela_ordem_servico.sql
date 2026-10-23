@@ -25,6 +25,7 @@ ALTER TABLE public.ordem_servico ADD CONSTRAINT fk_os_veiculo FOREIGN KEY (veicu
 CREATE TABLE public.ordem_servico_itens (
 	itens_id         uuid NOT NULL,
 	ordem_servico_id uuid NOT NULL,
+	quantidade       numeric(38, 2) NOT NULL,
 	CONSTRAINT ordem_servico_itens_pkey PRIMARY KEY (ordem_servico_id, itens_id)
 );
 

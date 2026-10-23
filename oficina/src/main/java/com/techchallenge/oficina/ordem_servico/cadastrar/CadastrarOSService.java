@@ -58,6 +58,7 @@ public class CadastrarOSService {
                 CalculoOrcamento.realizaCalculoTotal(itens, request.itens(), servicos),
                 servicos,
                 itens,
+                request.itens(),
                 request.diagnostico(),
                 veiculo,
                 veiculo.getCliente());

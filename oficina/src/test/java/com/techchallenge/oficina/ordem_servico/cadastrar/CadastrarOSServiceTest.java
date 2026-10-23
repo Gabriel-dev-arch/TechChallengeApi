@@ -83,19 +83,23 @@ class CadastrarOSServiceTest {
         assertThat(response.cliente().fullName()).isEqualTo("Ana Silva");
         assertThat(response.veiculo().placa()).isEqualTo(PLACA);
         assertThat(response.itens()).hasSize(1);
+        assertThat(response.itens().get(0).quantidade()).isEqualByComparingTo("2");
         assertThat(response.servicos()).extracting("descricao").containsExactly("Revisão");
 
         ArgumentCaptor<OrdemServico> ordemCaptor = ArgumentCaptor.forClass(OrdemServico.class);
         verify(repository).save(ordemCaptor.capture());
         assertThat(ordemCaptor.getValue().getStatus()).isEqualTo(StatusOS.RECEBIDA);
         assertThat(ordemCaptor.getValue().getOrcamento()).isEqualByComparingTo("150.00");
+        assertThat(ordemCaptor.getValue().getItensQuantidade().get(0).getQuantidade())
+                .isEqualByComparingTo("2");
     }
 
     @Test
     void deveImpedirCadastroQuandoVeiculoJaTemOrdemEmAberto() {
         CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA);
         when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of(
-                new OrdemServico(StatusOS.RECEBIDA, BigDecimal.ZERO, List.of(), List.of(), "Aberta", null, null)));
+                new OrdemServico(StatusOS.RECEBIDA, BigDecimal.ZERO, List.of(), List.of(), List.of(),
+                        "Aberta", null, null)));
 
         assertThatThrownBy(() -> service.cadastrar(request))
                 .isInstanceOf(OrdemServicoEmAbertoException.class)

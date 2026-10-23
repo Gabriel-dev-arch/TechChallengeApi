@@ -39,34 +39,23 @@ class ConsultarOSControllerTest {
     private ConsultarOSService service;
 
     @Test
-    void deveListarOrdensDeServicoPeloId() throws Exception {
-        when(service.listar(ID)).thenReturn(List.of(criarResponse()));
+    void deveBuscarOrdemDeServicoPeloId() throws Exception {
+        OrdemServicoResponse response = criarResponse();
+        when(service.buscarOSPeloID(ID)).thenReturn(response);
 
-        mockMvc.perform(get("/os").param("id", ID.toString()))
+        mockMvc.perform(get("/ordens-servico/{id}", ID))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].diagnostico").value("Ruído no motor"))
-                .andExpect(jsonPath("$[0].orcamento.total").value(250.00))
-                .andExpect(jsonPath("$[0].veiculo.placa").value("ABC1234"));
-
-        verify(service).listar(ID);
-    }
-
-    @Test
-    void deveBuscarOrdemDeServicoPelaPlaca() throws Exception {
-        when(service.buscar("ABC1234")).thenReturn(criarResponse());
-
-        mockMvc.perform(get("/os/{placa}", "ABC1234"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(response.id().toString()))
                 .andExpect(jsonPath("$.diagnostico").value("Ruído no motor"))
-                .andExpect(jsonPath("$.cliente.fullName").value("Ana Silva"));
+                .andExpect(jsonPath("$.orcamento.total").value(250.00))
+                .andExpect(jsonPath("$.veiculo.placa").value("ABC1234"));
 
-        verify(service).buscar("ABC1234");
+        verify(service).buscarOSPeloID(ID);
     }
 
     private OrdemServicoResponse criarResponse() {
-        return new OrdemServicoResponse(
+        return new OrdemServicoResponse(UUID.randomUUID(),
                 new OrcamentoResponse(new BigDecimal("250.00"), "Recebida"),
                 "Ruído no motor",
                 null,
