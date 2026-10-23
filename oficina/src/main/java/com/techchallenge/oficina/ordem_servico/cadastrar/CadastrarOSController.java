@@ -34,7 +34,7 @@ public class CadastrarOSController {
 	@PostMapping("/{id}/servicos")
 	@Operation(summary = "Inclui serviços a OS", description = "Inclui serviços a OS")
 	public ResponseEntity<OrdemServicoResponse> incluiServicoOS(@Valid @RequestBody List<ServicosRequest> request,
-																 @PathVariable UUID id) {
+																 	@PathVariable("id") UUID id) {
 
 		OrdemServicoResponse servicoResponse = service.incluiServicosOS(id, request);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
@@ -44,7 +44,7 @@ public class CadastrarOSController {
 	@PostMapping("/{id}/pecas")
 	@Operation(summary = "Inclui peças ou insumos a OS", description = "Inclui peças ou insumos a OS")
 	public ResponseEntity<OrdemServicoResponse> incluiPecasInsumosOS(@Valid @RequestBody List<ItemQuantidadeRequest> request,
-																 @PathVariable UUID id) {
+																 	@PathVariable("id") UUID id) {
 
 		OrdemServicoResponse servicoResponse = service.incluiPecasInsumosOS(id, request);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
