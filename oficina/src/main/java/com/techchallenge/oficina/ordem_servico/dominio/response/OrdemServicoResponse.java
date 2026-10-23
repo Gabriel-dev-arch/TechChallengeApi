@@ -3,9 +3,12 @@ package com.techchallenge.oficina.ordem_servico.dominio.response;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 
+import java.rmi.server.UID;
 import java.util.List;
+import java.util.UUID;
 
 public record OrdemServicoResponse(
+		UUID id,
         OrcamentoResponse orcamento,
         String diagnostico,
 		String abertaEm,
@@ -22,6 +25,6 @@ public record OrdemServicoResponse(
 		var pecaInsumoResponse 	= PecaInsumoResponse.from(ordemServico.getItens());
 		var servicosResponse 	= ServicoResponse.from(ordemServico.getServicos());
 
-		return new OrdemServicoResponse(orcamento, ordemServico.getDiagnostico(), ordemServico.formatDate(), clienteResponse, veiculoResponse, pecaInsumoResponse,servicosResponse);
+		return new OrdemServicoResponse(ordemServico.getId(), orcamento, ordemServico.getDiagnostico(), ordemServico.formatDate(), clienteResponse, veiculoResponse, pecaInsumoResponse,servicosResponse);
 	}
 }

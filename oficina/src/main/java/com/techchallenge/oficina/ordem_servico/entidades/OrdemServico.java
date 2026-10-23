@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.entidades;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
+import com.techchallenge.oficina.ordem_servico.cadastrar.ItemQuantidade;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.entidades.Servico;
 import com.techchallenge.oficina.shared.persistence.BaseEntity;
@@ -17,6 +18,10 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Getter
 @Entity
@@ -64,5 +69,40 @@ public class OrdemServico extends BaseEntity {
             return this.getCreatedAt().atOffset(ZoneOffset.of("-03:00")).format(DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm"));
         }
         return null;
+    }
+
+    public void incluirPecaInsumos(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens) {
+        this.itens.addAll(pecasInsumos);
+        this.realizaCalculoItensInsumosOrcamento(pecasInsumos, itens);
+    }
+
+    public void incluirServicos(List<Servico> servicos) {
+        this.servicos.addAll(servicos);
+        this.realizaCalculoServicos(servicos);
+    }
+
+    private void realizaCalculoItensInsumosOrcamento(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens){
+
+        Map<UUID, PecaInsumo> pecasPorId = this.itens.stream()
+                .collect(Collectors.toMap(PecaInsumo::getId,
+                        Function.identity(),
+                        (existente, substituto) -> existente));
+
+        BigDecimal valorTotalPecasInsumos = itens.stream()
+                .map(item -> {
+                    return pecasPorId.get(item.itens()).getPrecoUnitario().multiply(item.quantidade());
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add).add(this.getOrcamento());
+
+        this.orcamento = valorTotalPecasInsumos;
+    }
+
+    private void realizaCalculoServicos(List<Servico> servicos){
+
+        var valorTotalServicos = servicos.stream()
+                .map(Servico::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add).add(this.getOrcamento());
+
+        this.orcamento = valorTotalServicos;
     }
 }
