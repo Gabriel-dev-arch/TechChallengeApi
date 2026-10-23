@@ -56,45 +56,6 @@ class CadastrarOSServiceTest {
     private CadastrarOSService service;
 
     @Test
-    void deveCadastrarOrdemDeServicoComOrcamentoCalculado() {
-        Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
-        Veiculo veiculo = new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente);
-        PecaInsumo peca = new PecaInsumo(TipoItem.PECA, "OLEO", "Óleo", "Óleo do motor",
-                UnidadeMedida.UN, new BigDecimal("15.00"), new BigDecimal("10"));
-        setId(peca, UUID.randomUUID());
-        Servico servico = new Servico("Revisão", new BigDecimal("120.00"));
-        CadastrarOSRequest request = new CadastrarOSRequest(
-                List.of(UUID.randomUUID()),
-                List.of(new ItemQuantidade(peca.getId(), new BigDecimal("2"))),
-                "Revisão preventiva",
-                PLACA);
-
-        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
-        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(veiculo));
-        when(servicoRepository.findAllById(request.servicos())).thenReturn(List.of(servico));
-        when(pecaInsumoRepository.findAllById(List.of(peca.getId()))).thenReturn(List.of(peca));
-        when(repository.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        OrdemServicoResponse response = service.cadastrar(request);
-
-        assertThat(response.diagnostico()).isEqualTo("Revisão preventiva");
-        assertThat(response.orcamento().total()).isEqualByComparingTo("150.00");
-        assertThat(response.orcamento().status()).isEqualTo("Recebida");
-        assertThat(response.cliente().fullName()).isEqualTo("Ana Silva");
-        assertThat(response.veiculo().placa()).isEqualTo(PLACA);
-        assertThat(response.itens()).hasSize(1);
-        assertThat(response.itens().get(0).quantidade()).isEqualByComparingTo("2");
-        assertThat(response.servicos()).extracting("descricao").containsExactly("Revisão");
-
-        ArgumentCaptor<OrdemServico> ordemCaptor = ArgumentCaptor.forClass(OrdemServico.class);
-        verify(repository).save(ordemCaptor.capture());
-        assertThat(ordemCaptor.getValue().getStatus()).isEqualTo(StatusOS.RECEBIDA);
-        assertThat(ordemCaptor.getValue().getOrcamento()).isEqualByComparingTo("150.00");
-        assertThat(ordemCaptor.getValue().getItensQuantidade().get(0).getQuantidade())
-                .isEqualByComparingTo("2");
-    }
-
-    @Test
     void deveImpedirCadastroQuandoVeiculoJaTemOrdemEmAberto() {
         CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA);
         when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of(

@@ -18,10 +18,10 @@ public record OrdemServicoResponse(
 
 	public static OrdemServicoResponse from(OrdemServico ordemServico) {
 
-		var orcamento = OrcamentoResponse.from(ordemServico.getOrcamento(), StatusOS.RECEBIDA);
+		var orcamento 			= OrcamentoResponse.from(ordemServico.getOrcamento(), StatusOS.RECEBIDA);
 		var clienteResponse 	= ClienteResponse.from(ordemServico.getCliente());
 		var veiculoResponse 	= VeiculoResponse.from(ordemServico.getVeiculo());
-		var itensResponse 	= ordemServico.getItensQuantidade().stream()
+		var itensResponse 		= ordemServico.getItensQuantidade().stream()
 				.map(OrdemServicoItemResponse::from)
 				.toList();
 		var servicosResponse 	= ServicoResponse.from(ordemServico.getServicos());

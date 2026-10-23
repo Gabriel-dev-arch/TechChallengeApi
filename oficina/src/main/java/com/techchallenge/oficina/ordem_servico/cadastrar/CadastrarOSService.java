@@ -99,7 +99,7 @@ public class CadastrarOSService {
 
         estadosOS.executa(osCadastrada);
 
-        return OrdemServicoResponse.from(repository.save(osCadastrada));
+        return OrdemServicoResponse.from(osCadastrada);
     }
 
     @Transactional
