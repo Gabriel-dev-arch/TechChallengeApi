@@ -50,4 +50,22 @@ public class CadastrarOSController {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
 		return ResponseEntity.created(location).body(servicoResponse);
 	}
+
+	@PostMapping("/{id}/iniciar-diagnostico")
+	@Operation(summary = "Inicia diagnóstico do veículo", description = "Inicia diagnóstico do veículo")
+	public ResponseEntity<OrdemServicoResponse> iniciaDiagnostico(@PathVariable("id") UUID id) {
+
+		var ordemServicoResponse = service.iniciaDiagnostico(id);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
+		return ResponseEntity.created(location).body(ordemServicoResponse);
+	}
+
+	@PostMapping("/{id}/orcamento")
+	@Operation(summary = "Realiza o orçamento", description = "Realiza o orçamento")
+	public ResponseEntity<OrdemServicoResponse> iniciaOrcamento(@PathVariable("id") UUID id) {
+
+		var ordemServicoResponse = service.cadastrarOrcamento(id);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
+		return ResponseEntity.created(location).body(ordemServicoResponse);
+	}
 }

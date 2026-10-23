@@ -10,24 +10,22 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Audited;
+import org.hibernate.envers.AuditTable;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Getter
 @Entity
+@Audited
+@AuditTable(value = "ordem_servicos_audit")
 @Table(name = "ordem_servico")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrdemServico extends BaseEntity {
@@ -49,13 +47,15 @@ public class OrdemServico extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private StatusOS status;
 
+    @Transient
+    private EstadoOS estadoAtual;
+
     @LastModifiedDate
     private Instant updatedAt;
 
     public OrdemServico(StatusOS status, BigDecimal orcamento, List<Servico> servicos,
             List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itensQuantidade,
             String diagnostico, Veiculo veiculo, Cliente cliente) {
-        this.status = status;
         this.orcamento = orcamento;
         this.servicos = servicos;
         this.itensQuantidade = criarItens(pecasInsumos, itensQuantidade);
@@ -63,6 +63,13 @@ public class OrdemServico extends BaseEntity {
         this.veiculo = veiculo;
         this.cliente = cliente;
     }
+
+    public OrdemServico(StatusOS status, Veiculo veiculo, Cliente cliente) {
+        this.status = status;
+        this.veiculo = veiculo;
+        this.cliente = cliente;
+    }
+
 
     public String formatDate() {
 
@@ -144,8 +151,14 @@ public class OrdemServico extends BaseEntity {
 
         var valorTotalServicos = servicos.stream()
                 .map(Servico::getValor)
-                .reduce(BigDecimal.ZERO, BigDecimal::add).add(this.getOrcamento());
+                .reduce(BigDecimal.ZERO, BigDecimal::add).add(this.getOrcamento() == null ? BigDecimal.ZERO : this.getOrcamento());
 
         this.orcamento = valorTotalServicos;
+    }
+
+    public OrdemServico atualizaStatus(StatusOS status){
+        this.status = status;
+
+        return this;
     }
 }

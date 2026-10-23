@@ -1,12 +1,11 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
-import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoEmAbertoException;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.VeiculoNaoEncontradoException;
-import com.techchallenge.oficina.ordem_servico.dominio.response.CalculoOrcamento;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
+import com.techchallenge.oficina.ordem_servico.dominio.statusos.EstadosOS;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoRepository;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,13 +31,15 @@ public class CadastrarOSService {
     private final VeiculoRepository veiculoRepository;
     private final ServicoRepository servicoRepository;
     private final PecaInsumoRepository pecaInsumoRepository;
+    private final EstadosOS estadosOS;
 
     public CadastrarOSService(OrdemServicoRepository repository, VeiculoRepository veiculoRepository,
-                              ServicoRepository servicoRepository, PecaInsumoRepository pecaInsumoRepository) {
+                              ServicoRepository servicoRepository, PecaInsumoRepository pecaInsumoRepository, EstadosOS estadosOS) {
         this.repository = repository;
         this.veiculoRepository = veiculoRepository;
         this.servicoRepository = servicoRepository;
         this.pecaInsumoRepository = pecaInsumoRepository;
+        this.estadosOS = estadosOS;
     }
 
     @Transactional
@@ -51,17 +53,10 @@ public class CadastrarOSService {
 
         Veiculo veiculo = veiculoRepository.findByPlaca(request.placa()).orElseThrow(() -> new VeiculoNaoEncontradoException(request.placa()));
 
-        List<Servico> servicos = servicoRepository.findAllById(request.servicos());
-        List<PecaInsumo> itens = pecaInsumoRepository.findAllById(request.itens().stream().map(ItemQuantidade::itens).collect(Collectors.toList()));
-
         OrdemServico ordemServico = new OrdemServico(StatusOS.RECEBIDA,
-                CalculoOrcamento.realizaCalculoTotal(itens, request.itens(), servicos),
-                servicos,
-                itens,
-                request.itens(),
-                request.diagnostico(),
                 veiculo,
                 veiculo.getCliente());
+
 
         return OrdemServicoResponse.from(repository.save(ordemServico));
     }
@@ -87,13 +82,33 @@ public class CadastrarOSService {
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
         List<ItemQuantidade> itensQuantidade = request.stream()
-				.map(f -> new ItemQuantidade(f.id(), f.quantidade()))
-				.collect(Collectors.toList());
+                .map(f -> new ItemQuantidade(f.id(), f.quantidade()))
+                .collect(Collectors.toList());
 
         List<PecaInsumo> itens = pecaInsumoRepository.findAllById(request.stream().map(ItemQuantidadeRequest::id).toList());
 
         osCadastrada.incluirPecaInsumos(itens, itensQuantidade);
 
         return OrdemServicoResponse.from(repository.save(osCadastrada));
+    }
+
+    @Transactional
+    public OrdemServicoResponse iniciaDiagnostico(UUID id) {
+
+        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+
+        estadosOS.executa(osCadastrada);
+
+        return OrdemServicoResponse.from(repository.save(osCadastrada));
+    }
+
+    @Transactional
+    public OrdemServicoResponse cadastrarOrcamento(UUID id) {
+
+        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+
+        estadosOS.executa(osCadastrada);
+
+        return OrdemServicoResponse.from(osCadastrada);
     }
 }

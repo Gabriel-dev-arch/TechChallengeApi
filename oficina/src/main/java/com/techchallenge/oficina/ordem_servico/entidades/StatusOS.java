@@ -1,7 +1,5 @@
 package com.techchallenge.oficina.ordem_servico.entidades;
 
-import java.math.BigDecimal;
-
 public enum StatusOS {
 
 	RECEBIDA("Recebida"),
