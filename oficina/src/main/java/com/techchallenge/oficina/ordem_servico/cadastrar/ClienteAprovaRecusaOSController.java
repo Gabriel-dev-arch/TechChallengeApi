@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-@Tag(name = "Ordem de Serviço", description = "Cadastra Ordem de serviço")
+@Tag(name = "Cliente aprova ou recusa Ordem de Serviço", description = "Cliente aprova ou recusa ordem de serviço")
 @RestController
 @RequestMapping("/public/os")
 public class ClienteAprovaRecusaOSController {
@@ -22,7 +22,7 @@ public class ClienteAprovaRecusaOSController {
     }
 
     @PostMapping("/{id}/aprovar")
-    @Operation(summary = "Cadastra ordem de serviço", description = "Cadastra ordem de serviço")
+    @Operation(summary = "Aprova ordem de serviço", description = "Aprova ordem de serviço")
     public ResponseEntity aprovar(@PathVariable("id") UUID id) {
 
         service.aprovaOS(id);
@@ -30,7 +30,7 @@ public class ClienteAprovaRecusaOSController {
     }
 
     @PostMapping("/{id}/recusar")
-    @Operation(summary = "Cadastra ordem de serviço", description = "Cadastra ordem de serviço")
+    @Operation(summary = "Recusa ordem de serviço", description = "Recusa ordem de serviço")
     public ResponseEntity recusar(@PathVariable("id") UUID id) {
 
         service.recusaOS(id);

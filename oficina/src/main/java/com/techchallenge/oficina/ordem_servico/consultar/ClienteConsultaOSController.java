@@ -13,7 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.UUID;
 
-@Tag(name = "Ordem de Serviço", description = "Cadastra Ordem de serviço")
+@Tag(name = "Cliente aprova ou recusa Ordem de Serviço", description = "Cliente aprova ou recusa Ordem de Serviço")
 @RestController
 @RequestMapping("/public/os")
 public class ClienteConsultaOSController {
