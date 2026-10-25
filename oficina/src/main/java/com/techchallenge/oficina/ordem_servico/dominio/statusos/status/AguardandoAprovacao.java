@@ -1,21 +1,19 @@
-package com.techchallenge.oficina.ordem_servico.dominio.statusos;
+package com.techchallenge.oficina.ordem_servico.dominio.statusos.status;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
+import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatus;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
-import org.springframework.stereotype.Component;
 
-
-public class OsRecebida implements AvancarStatus{
+public class AguardandoAprovacao implements AvancarStatus {
 
     private final OrdemServicoRepository repository;
 
-    public OsRecebida(OrdemServico osCadastrada, OrdemServicoRepository repository) {
+    public AguardandoAprovacao(OrdemServico os, OrdemServicoRepository repository) {
         this.repository = repository;
-        avancar(osCadastrada);
+        avancar(os);
     }
 
-    @Override
     public OrdemServico avancar(OrdemServico osCadastrada) {
 
         if(!StatusOS.EM_DIAGNOSTICO.equals(osCadastrada.getStatus())){
@@ -25,6 +23,5 @@ public class OsRecebida implements AvancarStatus{
         OrdemServico ordemServico = osCadastrada.atualizaStatus(StatusOS.AGUARDANDO_APROVACAO);
 
         return repository.saveAndFlush(ordemServico);
-
     }
 }

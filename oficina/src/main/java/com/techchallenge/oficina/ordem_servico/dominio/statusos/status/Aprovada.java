@@ -1,28 +1,28 @@
-package com.techchallenge.oficina.ordem_servico.dominio.statusos;
+package com.techchallenge.oficina.ordem_servico.dominio.statusos.status;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
+import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatus;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-
-public class AguardandoAprovacao implements AvancarStatus{
+public class Aprovada implements AvancarStatus {
 
     private final OrdemServicoRepository repository;
 
-    public AguardandoAprovacao(OrdemServico os, OrdemServicoRepository repository) {
+
+    public Aprovada(OrdemServico os, OrdemServicoRepository repository) {
         this.repository = repository;
         avancar(os);
     }
 
+    @Override
     public OrdemServico avancar(OrdemServico osCadastrada) {
 
-
-        if(!StatusOS.EM_DIAGNOSTICO.equals(osCadastrada.getStatus())){
+        if(!StatusOS.APROVADA.equals(osCadastrada.getStatus())){
             throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status EM_DIAGNOSTICO.");
         }
-        OrdemServico ordemServico = osCadastrada.atualizaStatus(StatusOS.AGUARDANDO_APROVACAO);
+
+        OrdemServico ordemServico = osCadastrada.atualizaStatus(StatusOS.EM_EXECUCAO);
 
         return repository.saveAndFlush(ordemServico);
     }

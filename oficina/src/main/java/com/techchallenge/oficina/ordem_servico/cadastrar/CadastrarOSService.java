@@ -111,4 +111,24 @@ public class CadastrarOSService {
 
         return OrdemServicoResponse.from(osCadastrada);
     }
+
+    @Transactional
+    public OrdemServicoResponse iniciaExecucao(UUID id) {
+
+        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+
+        estadosOS.executa(osCadastrada);
+
+        return OrdemServicoResponse.from(osCadastrada);
+    }
+
+    @Transactional
+    public OrdemServicoResponse finalizaExecucao(UUID id) {
+
+        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+
+        estadosOS.executa(osCadastrada);
+
+        return OrdemServicoResponse.from(osCadastrada);
+    }
 }

@@ -68,4 +68,22 @@ public class CadastrarOSController {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
 		return ResponseEntity.created(location).body(ordemServicoResponse);
 	}
+
+	@PostMapping("/{id}/iniciar-execucao")
+	@Operation(summary = "Realiza a exeecução do serviço", description = "Realiza a exeecução do serviço")
+	public ResponseEntity<OrdemServicoResponse> iniciaExecucao(@PathVariable("id") UUID id) {
+
+		var ordemServicoResponse = service.iniciaExecucao(id);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
+		return ResponseEntity.created(location).body(ordemServicoResponse);
+	}
+
+	@PostMapping("/{id}/finalizar")
+	@Operation(summary = "Finaliza a exeecução do serviço", description = "Finaliza a exeecução do serviço")
+	public ResponseEntity<OrdemServicoResponse> finalizaExecucao(@PathVariable("id") UUID id) {
+
+		var ordemServicoResponse = service.finalizaExecucao(id);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
+		return ResponseEntity.created(location).body(ordemServicoResponse);
+	}
 }
