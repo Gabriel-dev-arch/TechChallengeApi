@@ -1,19 +1,16 @@
 package com.techchallenge.oficina.servicos.consultar;
 
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
-import com.techchallenge.oficina.servicos.cadastrar.CadastrarServicoRequest;
+import com.techchallenge.oficina.servicos.dominio.ServicoResponse;
 import com.techchallenge.oficina.servicos.entidades.Servico;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.techchallenge.oficina.servicos.dominio.ServicoResponse;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Servicos", description = "Consultar Servicos")
 @RestController

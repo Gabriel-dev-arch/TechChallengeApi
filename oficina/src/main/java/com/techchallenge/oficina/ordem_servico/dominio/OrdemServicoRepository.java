@@ -1,6 +1,5 @@
 package com.techchallenge.oficina.ordem_servico.dominio;
 
-import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import org.springframework.data.domain.Pageable;

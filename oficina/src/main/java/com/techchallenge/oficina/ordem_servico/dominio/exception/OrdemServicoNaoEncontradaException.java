@@ -1,7 +1,5 @@
 package com.techchallenge.oficina.ordem_servico.dominio.exception;
 
-import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
-
 import java.util.UUID;
 
 public class OrdemServicoNaoEncontradaException extends RuntimeException {

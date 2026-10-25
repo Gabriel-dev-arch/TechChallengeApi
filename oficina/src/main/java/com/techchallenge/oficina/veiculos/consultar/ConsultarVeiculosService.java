@@ -1,9 +1,9 @@
 package com.techchallenge.oficina.veiculos.consultar;
 
+import com.techchallenge.oficina.veiculos.dominio.PlacaValidator;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoNaoEncontradoException;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoResponse;
-import com.techchallenge.oficina.veiculos.dominio.PlacaValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

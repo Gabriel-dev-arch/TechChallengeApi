@@ -1,10 +1,6 @@
 package com.techchallenge.oficina.clientes.atualizar;
 
-import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
-import com.techchallenge.oficina.clientes.dominio.ClienteRepository;
-import com.techchallenge.oficina.clientes.dominio.ClienteResponse;
-import com.techchallenge.oficina.clientes.dominio.CpfCnpjValidator;
-import com.techchallenge.oficina.clientes.dominio.DocumentoJaCadastradoException;
+import com.techchallenge.oficina.clientes.dominio.*;
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

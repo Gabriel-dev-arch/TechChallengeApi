@@ -1,9 +1,9 @@
 package com.techchallenge.oficina.servicos.dominio;
 
+import com.techchallenge.oficina.servicos.entidades.Servico;
+
 import java.math.BigDecimal;
 import java.util.UUID;
-
-import com.techchallenge.oficina.servicos.entidades.Servico;
 
 public record ServicoResponse(
 		UUID id,

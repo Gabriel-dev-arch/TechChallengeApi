@@ -2,9 +2,7 @@ package com.techchallenge.oficina.ordem_servico.consultar;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
-import com.techchallenge.oficina.ordem_servico.dominio.exception.VeiculoNaoEncontradoException;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
-import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

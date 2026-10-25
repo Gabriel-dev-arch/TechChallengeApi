@@ -1,8 +1,9 @@
 package com.techchallenge.oficina.servicos.cadastrar;
 
-import java.net.URI;
-
+import com.techchallenge.oficina.servicos.dominio.ServicoResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,10 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.techchallenge.oficina.servicos.dominio.ServicoResponse;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import java.net.URI;
 
 @Tag(name = "Servicos", description = "Criar Servicos")
 @RestController
