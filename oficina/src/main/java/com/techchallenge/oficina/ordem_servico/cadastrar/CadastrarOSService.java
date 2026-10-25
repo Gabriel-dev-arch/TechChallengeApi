@@ -62,48 +62,7 @@ public class CadastrarOSService {
     }
 
     @Transactional
-    public OrdemServicoResponse incluiServicosOS(UUID id, @Valid List<ServicosRequest> request) {
-
-        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-
-        List<Servico> servicos = servicoRepository.findAllById(request.stream()
-                        .map(ServicosRequest::id)
-                        .collect(Collectors.toUnmodifiableList()))
-                .stream().toList();
-
-        osCadastrada.incluirServicos(servicos);
-
-        return OrdemServicoResponse.from(repository.saveAndFlush(osCadastrada));
-    }
-
-    @Transactional
-    public OrdemServicoResponse incluiPecasInsumosOS(UUID id, @Valid List<ItemQuantidadeRequest> request) {
-
-        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-
-        List<ItemQuantidade> itensQuantidade = request.stream()
-                .map(f -> new ItemQuantidade(f.id(), f.quantidade()))
-                .collect(Collectors.toList());
-
-        List<PecaInsumo> itens = pecaInsumoRepository.findAllById(request.stream().map(ItemQuantidadeRequest::id).toList());
-
-        osCadastrada.incluirPecaInsumos(itens, itensQuantidade);
-
-        return OrdemServicoResponse.from(repository.save(osCadastrada));
-    }
-
-    @Transactional
     public OrdemServicoResponse iniciaDiagnostico(UUID id) {
-
-        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-
-        estadosOS.executa(osCadastrada);
-
-        return OrdemServicoResponse.from(osCadastrada);
-    }
-
-    @Transactional
-    public OrdemServicoResponse cadastrarOrcamento(UUID id) {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
@@ -130,5 +89,46 @@ public class CadastrarOSService {
         estadosOS.executa(osCadastrada);
 
         return OrdemServicoResponse.from(osCadastrada);
+    }
+
+    @Transactional
+    public OrdemServicoResponse incluiServicosOS(UUID id, @Valid List<ServicosRequest> request) {
+
+        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+
+        List<Servico> servicos = servicoRepository.findAllById(request.stream()
+                        .map(ServicosRequest::id)
+                        .collect(Collectors.toUnmodifiableList()))
+                .stream().toList();
+
+        osCadastrada.incluirServicos(servicos);
+
+        return OrdemServicoResponse.from(repository.saveAndFlush(osCadastrada));
+    }
+
+    @Transactional
+    public OrdemServicoResponse cadastrarOrcamento(UUID id) {
+
+        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+
+        estadosOS.executa(osCadastrada);
+
+        return OrdemServicoResponse.from(osCadastrada);
+    }
+
+    @Transactional
+    public OrdemServicoResponse incluiPecasInsumosOS(UUID id, @Valid List<ItemQuantidadeRequest> request) {
+
+        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+
+        List<ItemQuantidade> itensQuantidade = request.stream()
+                .map(f -> new ItemQuantidade(f.id(), f.quantidade()))
+                .collect(Collectors.toList());
+
+        List<PecaInsumo> itens = pecaInsumoRepository.findAllById(request.stream().map(ItemQuantidadeRequest::id).toList());
+
+        osCadastrada.incluirPecaInsumos(itens, itensQuantidade);
+
+        return OrdemServicoResponse.from(repository.save(osCadastrada));
     }
 }
