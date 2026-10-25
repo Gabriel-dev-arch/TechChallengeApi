@@ -19,7 +19,6 @@ public class EstadosOS {
         return switch (osCadastrada.getStatus()) {
             case RECEBIDA -> new EmDiagnostico(osCadastrada, repository);
             case EM_DIAGNOSTICO -> new AguardandoAprovacao(osCadastrada, repository);
-            case AGUARDANDO_APROVACAO -> new AprovarOuNegar(osCadastrada, repository);
             case EM_EXECUCAO -> new EmExecucao(osCadastrada, repository);
             case ENTREGUE -> new Finalizar(osCadastrada, repository);
             default -> throw new IllegalStateException("Unexpected value: " + osCadastrada.getStatus());

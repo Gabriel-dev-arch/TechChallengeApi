@@ -1,7 +1,6 @@
 package com.techchallenge.oficina.ordem_servico.dominio.response;
 
-import com.techchallenge.oficina.ordem_servico.cadastrar.CadastrarOSRequest;
-import com.techchallenge.oficina.ordem_servico.cadastrar.ItemQuantidade;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.entidades.Servico;
 

@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
 import com.techchallenge.oficina.config.SecurityConfig;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.CadastrarOSRequest;
 import com.techchallenge.oficina.ordem_servico.dominio.response.ClienteResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrcamentoResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;

@@ -1,7 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.entidades;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
-import com.techchallenge.oficina.ordem_servico.cadastrar.ItemQuantidade;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.entidades.Servico;
 import com.techchallenge.oficina.shared.persistence.BaseEntity;

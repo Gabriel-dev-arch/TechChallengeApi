@@ -1,4 +1,4 @@
-package com.techchallenge.oficina.ordem_servico.cadastrar;
+package com.techchallenge.oficina.ordem_servico.cadastrar.request;
 
 import java.math.BigDecimal;
 import java.util.UUID;

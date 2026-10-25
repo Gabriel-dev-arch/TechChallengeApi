@@ -1,4 +1,4 @@
-package com.techchallenge.oficina.ordem_servico.cadastrar;
+package com.techchallenge.oficina.ordem_servico.cadastrar.request;
 
 import java.util.List;
 import java.util.UUID;

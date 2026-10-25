@@ -2,11 +2,10 @@ package com.techchallenge.oficina.ordem_servico.consultar;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
-import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
-import com.techchallenge.oficina.ordem_servico.cadastrar.ItemQuantidade;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.entidades.Servico;
 import com.techchallenge.oficina.shared.persistence.BaseEntity;

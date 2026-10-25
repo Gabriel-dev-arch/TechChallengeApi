@@ -1,5 +1,8 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.CadastrarOSRequest;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidadeRequest;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.ServicosRequest;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,6 +62,7 @@ public class CadastrarOSController {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
 		return ResponseEntity.created(location).body(ordemServicoResponse);
 	}
+
 
 	@PostMapping("/{id}/orcamento")
 	@Operation(summary = "Realiza o orçamento", description = "Realiza o orçamento")

@@ -1,24 +1,18 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
-import com.techchallenge.oficina.clientes.entidades.Cliente;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.CadastrarOSRequest;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoEmAbertoException;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.VeiculoNaoEncontradoException;
-import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoRepository;
-import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
-import com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.dominio.ServicoRepository;
-import com.techchallenge.oficina.servicos.entidades.Servico;
 import com.techchallenge.oficina.shared.persistence.BaseEntity;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
-import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
