@@ -53,6 +53,7 @@ public class OrdemServico extends BaseEntity {
     public OrdemServico(StatusOS status, BigDecimal orcamento, List<Servico> servicos,
             List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itensQuantidade,
             String diagnostico, Veiculo veiculo, Cliente cliente) {
+        this.status = status;
         this.orcamento = orcamento;
         this.servicos = servicos;
         this.itensQuantidade = criarItens(pecasInsumos, itensQuantidade);
