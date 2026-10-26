@@ -36,8 +36,7 @@ public class CadastrarOSController {
 
 	@PostMapping("/{id}/servicos")
 	@Operation(summary = "Inclui serviços a OS", description = "Inclui serviços a OS")
-	public ResponseEntity<OrdemServicoResponse> incluiServicoOS(@Valid @RequestBody List<ServicosRequest> request,
-																 	@PathVariable("id") UUID id) {
+	public ResponseEntity<OrdemServicoResponse> incluiServicoOS(@Valid @RequestBody List<ServicosRequest> request, @PathVariable("id") UUID id) {
 
 		OrdemServicoResponse servicoResponse = service.incluiServicosOS(id, request);
 		return ResponseEntity.ok(servicoResponse);

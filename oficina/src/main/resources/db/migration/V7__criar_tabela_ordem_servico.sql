@@ -6,7 +6,7 @@ CREATE TABLE public.ordem_servico (
 	cliente_id                  uuid           NOT NULL,
 	id                          uuid           NOT NULL,
 	veiculo_id                  uuid           NULL,
-	diagnostico                 varchar(255)   NULL,
+	diagnostico                 varchar(10000)   NULL,
 	first_name                  varchar(255)   NULL,
 	last_name                   varchar(255) NULL,
 	status                      varchar(255) NULL,

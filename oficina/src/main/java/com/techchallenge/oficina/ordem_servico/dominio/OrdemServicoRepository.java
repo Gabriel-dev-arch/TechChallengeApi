@@ -21,7 +21,8 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, UUID
     List<OrdemServico> buscarPorPlaca(@Param("placa") String placa);
 
     @Query("SELECT os FROM OrdemServico os WHERE os.veiculo.placa = :placa AND os.status NOT IN (" +
-            "com.techchallenge.oficina.ordem_servico.entidades.StatusOS.ENTREGUE)")
+            "com.techchallenge.oficina.ordem_servico.entidades.StatusOS.ENTREGUE, " +
+            "com.techchallenge.oficina.ordem_servico.entidades.StatusOS.FINALIZADA)")
     List<OrdemServico> buscarPorPlacaComOSEmAberto(@Param("placa") String placa);
 
 

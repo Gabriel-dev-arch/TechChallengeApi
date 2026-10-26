@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Tag(name = "Cliente aprova ou recusa Ordem de Serviço", description = "Cliente aprova ou recusa ordem de serviço")
 @RestController
-@RequestMapping({"/public/os/{id}", "/ordens-servico/public/os/{id}"})
+@RequestMapping("/public/os/{id}")
 public class ClienteAprovaRecusaOSController {
 
     private final ClienteAprovaRecusaOSService service;

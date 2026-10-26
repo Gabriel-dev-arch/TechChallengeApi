@@ -20,6 +20,6 @@ public class EmDiagnostico implements AvancarStatus {
             throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status RECEBIDA.");
         }
         OrdemServico ordemServico = os.atualizaStatus(StatusOS.EM_DIAGNOSTICO);
-        return repository.saveAndFlush(ordemServico);
+        return repository.save(ordemServico);
     }
 }

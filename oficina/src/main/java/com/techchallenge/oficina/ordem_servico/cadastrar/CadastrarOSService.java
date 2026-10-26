@@ -67,7 +67,7 @@ public class CadastrarOSService {
     public OrdemServicoResponse iniciaDiagnostico(UUID id) {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-        osCadastrada.incluirDiagnostico();;
+        osCadastrada.incluirDiagnostico();
 
         estadosOS.executa(osCadastrada);
 
