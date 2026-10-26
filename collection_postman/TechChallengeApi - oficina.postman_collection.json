@@ -1,0 +1,905 @@
+{
+  "info": {
+    "_postman_id": "27b15317-63d4-4721-942b-c3d38a5c2910",
+    "name": "TechChallengeApi - oficina",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "14657216"
+  },
+  "item": [
+    {
+      "name": "Servico",
+      "item": [
+        {
+          "name": "consulta serviço",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"string\",\n  \"idCliente\": \"3fb772e3-e927-4581-9629-01e85d3f961c\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/servicos/7b7988d1-23d7-4182-9e35-7bb2fa4371ee",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "servicos",
+                "7b7988d1-23d7-4182-9e35-7bb2fa4371ee"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "consulta serviço Por palavra chave",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Troca\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/servicos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "servicos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "consulta todos serviços",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"string\",\n  \"idCliente\": \"3fb772e3-e927-4581-9629-01e85d3f961c\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/servicos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "servicos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualiza serviço",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"descricao\": \"Higienização do Ar-Condicionado e Troca de Filtro\",\n    \"valor\": 260.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/servicos/7b7988d1-23d7-4182-9e35-7bb2fa4371ee",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "servicos",
+                "7b7988d1-23d7-4182-9e35-7bb2fa4371ee"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remover serviço",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"descricao\": \"Higienização do Ar-Condicionado e Troca de Filtro\",\n    \"valor\": 260.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/servicos/c25aec88-f8ee-433c-a054-250c1fe67572",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "servicos",
+                "c25aec88-f8ee-433c-a054-250c1fe67572"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar serviço",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"descricao\": \"teste\",\n    \"valor\": 260.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/servicos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "servicos"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "OS",
+      "item": [
+        {
+          "name": "consultas OS",
+          "item": [
+            {
+              "name": "Consulta OS pela placa",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_autenticacao}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"placa\": \"string\",\n  \"idCliente\": \"3fb772e3-e927-4581-9629-01e85d3f961c\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/ordens-servico/DJM8H54",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "ordens-servico",
+                    "DJM8H54"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Consulta OS pelo ID",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_autenticacao}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"placa\": \"string\",\n  \"idCliente\": \"3fb772e3-e927-4581-9629-01e85d3f961c\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/ordens-servico/bafc77dd-063f-4f1d-abde-0269a059579b",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "ordens-servico",
+                    "bafc77dd-063f-4f1d-abde-0269a059579b"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Consulta lista OS em aberto",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_autenticacao}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/ordens-servico?status=RECEBIDA",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "ordens-servico"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "RECEBIDA"
+                    }
+                  ]
+                },
+                "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/ordens-servico/?page=0&size=20&status=sdgsdg' \\\n  -H 'accept: */*'"
+              },
+              "response": []
+            },
+            {
+              "name": "Consulta  lista de OS pelo status",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_autenticacao}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/ordens-servico?status=RECEBIDA",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "ordens-servico"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "RECEBIDA"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "1 - Cadastrar OS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resposta = pm.response.json();\nconst id = resposta.id; \npm.environment.set(\"id\", id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"DJM8H54\"\n}\n\n\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2 - Inclui Serviço a OS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n        \"id\": \"c042950d-08b4-4e92-a3d1-cd35520f391d\",\n        \"descricao\": \"Troca de Junta do Cabeçote\",\n        \"valor\": 1100.00\n    },\n    {\n        \"id\": \"0f629f4a-703c-48e8-a82f-4eb49ec5de30\",\n        \"descricao\": \"Instalação de Kit Multimídia e Câmera de Ré\",\n        \"valor\": 300.00\n    },\n    {\n        \"id\": \"0bebeb45-bed5-4b82-801f-94d16d808a0d\",\n        \"descricao\": \"Polimento de Faróis (Par)\",\n        \"valor\": 130.00\n    }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/d07779e1-2c1a-4e19-8dd5-4a77c71e1d0c/servicos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "d07779e1-2c1a-4e19-8dd5-4a77c71e1d0c",
+                "servicos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3 - Inclui peças/inssumos",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n        \"id\": \"c7342bb2-2c2c-44c7-a950-ddfef2a171b8\",\n        \"quantidade\": 1\n    },\n    {\n        \"id\": \"5fc5e72e-e3f3-4c30-9359-8cb8f7957960\",\n        \"quantidade\": 2\n    },\n    {\n        \"id\": \"557f9d41-c03b-4e3f-9d19-938ef1163853\",\n        \"quantidade\": 3\n    },\n    {\n        \"id\": \"78994fe2-5b99-4711-90bb-9f3890f4ef73\",\n        \"quantidade\": 2\n    },\n    {\n        \"id\": \"d5059bbd-cc31-48aa-a0c3-f4b8accaf081\",\n        \"quantidade\": 1\n    },\n    {\n        \"id\": \"6d33e756-2849-448c-8df3-30f5c74a713a\",\n        \"quantidade\": 1\n    },\n    {\n        \"id\": \"8197fcde-2f67-4d9f-9ed9-4ae133ad88e8\",\n        \"quantidade\": 2\n    }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/{{id}}/pecas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "{{id}}",
+                "pecas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4 - Iniciar Diagnóstico",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/{{id}}/iniciar-diagnostico",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "{{id}}",
+                "iniciar-diagnostico"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5 - realiza orçamento",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/eb6995b1-f576-48e3-8b0d-91b78f8459e7/orcamento",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "eb6995b1-f576-48e3-8b0d-91b78f8459e7",
+                "orcamento"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5 - inicia execução",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/cec96988-c705-44da-b3c3-a6c94b9d6bda/iniciar-execucao",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "cec96988-c705-44da-b3c3-a6c94b9d6bda",
+                "iniciar-execucao"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7 - Finalizar OS",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/cec96988-c705-44da-b3c3-a6c94b9d6bda/finalizar",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "cec96988-c705-44da-b3c3-a6c94b9d6bda",
+                "finalizar"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pecas e Insumos",
+      "item": [
+        {
+          "name": "Itens e Insumos",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/pecas-insumos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "pecas-insumos"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Aprova Request",
+      "item": [
+        {
+          "name": "Recusa Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/ordens-servico/{{id}}/recusar",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "ordens-servico",
+                "{{id}}",
+                "recusar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aprova Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_autenticacao}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/public/os/{{id}}/aprovar",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "public",
+                "os",
+                "{{id}}",
+                "aprovar"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\nconst resposta = pm.response.json();\n\n// 2. Extrai o token do corpo da resposta (ajuste de acordo com o seu JSON)\nconst meuToken = resposta.accessToken; \n\n// 3. Salva ou atualiza a variável no ambiente\npm.environment.set(\"token_autenticacao\", meuToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/autenticacao/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "autenticacao",
+            "login"
+          ]
+        },
+        "description": "Generated from cURL: curl -s -X POST http://localhost:8080/autenticacao/login -H \"Content-Type: application/json\" \\\n  -d '{\"username\":\"admin\",\"password\":\"admin123\"}'\n# {\"accessToken\":\"eyJ...\",\"tokenType\":\"Bearer\",\"expiresIn\":3600}"
+      },
+      "response": []
+    },
+    {
+      "name": " sonar",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "ojrc85drsk",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "login",
+              "value": "jenkins-bot"
+            },
+            {
+              "key": "name",
+              "value": "Jenkins Bot"
+            },
+            {
+              "key": "password",
+              "value": "7H1P5FwI(7*"
+            },
+            {
+              "key": "",
+              "value": "",
+              "disabled": true
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:9000/api/users/create",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9000",
+          "path": [
+            "api",
+            "users",
+            "create"
+          ]
+        },
+        "description": "Generated from cURL: curl -X POST -u admin:admin \\     \n  \"http://localhost:9000/api/users/create\" \\\n  -d \"login=jenkins-bot\" \\\n  -d \"name=Jenkins Bot\" \\\n  -d \"password=&7H1P5FwI(7*\""
+      },
+      "response": []
+    },
+    {
+      "name": "Add permissão",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "ojrc85drsk",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "login",
+              "value": "jenkins-bot"
+            },
+            {
+              "key": "permission",
+              "value": "provisioning"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:9000/api/permissions/add_user",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9000",
+          "path": [
+            "api",
+            "permissions",
+            "add_user"
+          ]
+        },
+        "description": "Generated from cURL: curl -X POST -u admin:admin\n  \"http://localhost:9000/api/permissions/add_user\"\n  -d \"login=jenkins-bot\"\n  -d \"permission=provisioning\""
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "auth_password_0i62",
+      "secret": true
+    }
+  ]
+}
