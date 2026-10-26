@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -45,13 +44,13 @@ class EstadosOSTest {
     @DisplayName("Deve transitar RECEBIDA para EmDiagnostico e atualizar status para EM_DIAGNOSTICO")
     void deveExecutarRecebida() {
         OrdemServico os = criarOS(StatusOS.RECEBIDA);
-        when(repository.saveAndFlush(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         AvancarStatus resultado = estadosOS.executa(os);
 
         assertThat(resultado).isInstanceOf(EmDiagnostico.class);
         assertThat(os.getStatus()).isEqualTo(StatusOS.EM_DIAGNOSTICO);
-        verify(repository).saveAndFlush(os);
+        verify(repository).save(os);
     }
 
     @Test
@@ -102,28 +101,29 @@ class EstadosOSTest {
         AvancarStatus resultado = estadosOS.executa(os);
 
         assertThat(resultado).isInstanceOf(EmExecucao.class);
+        assertThat(os.getStatus()).isEqualTo(StatusOS.FINALIZADA);
+        verify(repository).saveAndFlush(os);
+    }
+
+    @Test
+    @DisplayName("Deve transitar FINALIZADA para Finalizar e atualizar status para ENTREGUE")
+    void deveExecutarEntregue() {
+        OrdemServico os = criarOS(StatusOS.FINALIZADA);
+
+        AvancarStatus resultado = estadosOS.executa(os);
+
+        assertThat(resultado).isInstanceOf(Finalizar.class);
         assertThat(os.getStatus()).isEqualTo(StatusOS.ENTREGUE);
         verify(repository).saveAndFlush(os);
     }
 
     @Test
-    @DisplayName("Deve transitar ENTREGUE para Finalizar")
-    void deveExecutarEntregue() {
-        OrdemServico os = criarOS(StatusOS.ENTREGUE);
-
-        // Finalizar exige status FINALIZADA na validação do construtor
-        assertThatThrownBy(() -> estadosOS.executa(os))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Status inválido");
-    }
-
-    @Test
     @DisplayName("Deve lançar exceção para status inesperado")
     void deveLancarExcecaoParaStatusInesperado() {
-        OrdemServico os = criarOS(StatusOS.FINALIZADA);
+        OrdemServico os = criarOS(StatusOS.ENTREGUE);
 
         assertThatThrownBy(() -> estadosOS.executa(os))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Unexpected value: " + StatusOS.FINALIZADA);
+            .hasMessageContaining("Unexpected value: " + StatusOS.ENTREGUE);
     }
 }
