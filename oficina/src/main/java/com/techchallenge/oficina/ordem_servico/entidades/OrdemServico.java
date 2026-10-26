@@ -47,9 +47,6 @@ public class OrdemServico extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private StatusOS status;
 
-    @Transient
-    private EstadoOS estadoAtual;
-
     @LastModifiedDate
     private Instant updatedAt;
 

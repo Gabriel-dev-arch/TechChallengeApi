@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 
 public record ServicoResponse(
 		String descricao,
-		BigDecimal valor
-		) {
-	
-	
+		BigDecimal valor) {
+
 	public static ServicoResponse from(Servico servico) {
 		return new ServicoResponse(
 				servico.getDescricao(),
