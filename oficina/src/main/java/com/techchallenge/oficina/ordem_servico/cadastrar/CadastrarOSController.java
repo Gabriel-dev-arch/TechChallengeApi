@@ -40,8 +40,7 @@ public class CadastrarOSController {
 																 	@PathVariable("id") UUID id) {
 
 		OrdemServicoResponse servicoResponse = service.incluiServicosOS(id, request);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
-		return ResponseEntity.created(location).body(servicoResponse);
+		return ResponseEntity.ok(servicoResponse);
 	}
 
 	@PostMapping("/{id}/pecas")
@@ -50,8 +49,7 @@ public class CadastrarOSController {
 																 	@PathVariable("id") UUID id) {
 
 		OrdemServicoResponse servicoResponse = service.incluiPecasInsumosOS(id, request);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
-		return ResponseEntity.created(location).body(servicoResponse);
+		return ResponseEntity.ok(servicoResponse);
 	}
 
 	@PostMapping("/{id}/iniciar-diagnostico")
@@ -59,8 +57,7 @@ public class CadastrarOSController {
 	public ResponseEntity<OrdemServicoResponse> iniciaDiagnostico(@PathVariable("id") UUID id) {
 
 		var ordemServicoResponse = service.iniciaDiagnostico(id);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
-		return ResponseEntity.created(location).body(ordemServicoResponse);
+		return ResponseEntity.ok(ordemServicoResponse);
 	}
 
 
@@ -70,7 +67,7 @@ public class CadastrarOSController {
 
 		var ordemServicoResponse = service.cadastrarOrcamento(id);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
-		return ResponseEntity.created(location).body(ordemServicoResponse);
+		return ResponseEntity.ok(ordemServicoResponse);
 	}
 
 	@PostMapping("/{id}/iniciar-execucao")
@@ -78,8 +75,7 @@ public class CadastrarOSController {
 	public ResponseEntity<OrdemServicoResponse> iniciaExecucao(@PathVariable("id") UUID id) {
 
 		var ordemServicoResponse = service.iniciaExecucao(id);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
-		return ResponseEntity.created(location).body(ordemServicoResponse);
+		return ResponseEntity.ok(ordemServicoResponse);
 	}
 
 	@PostMapping("/{id}/finalizar")
@@ -87,7 +83,6 @@ public class CadastrarOSController {
 	public ResponseEntity<OrdemServicoResponse> finalizaExecucao(@PathVariable("id") UUID id) {
 
 		var ordemServicoResponse = service.finalizaExecucao(id);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
-		return ResponseEntity.created(location).body(ordemServicoResponse);
+		return ResponseEntity.ok(ordemServicoResponse);
 	}
 }

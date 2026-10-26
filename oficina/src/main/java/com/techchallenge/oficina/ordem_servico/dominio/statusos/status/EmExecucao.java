@@ -18,7 +18,7 @@ public class EmExecucao implements AvancarStatus {
     @Override
     public OrdemServico avancar(OrdemServico osCadastrada) {
 
-        if(!StatusOS.APROVADA.equals(osCadastrada.getStatus())){
+        if(!StatusOS.EM_EXECUCAO.equals(osCadastrada.getStatus())){
             throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status RECEBIDA.");
         }
         OrdemServico ordemServico = osCadastrada.atualizaStatus(StatusOS.ENTREGUE);

@@ -153,6 +153,19 @@ public class OrdemServico extends BaseEntity {
         this.orcamento = valorTotalServicos;
     }
 
+    public void incluirDiagnostico() {
+
+       var servicos = this.getServicos().stream()
+                            .map(f -> f.getDescricao())
+                            .collect(Collectors.joining("\n"));
+
+        var itens = this.getItens().stream()
+                            .map(f -> f.getDescricao())
+                            .collect(Collectors.joining("\n"));
+
+       this.diagnostico = String.valueOf(servicos).concat("\n").concat(itens);
+    }
+
     public OrdemServico atualizaStatus(StatusOS status){
         this.status = status;
 

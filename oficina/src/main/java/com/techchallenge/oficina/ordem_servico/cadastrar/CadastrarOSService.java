@@ -67,6 +67,7 @@ public class CadastrarOSService {
     public OrdemServicoResponse iniciaDiagnostico(UUID id) {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+        osCadastrada.incluirDiagnostico();;
 
         estadosOS.executa(osCadastrada);
 
@@ -90,7 +91,7 @@ public class CadastrarOSService {
 
         estadosOS.executa(osCadastrada);
 
-        return OrdemServicoResponse.from(osCadastrada);
+        return OrdemServicoResponse.from(osCadastrada, osCadastrada.getStatus());
     }
 
     @Transactional

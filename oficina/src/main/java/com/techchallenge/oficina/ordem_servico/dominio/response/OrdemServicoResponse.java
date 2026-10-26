@@ -16,9 +16,9 @@ public record OrdemServicoResponse(
         List<OrdemServicoItemResponse> itens,
         List<ServicoResponse> servicos) {
 
-	public static OrdemServicoResponse from(OrdemServico ordemServico, StatusOS status) {
+	public static OrdemServicoResponse from(OrdemServico ordemServico) {
 
-		var orcamento 			= OrcamentoResponse.from(ordemServico.getOrcamento(), status);
+		var orcamento 			= OrcamentoResponse.from(ordemServico.getOrcamento(), ordemServico.getStatus());
 		var clienteResponse 	= ClienteResponse.from(ordemServico.getCliente());
 		var veiculoResponse 	= VeiculoResponse.from(ordemServico.getVeiculo());
 		var itensResponse 		= ordemServico.getItensQuantidade().stream()
@@ -29,9 +29,9 @@ public record OrdemServicoResponse(
 		return new OrdemServicoResponse(ordemServico.getId(), orcamento, ordemServico.getDiagnostico(), ordemServico.formatDate(), clienteResponse, veiculoResponse, itensResponse,servicosResponse);
 	}
 
-	public static OrdemServicoResponse from(OrdemServico ordemServico) {
+	public static OrdemServicoResponse from(OrdemServico ordemServico, StatusOS status) {
 
-		var orcamento 			= OrcamentoResponse.from(ordemServico.getOrcamento(), StatusOS.RECEBIDA);
+		var orcamento 			= OrcamentoResponse.from(ordemServico.getOrcamento(), status);
 		var clienteResponse 	= ClienteResponse.from(ordemServico.getCliente());
 		var veiculoResponse 	= VeiculoResponse.from(ordemServico.getVeiculo());
 		var itensResponse 		= ordemServico.getItensQuantidade().stream()
