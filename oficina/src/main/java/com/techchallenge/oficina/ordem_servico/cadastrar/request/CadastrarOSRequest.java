@@ -7,5 +7,7 @@ public record CadastrarOSRequest(
 		List<UUID> servicos,
 		List<ItemQuantidade> itens,
 		String diagnostico,
-		String placa) {
+		String placa,
+		FuncionarioRequest funcionario
+		) {
 }

@@ -4,12 +4,13 @@ CREATE TABLE public.ordem_servico (
 	updated_at                  timestamptz(6) NULL,
 	"version"                   int8           NOT NULL,
 	cliente_id                  uuid           NOT NULL,
+	funcionario_id              uuid           NOT NULL,
 	id                          uuid           NOT NULL,
 	veiculo_id                  uuid           NULL,
-	diagnostico                 varchar(10000)   NULL,
+	diagnostico                 varchar(10000) NULL,
 	first_name                  varchar(255)   NULL,
-	last_name                   varchar(255) NULL,
-	status                      varchar(255) NULL,
+	last_name                   varchar(255)   NULL,
+	status                      varchar(255)   NULL,
 	CONSTRAINT ordem_servico_pkey PRIMARY KEY (id)
 );
 
@@ -18,6 +19,7 @@ CREATE TABLE public.ordem_servico (
 
 ALTER TABLE public.ordem_servico ADD CONSTRAINT fk_os_client FOREIGN KEY (cliente_id) REFERENCES public.clientes(id);
 ALTER TABLE public.ordem_servico ADD CONSTRAINT fk_os_veiculo FOREIGN KEY (veiculo_id) REFERENCES public.veiculos(id);
+ALTER TABLE public.ordem_servico ADD CONSTRAINT fk_os_funcionario FOREIGN KEY (funcionario_id) REFERENCES public.funcionarios(id);
 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------

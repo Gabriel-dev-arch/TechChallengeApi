@@ -112,3 +112,18 @@ INSERT INTO public.veiculos (id,placa,marca,modelo,ano,created_at,updated_at,"ve
 	 ('b15eb36d-c98a-43c1-b3e9-4b5c1939bcdf'::uuid,'KLP0G76','Volkswagen','Polo Track 1.0',2023,'2026-10-11 17:23:35.715485-03','2026-10-18 17:23:35.715485-03',1,'053894a5-3a5c-4143-99da-ee4a3f030f11'::uuid),
 	 ('79e6b306-af92-4388-bbd6-bb02abc4aa03'::uuid,'DJM8H54','Chevrolet','Tracker Premier 1.2 Turbo',2022,'2026-10-13 17:23:35.715485-03','2026-10-18 17:23:35.715485-03',1,'c106b59c-5006-4771-9ae7-9a86af46b054'::uuid),
 	 ('1b58369b-4c5b-476d-98a5-bbdb419fb15c'::uuid,'EWR1B95','Peugeot','208 Allure 1.0 Turbo',2024,'2026-10-16 17:23:35.715485-03','2026-10-18 17:23:35.715485-03',1,'dd4b0dcf-0772-4ea5-9afb-88f49ef54d9f'::uuid);
+
+
+---------------------------------FUNCIONÁRIOS--------------------------------------
+
+INSERT INTO public.funcionarios (id,nome,email,senha_hash,"admin",ativo,created_at,updated_at,"version") VALUES
+	 ('b9f8ec3c-5994-4abf-a2b7-452d02e2d7cd'::uuid,'Ana Silva','ana.silva@empresa.com',1234,true,true,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('a7ba91c3-0f4e-4658-80de-512d827ac7e6'::uuid,'Bruno Oliveira','bruno.oliveira@empresa.com',5678,false,true,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('4513757b-2c0e-4797-a7f8-431e48769e1d'::uuid,'Carla Souza','carla.souza@empresa.com',9012,false,true,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('f2500b02-4df6-4244-82f1-c2d7feaa9d89'::uuid,'Daniel Santos','daniel.santos@empresa.com',3456,true,true,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('afefabb7-04c4-432d-9a95-67e330dc642f'::uuid,'Eduarda Lima','eduarda.lima@empresa.com',7890,false,false,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('70dcd86c-cf35-44c5-a1d6-8d6f01bea2b1'::uuid,'Felipe Pereira','felipe.pereira@empresa.com',2345,false,true,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('c47d94c1-3993-4643-8642-209e159655f8'::uuid,'Gabriela Costa','gabriela.costa@empresa.com',6789,true,true,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('42c59336-9919-48fe-92c4-29dc90668090'::uuid,'Henrique Alves','henrique.alves@empresa.com',123,false,false,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('e3170a7c-82cf-4fb3-a5d9-bcc42f8747c8'::uuid,'Isabela Rodrigues','isabela.rodrigues@empresa.com',4567,false,true,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0),
+	 ('75ef92f9-993a-4ffc-b205-f65e498ac3ab'::uuid,'João Ferreira',NULL,8901,false,true,'2026-10-26 20:15:19.307935-03','2026-10-26 20:15:19.307935-03',0);

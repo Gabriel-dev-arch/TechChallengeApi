@@ -1,14 +1,15 @@
 CREATE TABLE public.ordem_servico_aud (
-	id uuid                 NOT NULL,
-	cliente_id uuid         NOT NULL,
-	veiculo_id uuid         NOT NULL,
-	orcamento numeric(38, 2) NULL,
-	status varchar(255)     NOT NULL,
-	diagnostico varchar(10000) NULL,
-	revtype int2            NOT NULL,
-	created_at timestamptz(6) NULL,
-	rev timestamptz(6)      NOT NULL,
-	updated_at timestamptz(6) NULL,
+	id                  uuid            NOT NULL,
+	cliente_id          uuid            NOT NULL,
+	veiculo_id          uuid            NOT NULL,
+	orcamento           numeric(38, 2)  NULL,
+	status              varchar(255)    NOT NULL,
+	diagnostico         varchar(10000)  NULL,
+	revtype             int2            NOT NULL,
+	funcionario_id      uuid            NOT NULL,
+	created_at          timestamptz(6)  NULL,
+	rev                 timestamptz(6)  NOT NULL,
+	updated_at          timestamptz(6)  NULL,
 	CONSTRAINT ordem_servico_aud_pkey PRIMARY KEY (rev, id));
 
 --------------------------------------------------------------------------------------------------------

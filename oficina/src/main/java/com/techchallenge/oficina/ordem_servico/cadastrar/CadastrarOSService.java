@@ -1,5 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
+import com.techchallenge.oficina.funcionario.dominio.FuncionarioRepository;
+import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.CadastrarOSRequest;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidadeRequest;
@@ -33,14 +35,16 @@ public class CadastrarOSService {
     private final VeiculoRepository veiculoRepository;
     private final ServicoRepository servicoRepository;
     private final PecaInsumoRepository pecaInsumoRepository;
+    private final FuncionarioRepository funcionarioRepository;
     private final EstadosOS estadosOS;
 
     public CadastrarOSService(OrdemServicoRepository repository, VeiculoRepository veiculoRepository,
-                              ServicoRepository servicoRepository, PecaInsumoRepository pecaInsumoRepository, EstadosOS estadosOS) {
+                              ServicoRepository servicoRepository, PecaInsumoRepository pecaInsumoRepository, FuncionarioRepository funcionarioRepository, EstadosOS estadosOS) {
         this.repository = repository;
         this.veiculoRepository = veiculoRepository;
         this.servicoRepository = servicoRepository;
         this.pecaInsumoRepository = pecaInsumoRepository;
+        this.funcionarioRepository = funcionarioRepository;
         this.estadosOS = estadosOS;
     }
 
@@ -53,11 +57,13 @@ public class CadastrarOSService {
             throw new OrdemServicoEmAbertoException(request.placa());
         }
 
+        Funcionario funcionario = funcionarioRepository.getReferenceById(request.funcionario().id());
         Veiculo veiculo = veiculoRepository.findByPlaca(request.placa()).orElseThrow(() -> new VeiculoNaoEncontradoException(request.placa()));
 
         OrdemServico ordemServico = new OrdemServico(StatusOS.RECEBIDA,
                 veiculo,
-                veiculo.getCliente());
+                veiculo.getCliente(),
+                funcionario);
 
 
         return OrdemServicoResponse.from(repository.save(ordemServico));
