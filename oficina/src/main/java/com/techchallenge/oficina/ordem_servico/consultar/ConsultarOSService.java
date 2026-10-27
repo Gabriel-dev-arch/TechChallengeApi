@@ -1,8 +1,10 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
+import com.techchallenge.oficina.autenticacao.dominio.ControleDeAcesso;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
+import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -16,30 +18,32 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ConsultarOSService {
 
-	private final OrdemServicoRepository repository;
+    private final OrdemServicoRepository repository;
+    private final ControleDeAcesso controleDeAcesso;
 
-	public ConsultarOSService(OrdemServicoRepository repository) {
-		this.repository = repository;
+    public ConsultarOSService(OrdemServicoRepository repository, ControleDeAcesso controleDeAcesso) {
+        this.repository = repository;
+        this.controleDeAcesso = controleDeAcesso;
     }
 
-	public OrdemServicoResponse consultarStatusOS(UUID id) {
+    public OrdemServicoResponse consultarStatusOS(UUID id) {
+        OrdemServico ordem = repository.findById(id)
+                .orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+        controleDeAcesso.verificarDono(ordem.getCliente().getDocumento());
+        return OrdemServicoResponse.from(ordem, ordem.getStatus());
+    }
 
-		return repository.findById(id)
-				.map(f -> OrdemServicoResponse.from(f, f.getStatus()))
-				.orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-		
-	}
+    public PageImpl<OrdemServicoResponse> listarOrdemServicoEmAberto(StatusOS statusOs, Pageable pageable) {
+        List<OrdemServicoResponse> encontrado = repository.buscarPorStatus(statusOs, pageable)
+                .stream()
+                .map(OrdemServicoResponse::from).toList();
+        return new PageImpl<>(encontrado, pageable, encontrado.size());
+    }
 
-	public PageImpl<OrdemServicoResponse> listarOrdemServicoEmAberto(StatusOS statusOs, Pageable pageable) {
-		List<OrdemServicoResponse> encontrado = repository.buscarPorStatus(statusOs, pageable)
-				.stream()
-				.map(OrdemServicoResponse::from).toList();
-		return new PageImpl<>(encontrado, pageable, encontrado.size());
-	}
-
-	public OrdemServicoResponse buscarOSPeloID(UUID id) {
-
-		return repository.findById(id).stream().findFirst().map(OrdemServicoResponse::from)
-				.orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-	}
+    public OrdemServicoResponse buscarOSPeloID(UUID id) {
+        OrdemServico ordem = repository.findById(id)
+                .orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+        controleDeAcesso.verificarDono(ordem.getCliente().getDocumento());
+        return OrdemServicoResponse.from(ordem, ordem.getStatus());
+    }
 }

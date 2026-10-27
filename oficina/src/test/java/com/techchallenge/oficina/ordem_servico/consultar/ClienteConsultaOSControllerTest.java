@@ -23,12 +23,11 @@ import java.util.UUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ClienteConsultaOSController.class)
 @Import(SecurityConfig.class)
-@WithMockUser(roles = "ADMIN")
+@WithMockUser(roles = "CLIENTE")
 class ClienteConsultaOSControllerTest {
 
     private static final UUID ID = UUID.randomUUID();
@@ -48,7 +47,7 @@ class ClienteConsultaOSControllerTest {
                 null,
                 new ClienteResponse("Carlos Santos", "carlos@email.com", "12345678901", "CPF", "11988888888"),
                 new VeiculoResponse("XYZ9876", "Honda", "Civic", 2022),
-                new FuncionarioResponse(ID, "Carlos Santos", "carlos@empresa.com"),
+                new FuncionarioResponse(null, "Carlos Santos", "carlos@empresa.com"),
                 List.of(),
                 List.of());
 
