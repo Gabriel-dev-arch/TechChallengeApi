@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
 import com.techchallenge.oficina.config.SecurityConfig;
+import com.techchallenge.oficina.funcionario.dominio.FuncionarioResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.response.ClienteResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrcamentoResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
@@ -84,6 +85,7 @@ class ConsultarOSControllerTest {
                 null,
                 new ClienteResponse("Ana Silva", "ana@email.com", "12345678901", "CPF", "11999999999"),
                 new VeiculoResponse("ABC1234", "Fiat", "Uno", 2020),
+                new FuncionarioResponse(null, "Ana Silva", "ana.silva@empresa.com"),
                 List.of(),
                 List.of());
     }

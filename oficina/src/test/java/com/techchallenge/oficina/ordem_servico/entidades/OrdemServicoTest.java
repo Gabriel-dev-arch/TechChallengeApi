@@ -46,7 +46,7 @@ class OrdemServicoTest {
     void deveFormatarData() {
         Cliente cliente = new Cliente("João", "Silva", "joao@email.com", "12345678901", "11999999999");
         Veiculo veiculo = new Veiculo("ABC1234", "Fiat", "Uno", 2020, cliente);
-        OrdemServico os = new OrdemServico(StatusOS.RECEBIDA, veiculo, cliente);
+        OrdemServico os = new OrdemServico(StatusOS.RECEBIDA, veiculo, cliente, null);
 
         assertThat(os.formatDate()).isNull();
 
@@ -60,7 +60,7 @@ class OrdemServicoTest {
     void deveIncluirServicos() {
         Cliente cliente = new Cliente("João", "Silva", "joao@email.com", "12345678901", "11999999999");
         Veiculo veiculo = new Veiculo("ABC1234", "Fiat", "Uno", 2020, cliente);
-        OrdemServico os = new OrdemServico(StatusOS.RECEBIDA, BigDecimal.valueOf(100), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), "Diagnostico", veiculo, cliente);
+        OrdemServico os = new OrdemServico(StatusOS.RECEBIDA, BigDecimal.valueOf(100), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), "Diagnostico", veiculo, cliente, null);
 
         Servico s1 = new Servico("Alinhamento", BigDecimal.valueOf(80));
         Servico s2 = new Servico("Balanceamento", BigDecimal.valueOf(60));
@@ -82,7 +82,7 @@ class OrdemServicoTest {
                 UnidadeMedida.UN, BigDecimal.valueOf(25), BigDecimal.TEN);
         setId(peca, pecaId);
 
-        OrdemServico os = new OrdemServico(StatusOS.RECEBIDA, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), "Diagnostico", veiculo, cliente);
+        OrdemServico os = new OrdemServico(StatusOS.RECEBIDA, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), "Diagnostico", veiculo, cliente, null);
 
         // Adiciona 2 velas
         os.incluirPecaInsumos(List.of(peca), List.of(new ItemQuantidade(pecaId, BigDecimal.valueOf(2))));
@@ -116,7 +116,7 @@ class OrdemServicoTest {
                 new ArrayList<>(List.of(servico)),
                 List.of(peca),
                 List.of(new ItemQuantidade(pecaId, BigDecimal.ONE)),
-                null, veiculo, cliente);
+                null, veiculo, cliente, null);
 
         os.incluirDiagnostico();
 

@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
 import com.techchallenge.oficina.config.SecurityConfig;
+import com.techchallenge.oficina.funcionario.dominio.FuncionarioResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.response.ClienteResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrcamentoResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
@@ -47,6 +48,7 @@ class ClienteConsultaOSControllerTest {
                 null,
                 new ClienteResponse("Carlos Santos", "carlos@email.com", "12345678901", "CPF", "11988888888"),
                 new VeiculoResponse("XYZ9876", "Honda", "Civic", 2022),
+                new FuncionarioResponse(ID, "Carlos Santos", "carlos@empresa.com"),
                 List.of(),
                 List.of());
 

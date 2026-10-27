@@ -1,7 +1,10 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
+import com.techchallenge.oficina.funcionario.dominio.FuncionarioRepository;
+import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.CadastrarOSRequest;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.FuncionarioRequest;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidadeRequest;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ServicosRequest;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
@@ -44,6 +47,7 @@ class CadastrarOSServiceTest {
 
     private static final String PLACA = "ABC1234";
     private static final UUID OS_ID = UUID.randomUUID();
+    private static final UUID FUNCIONARIO_ID = UUID.randomUUID();
 
     @Mock
     private OrdemServicoRepository repository;
@@ -58,6 +62,9 @@ class CadastrarOSServiceTest {
     private PecaInsumoRepository pecaInsumoRepository;
 
     @Mock
+    private FuncionarioRepository funcionarioRepository;
+
+    @Mock
     private EstadosOS estadosOS;
 
     @InjectMocks
@@ -66,10 +73,11 @@ class CadastrarOSServiceTest {
     @Test
     @DisplayName("Deve impedir cadastro quando veículo já tem ordem em aberto")
     void deveImpedirCadastroQuandoVeiculoJaTemOrdemEmAberto() {
-        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA);
+        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA,
+            new FuncionarioRequest(FUNCIONARIO_ID));
         when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of(
                 new OrdemServico(StatusOS.RECEBIDA, BigDecimal.ZERO, List.of(), List.of(), List.of(),
-                        "Aberta", null, null)));
+                "Aberta", null, null, null)));
 
         assertThatThrownBy(() -> service.cadastrar(request))
                 .isInstanceOf(OrdemServicoEmAbertoException.class)
@@ -82,7 +90,8 @@ class CadastrarOSServiceTest {
     @Test
     @DisplayName("Deve lançar exceção quando veículo não existe")
     void deveLancarExcecaoQuandoVeiculoNaoExiste() {
-        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA);
+        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA,
+            new FuncionarioRequest(FUNCIONARIO_ID));
         when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
         when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.empty());
 
@@ -96,12 +105,15 @@ class CadastrarOSServiceTest {
     @Test
     @DisplayName("Deve cadastrar ordem de serviço com sucesso")
     void deveCadastrarComSucesso() {
-        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA);
+        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA,
+            new FuncionarioRequest(FUNCIONARIO_ID));
         Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
         Veiculo veiculo = new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente);
+        Funcionario funcionario = criarFuncionario();
 
         when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
         when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(veiculo));
+        when(funcionarioRepository.getReferenceById(FUNCIONARIO_ID)).thenReturn(funcionario);
         when(repository.save(any(OrdemServico.class))).thenAnswer(i -> i.getArgument(0));
 
         OrdemServicoResponse response = service.cadastrar(request);
@@ -228,7 +240,12 @@ class CadastrarOSServiceTest {
     private OrdemServico criarOS(StatusOS status) {
         Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
         Veiculo veiculo = new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente);
-        return new OrdemServico(status, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), "Diagnóstico", veiculo, cliente);
+        return new OrdemServico(status, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                "Diagnóstico", veiculo, cliente, criarFuncionario());
+    }
+
+    private Funcionario criarFuncionario() {
+        return new Funcionario("Ana Silva", "ana.silva@empresa.com", (short) 1234, false, true);
     }
 
     private void setId(Object entity, UUID id) {

@@ -32,7 +32,7 @@ class ClienteAprovaRecusaOSServiceTest {
     private final UUID id = UUID.randomUUID();
 
     private OrdemServico criarOS(StatusOS status) {
-        return new OrdemServico(status, BigDecimal.ZERO, List.of(), List.of(), List.of(), "Diagnostico", null, null);
+        return new OrdemServico(status, BigDecimal.ZERO, List.of(), List.of(), List.of(), "Diagnostico", null, null, null);
     }
 
     @Test

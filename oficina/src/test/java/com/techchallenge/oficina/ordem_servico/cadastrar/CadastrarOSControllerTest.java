@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
 import com.techchallenge.oficina.config.SecurityConfig;
+import com.techchallenge.oficina.funcionario.dominio.FuncionarioResponse;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.CadastrarOSRequest;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidadeRequest;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ServicosRequest;
@@ -49,6 +50,7 @@ class CadastrarOSControllerTest {
                 null,
                 new ClienteResponse("Ana Silva", "ana@email.com", "12345678901", "CPF", "11999999999"),
                 new VeiculoResponse("ABC1234", "Fiat", "Uno", 2020),
+                new FuncionarioResponse(ID, "Ana Silva", "ana.silva@empresa.com"),
                 List.of(),
                 List.of());
     }

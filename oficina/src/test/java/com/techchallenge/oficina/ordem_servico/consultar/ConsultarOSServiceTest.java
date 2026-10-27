@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
+import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
@@ -120,7 +121,8 @@ class ConsultarOSServiceTest {
         return new OrdemServico(StatusOS.RECEBIDA, new BigDecimal("250.00"),
                 List.of(servico), List.of(peca),
                 List.of(new ItemQuantidade(peca.getId(), BigDecimal.ONE)),
-                "Ruído no motor", veiculo, cliente);
+            "Ruído no motor", veiculo, cliente,
+            new Funcionario("Ana Silva", "ana.silva@empresa.com", (short) 1234, false, true));
     }
 
     private void setId(PecaInsumo peca, UUID id) {

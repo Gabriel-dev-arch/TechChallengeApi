@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.dominio.response;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
+import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
@@ -87,7 +88,8 @@ class ResponseDTOTest {
 
         OrdemServico os = new OrdemServico(StatusOS.RECEBIDA, BigDecimal.valueOf(110),
                 List.of(servico), List.of(peca), List.of(new ItemQuantidade(pecaId, BigDecimal.ONE)),
-                "Diagnóstico", veiculo, cliente);
+                "Diagnóstico", veiculo, cliente,
+                new Funcionario("Ana Silva", "ana.silva@empresa.com", (short) 1234, false, true));
         setId(os, UUID.randomUUID());
 
         OrdemServicoResponse r1 = OrdemServicoResponse.from(os);
