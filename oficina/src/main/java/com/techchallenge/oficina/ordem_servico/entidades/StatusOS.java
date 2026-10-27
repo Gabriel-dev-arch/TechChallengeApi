@@ -1,0 +1,23 @@
+package com.techchallenge.oficina.ordem_servico.entidades;
+
+public enum StatusOS {
+
+	RECEBIDA("Recebida"),
+	EM_DIAGNOSTICO("Em diagnóstico"),
+	AGUARDANDO_APROVACAO("Aguardando aprovação"),
+	APROVADA("Aprovada"),
+	NEGADA("negada"),
+	EM_EXECUCAO("Em execução"),
+	FINALIZADA("Finalizada"),
+	ENTREGUE("Entregue");
+
+	private final String descricao;
+
+	StatusOS(String descricao) {
+		this.descricao = descricao;
+	}
+
+	public String getDescricao() {
+		return descricao;
+	}
+}

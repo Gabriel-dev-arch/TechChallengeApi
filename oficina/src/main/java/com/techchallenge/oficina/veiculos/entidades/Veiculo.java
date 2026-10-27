@@ -2,11 +2,7 @@ package com.techchallenge.oficina.veiculos.entidades;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.shared.persistence.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

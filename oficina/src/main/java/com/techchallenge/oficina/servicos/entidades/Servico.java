@@ -1,14 +1,13 @@
 package com.techchallenge.oficina.servicos.entidades;
 
-import java.math.BigDecimal;
-
 import com.techchallenge.oficina.shared.persistence.BaseEntity;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 
 @Getter

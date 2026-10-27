@@ -3,11 +3,7 @@ package com.techchallenge.oficina.clientes.dominio;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /** O texto deve ser um CPF ou CNPJ válido (com ou sem máscara). */
 @Documented

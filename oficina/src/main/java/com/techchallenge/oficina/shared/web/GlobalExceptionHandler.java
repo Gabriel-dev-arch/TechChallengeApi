@@ -1,16 +1,14 @@
 package com.techchallenge.oficina.shared.web;
 
 import com.techchallenge.oficina.autenticacao.login.CredenciaisInvalidasException;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoEmAbertoException;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.servicos.dominio.ServicoNaoEncontradoException;
 import com.techchallenge.oficina.shared.excecoes.ConflitoException;
 import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
 import com.techchallenge.oficina.shared.excecoes.RegraInvalidaException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
@@ -21,11 +19,12 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.exc.InvalidFormatException;
+
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Converte exceções em respostas {@code application/problem+json} (RFC 9457).
@@ -68,6 +67,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	ProblemDetail credenciaisInvalidas(CredenciaisInvalidasException ex) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
 	}
+
+	@ExceptionHandler(OrdemServicoEmAbertoException.class)
+	ProblemDetail ordemDeServicosEmAberto(OrdemServicoEmAbertoException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
+	@ExceptionHandler(OrdemServicoNaoEncontradaException.class)
+	ProblemDetail ordemDeServicosNaoEncontrada(OrdemServicoNaoEncontradaException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
 
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,

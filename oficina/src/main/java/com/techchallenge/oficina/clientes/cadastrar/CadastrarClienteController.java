@@ -1,8 +1,8 @@
 package com.techchallenge.oficina.clientes.cadastrar;
 
 import com.techchallenge.oficina.clientes.dominio.ClienteResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -2,11 +2,7 @@ package com.techchallenge.oficina.pecasinsumos.cadastrar;
 
 import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
 import com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 

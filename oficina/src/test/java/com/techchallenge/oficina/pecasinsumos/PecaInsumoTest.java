@@ -1,14 +1,6 @@
 package com.techchallenge.oficina.pecasinsumos;
 
-import com.techchallenge.oficina.pecasinsumos.dominio.EstoqueInsuficienteException;
-import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoComReservaException;
-import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoInativoException;
-import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoJaAtivoException;
-import com.techchallenge.oficina.pecasinsumos.dominio.PrecoInvalidoException;
-import com.techchallenge.oficina.pecasinsumos.dominio.QuantidadeInvalidaException;
-import com.techchallenge.oficina.pecasinsumos.dominio.ReservaInsuficienteException;
-import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
-import com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida;
+import com.techchallenge.oficina.pecasinsumos.dominio.*;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

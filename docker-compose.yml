@@ -4,9 +4,9 @@ services:
     container_name: oficina-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-oficina}
-      POSTGRES_USER: ${DB_USER:?defina DB_USER no .env}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
+      POSTGRES_DB: oficina
+      POSTGRES_USER: oficina
+      POSTGRES_PASSWORD: oficina
     ports:
       - "${DB_PORT:-5432}:5432"
     networks:
@@ -30,9 +30,9 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-oficina}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: oficina
+      DB_USER: oficina
+      DB_PASSWORD: oficina
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
       JWT_EXPIRACAO_MINUTOS: ${JWT_EXPIRACAO_MINUTOS:-60}
       ADMIN_USERNAME: ${ADMIN_USERNAME:?defina ADMIN_USERNAME no .env}

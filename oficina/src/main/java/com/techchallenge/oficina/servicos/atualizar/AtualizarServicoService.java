@@ -1,17 +1,15 @@
 package com.techchallenge.oficina.servicos.atualizar;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-
 import com.techchallenge.oficina.servicos.dominio.ServicoNaoEncontradoException;
 import com.techchallenge.oficina.servicos.dominio.ServicoRepository;
 import com.techchallenge.oficina.servicos.dominio.ServicoResponse;
 import com.techchallenge.oficina.servicos.entidades.Servico;
-
 import jakarta.validation.Valid;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.UUID;
 
 @Service
 @Validated
