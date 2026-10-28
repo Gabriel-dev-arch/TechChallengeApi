@@ -20,12 +20,12 @@ public class EstadosOS {
     public AvancarStatusOSAbstract executa(OrdemServico osCadastrada) {
 
         return switch (osCadastrada.getStatus()) {
-            case RECEBIDA       -> new IniciaDiagnostico(osCadastrada, repository, eventPublisher);
-            case EM_DIAGNOSTICO -> new AguardandoAprovacao(osCadastrada, repository, eventPublisher);
-            case APROVADA       -> new AprovarOuNegar(osCadastrada, repository, eventPublisher);
-            case NEGADA         -> new AprovarOuNegar(osCadastrada, repository, eventPublisher);
-            case EM_EXECUCAO    -> new ExecutarServico(osCadastrada, repository, eventPublisher);
-            case FINALIZADA     -> new Finalizar(osCadastrada, repository, eventPublisher);
+            case RECEBIDA       -> new IniciaDiagnostico    (osCadastrada, repository, eventPublisher);
+            case EM_DIAGNOSTICO -> new AguardandoAprovacao  (osCadastrada, repository, eventPublisher);
+            case APROVADA       -> new AprovarOuNegar       (osCadastrada, repository, eventPublisher);
+            case NEGADA         -> new AprovarOuNegar       (osCadastrada, repository, eventPublisher);
+            case EM_EXECUCAO    -> new ExecutarServico      (osCadastrada, repository, eventPublisher);
+            case FINALIZADA     -> new Finalizar            (osCadastrada, repository, eventPublisher);
             default -> throw new IllegalStateException("Unexpected value: " + osCadastrada.getStatus());
         };
     }

@@ -34,7 +34,7 @@ class IniciaDiagnosticoTest {
                 List.of(), List.of(), List.of(), "Diagnostico", null, null, null);
         when(repository.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
         doAnswer(invocation -> {
-            assertThat(os.getStatus()).isEqualTo(StatusOS.RECEBIDA);
+            assertThat(os.getStatus()).isEqualTo(StatusOS.EM_DIAGNOSTICO);
             return null;
         }).when(eventPublisher).publishEvent(any(Object.class));
 
