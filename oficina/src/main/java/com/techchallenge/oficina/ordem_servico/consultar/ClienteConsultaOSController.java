@@ -27,8 +27,6 @@ public class ClienteConsultaOSController {
     @GetMapping("/{id}")
     @Operation(summary = "Acompanhar status da OS", description = "Acompanhar status da OS")
     public ResponseEntity<OrdemServicoResponse> cadastrar(@PathVariable UUID id) {
-        OrdemServicoResponse servicoResponse = service.consultarStatusOS(id);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
-        return ResponseEntity.ok(servicoResponse);
+        return ResponseEntity.ok(service.consultarStatusOS(id));
     }
 }

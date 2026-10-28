@@ -65,7 +65,6 @@ public class CadastrarOSController {
 	public ResponseEntity<OrdemServicoResponse> iniciaOrcamento(@PathVariable("id") UUID id) {
 
 		var ordemServicoResponse = service.cadastrarOrcamento(id);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
 		return ResponseEntity.ok(ordemServicoResponse);
 	}
 

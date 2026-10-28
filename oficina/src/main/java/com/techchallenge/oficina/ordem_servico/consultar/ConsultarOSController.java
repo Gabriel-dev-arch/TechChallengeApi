@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -30,13 +31,12 @@ public class ConsultarOSController {
 	public PagedModel<OrdemServicoResponse> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
 												   @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
 												   @RequestParam(required = true) String status) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt"));
-		return new PagedModel<>(service.listarOrdemServicoEmAberto(StatusOS.valueOf(status), pageable));
+		return new PagedModel<>(service.listarOrdemServicoEmAberto(StatusOS.valueOf(status), PageRequest.of(page, size, Sort.by("createdAt"))));
 	}
 
 	@GetMapping("/{id}")
 	@Operation(summary = "Buscar Ordem de Serviço pelo id", description = "Buscar Ordem de Serviço pelo id")
-	public OrdemServicoResponse buscarOSPeloID(@PathVariable UUID id) {
-		return service.buscarOSPeloID(id);
+	public ResponseEntity<OrdemServicoResponse> buscarOSPeloID(@PathVariable UUID id) {
+		return ResponseEntity.ok(service.buscarOSPeloID(id));
 	}
 }

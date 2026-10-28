@@ -2,21 +2,18 @@ package com.techchallenge.oficina.ordem_servico.dominio.statusos.status;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatus;
+import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatusOSAbstract;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 
-public class Aprovada implements AvancarStatus {
-
-    private final OrdemServicoRepository repository;
-
+public class Aprovada extends AvancarStatusOSAbstract {
 
     public Aprovada(OrdemServico os, OrdemServicoRepository repository) {
-        this.repository = repository;
-        avancar(os);
+        super(os,repository);
     }
 
     @Override
-    public OrdemServico avancar(OrdemServico osCadastrada) {
+    public OrdemServico avancar(OrdemServico osCadastrada, OrdemServicoRepository repository) {
 
         if(!StatusOS.APROVADA.equals(osCadastrada.getStatus())){
             throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status EM_DIAGNOSTICO.");

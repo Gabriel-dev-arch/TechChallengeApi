@@ -2,21 +2,18 @@ package com.techchallenge.oficina.ordem_servico.dominio.statusos.status;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatus;
+import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatusOSAbstract;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 
-public class EmExecucao implements AvancarStatus {
+public class ExecutarServico extends AvancarStatusOSAbstract {
 
-    private final OrdemServicoRepository repository;
-
-
-    public EmExecucao(OrdemServico os, OrdemServicoRepository repository) {
-        this.repository = repository;
-        avancar(os);
+    public ExecutarServico(OrdemServico os, OrdemServicoRepository repository) {
+        super(os, repository);
     }
 
     @Override
-    public OrdemServico avancar(OrdemServico osCadastrada) {
+    public OrdemServico avancar(OrdemServico osCadastrada,  OrdemServicoRepository repository) {
 
         if(!StatusOS.EM_EXECUCAO.equals(osCadastrada.getStatus())){
             throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status RECEBIDA.");
