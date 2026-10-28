@@ -25,8 +25,8 @@ public class ConsultarServicoController {
 
 	@GetMapping("/{id}")
 	@Operation(summary = "Busca servicos pelo ID", description = "Busca servicos pelo ID")
-	public ResponseEntity<ServicoResponse> consultar(@PathVariable String id) {
-		ServicoResponse servico = service.listar(UUID.fromString(id));
+	public ResponseEntity<ServicoResponse> consultar(@PathVariable UUID id) {
+		ServicoResponse servico = service.listar(id);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(servico.id());
 		return ResponseEntity.created(location).body(servico);
 	}

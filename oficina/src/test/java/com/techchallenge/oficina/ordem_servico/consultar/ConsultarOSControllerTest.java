@@ -78,6 +78,24 @@ class ConsultarOSControllerTest {
         verify(service).listarOrdemServicoEmAberto(eq(StatusOS.RECEBIDA), any(Pageable.class));
     }
 
+    @Test
+    @DisplayName("Aceita o status em minúsculas")
+    void deveAceitarStatusEmMinusculas() throws Exception {
+        when(service.listarOrdemServicoEmAberto(eq(StatusOS.RECEBIDA), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(criarResponse())));
+
+        mockMvc.perform(get("/ordens-servico").param("status", "recebida"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Status desconhecido devolve 400 com os valores aceitos")
+    void deveRejeitarStatusDesconhecido() throws Exception {
+        mockMvc.perform(get("/ordens-servico").param("status", "XYZ"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("Valores aceitos")));
+    }
+
     private OrdemServicoResponse criarResponse() {
         return new OrdemServicoResponse(UUID.randomUUID(),
                 new OrcamentoResponse(new BigDecimal("250.00"), "Recebida"),

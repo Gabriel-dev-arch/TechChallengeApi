@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.dominio.statusos;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.status.*;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
@@ -123,7 +124,7 @@ class EstadosOSTest {
         OrdemServico os = criarOS(StatusOS.ENTREGUE);
 
         assertThatThrownBy(() -> estadosOS.executa(os))
-                .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Unexpected value: " + StatusOS.ENTREGUE);
+                .isInstanceOf(TransicaoInvalidaException.class)
+                .hasMessageContaining("status " + StatusOS.ENTREGUE);
     }
 }

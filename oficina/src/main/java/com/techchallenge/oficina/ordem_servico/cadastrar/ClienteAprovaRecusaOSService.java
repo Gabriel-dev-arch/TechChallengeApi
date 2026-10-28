@@ -6,6 +6,7 @@ import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNao
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -21,17 +22,23 @@ public class ClienteAprovaRecusaOSService {
         this.controleDeAcesso = controleDeAcesso;
     }
 
+    @Transactional
     public void aprovaOS(UUID id) {
-        atualizaStatus(id, StatusOS.APROVADA);
+        OrdemServico os = buscarOSDoCliente(id);
+        repository.saveAndFlush(os.atualizaStatus(StatusOS.APROVADA));
     }
 
+    /** Recusa o orçamento e devolve ao estoque as peças reservadas para a OS. */
+    @Transactional
     public void recusaOS(UUID id) {
-        atualizaStatus(id, StatusOS.NEGADA);
+        OrdemServico os = buscarOSDoCliente(id);
+        os.liberarReservas();
+        repository.saveAndFlush(os.atualizaStatus(StatusOS.NEGADA));
     }
 
-    private void atualizaStatus(UUID id, StatusOS status) {
+    private OrdemServico buscarOSDoCliente(UUID id) {
         OrdemServico os = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
         controleDeAcesso.verificarDono(os.getCliente().getDocumento());
-        repository.saveAndFlush(os.atualizaStatus(status));
+        return os;
     }
 }

@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.dominio.statusos;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.status.*;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,8 @@ public class EstadosOS {
             case NEGADA         -> new AprovarOuNegar(osCadastrada, repository);
             case EM_EXECUCAO    -> new EmExecucao(osCadastrada, repository);
             case FINALIZADA     -> new Finalizar(osCadastrada, repository);
-            default -> throw new IllegalStateException("Unexpected value: " + osCadastrada.getStatus());
+            default -> throw new TransicaoInvalidaException("A ordem de serviço com status "
+                    + osCadastrada.getStatus() + " não tem uma próxima etapa a executar");
         };
     }
 }

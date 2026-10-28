@@ -1,5 +1,6 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
+import com.techchallenge.oficina.funcionario.dominio.FuncionarioNaoEncontradoException;
 import com.techchallenge.oficina.funcionario.dominio.FuncionarioRepository;
 import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.CadastrarOSRequest;
@@ -18,6 +19,7 @@ import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoRepository;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.dominio.ServicoRepository;
 import com.techchallenge.oficina.servicos.entidades.Servico;
+import com.techchallenge.oficina.veiculos.dominio.PlacaValidator;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 import jakarta.validation.Valid;
@@ -51,14 +53,18 @@ public class CadastrarOSService {
     @Transactional
     public OrdemServicoResponse cadastrar(CadastrarOSRequest request) {
 
-        var veiculoComOSEmAberto = repository.buscarPorPlacaComOSEmAberto(request.placa());
+        // mesma normalização do cadastro de veículos: aceita minúsculas e hífen
+        String placa = PlacaValidator.normalizar(request.placa());
+        var veiculoComOSEmAberto = repository.buscarPorPlacaComOSEmAberto(placa);
 
         if (!veiculoComOSEmAberto.isEmpty()) {
-            throw new OrdemServicoEmAbertoException(request.placa());
+            throw new OrdemServicoEmAbertoException(placa);
         }
 
-        Funcionario funcionario = funcionarioRepository.getReferenceById(request.funcionario().id());
-        Veiculo veiculo = veiculoRepository.findByPlaca(request.placa()).orElseThrow(() -> new VeiculoNaoEncontradoException(request.placa()));
+        Veiculo veiculo = veiculoRepository.findByPlaca(placa).orElseThrow(() -> new VeiculoNaoEncontradoException(placa));
+        UUID funcionarioId = request.funcionario().id();
+        Funcionario funcionario = funcionarioRepository.findById(funcionarioId)
+                .orElseThrow(() -> new FuncionarioNaoEncontradoException(funcionarioId));
 
         OrdemServico ordemServico = new OrdemServico(StatusOS.RECEBIDA,
                 veiculo,

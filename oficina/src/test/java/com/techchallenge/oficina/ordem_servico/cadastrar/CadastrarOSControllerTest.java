@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,7 +68,8 @@ class CadastrarOSControllerTest {
                                   "servicos": [],
                                   "itens": [],
                                   "diagnostico": "Revisão preventiva",
-                                  "placa": "ABC1234"
+                                  "placa": "ABC1234",
+                                  "funcionario": {"id": "b9f8ec3c-5994-4abf-a2b7-452d02e2d7cd"}
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -79,6 +81,19 @@ class CadastrarOSControllerTest {
                 .andExpect(jsonPath("$.veiculo.placa").value("ABC1234"));
 
         verify(service).cadastrar(any(CadastrarOSRequest.class));
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar abertura de OS sem placa e sem funcionário")
+    void deveRejeitarAberturaSemPlacaEFuncionario() throws Exception {
+        mockMvc.perform(post("/ordens-servico")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"funcionario\": {}}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[?(@.campo == 'placa')]").exists())
+                .andExpect(jsonPath("$.errors[?(@.campo == 'funcionario.id')]").exists());
+
+        verify(service, never()).cadastrar(any(CadastrarOSRequest.class));
     }
 
     @Test

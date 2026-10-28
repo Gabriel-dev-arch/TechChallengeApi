@@ -2,10 +2,15 @@ package com.techchallenge.oficina.ordem_servico.cadastrar;
 
 import com.techchallenge.oficina.autenticacao.dominio.ControleDeAcesso;
 import com.techchallenge.oficina.clientes.entidades.Cliente;
+import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
+import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
+import com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida;
+import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
+import com.techchallenge.oficina.shared.persistence.BaseEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,6 +98,25 @@ class ClienteAprovaRecusaOSServiceTest {
         assertThat(os.getStatus()).isEqualTo(StatusOS.NEGADA);
         verify(controleDeAcesso).verificarDono(DOCUMENTO);
         verify(repository).saveAndFlush(os);
+    }
+
+    @Test
+    @DisplayName("Recusar o orçamento devolve ao estoque as peças reservadas")
+    void recusaDeveLiberarReservas() throws ReflectiveOperationException {
+        PecaInsumo peca = new PecaInsumo(TipoItem.PECA, "VELA", "Vela", null, UnidadeMedida.UN,
+                BigDecimal.TEN, BigDecimal.TEN);
+        var campoId = BaseEntity.class.getDeclaredField("id");
+        campoId.setAccessible(true);
+        campoId.set(peca, UUID.randomUUID());
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        os.incluirPecaInsumos(List.of(peca), List.of(new ItemQuantidade(peca.getId(), BigDecimal.valueOf(2))));
+        os.atualizaStatus(StatusOS.AGUARDANDO_APROVACAO);
+        when(repository.findById(id)).thenReturn(Optional.of(os));
+
+        service.recusaOS(id);
+
+        assertThat(os.getStatus()).isEqualTo(StatusOS.NEGADA);
+        assertThat(peca.getQuantidadeReservada()).isZero();
     }
 
     @Test

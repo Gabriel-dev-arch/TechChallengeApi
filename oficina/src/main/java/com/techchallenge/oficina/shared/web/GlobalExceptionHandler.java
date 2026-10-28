@@ -1,8 +1,6 @@
 package com.techchallenge.oficina.shared.web;
 
 import com.techchallenge.oficina.autenticacao.login.CredenciaisInvalidasException;
-import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoEmAbertoException;
-import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.servicos.dominio.ServicoNaoEncontradoException;
 import com.techchallenge.oficina.shared.excecoes.ConflitoException;
 import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
@@ -73,16 +71,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(CredenciaisInvalidasException.class)
 	ProblemDetail credenciaisInvalidas(CredenciaisInvalidasException ex) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-	}
-
-	@ExceptionHandler(OrdemServicoEmAbertoException.class)
-	ProblemDetail ordemDeServicosEmAberto(OrdemServicoEmAbertoException ex) {
-		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-	}
-
-	@ExceptionHandler(OrdemServicoNaoEncontradaException.class)
-	ProblemDetail ordemDeServicosNaoEncontrada(OrdemServicoNaoEncontradaException ex) {
-		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
 

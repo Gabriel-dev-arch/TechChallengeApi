@@ -4,6 +4,7 @@ import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrcamentoFechadoException;
+import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoNaoEncontradoException;
 import com.techchallenge.oficina.pecasinsumos.dominio.QuantidadeInvalidaException;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.entidades.Servico;
@@ -97,14 +98,20 @@ public class OrdemServico extends BaseEntity {
 
     public void incluirPecaInsumos(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens) {
         exigirOrcamentoAberto();
-        // valida tudo antes de alterar a OS, para não deixar a inclusão pela metade
-        itens.forEach(item -> exigirQuantidadePositiva(item.quantidade()));
         Map<UUID, PecaInsumo> pecasPorId = pecasInsumos.stream()
                 .collect(Collectors.toMap(PecaInsumo::getId, Function.identity()));
+        // valida tudo antes de alterar a OS, para não deixar a inclusão pela metade
+        for (ItemQuantidade item : itens) {
+            exigirQuantidadePositiva(item.quantidade());
+            if (!pecasPorId.containsKey(item.itens())) {
+                throw new PecaInsumoNaoEncontradoException(item.itens());
+            }
+        }
 
         for (ItemQuantidade itemQuantidade : itens) {
-            PecaInsumo peca = Objects.requireNonNull(pecasPorId.get(itemQuantidade.itens()),
-                    "Peça ou insumo não encontrado: " + itemQuantidade.itens());
+            PecaInsumo peca = pecasPorId.get(itemQuantidade.itens());
+            // a reserva confere se o item está ativo, se há saldo disponível e se a unidade aceita a quantidade
+            peca.reservar(itemQuantidade.quantidade());
             OrdemServicoItem itemExistente = this.itensQuantidade.stream()
                     .filter(item -> item.getItem().getId().equals(itemQuantidade.itens()))
                     .findFirst()
@@ -122,6 +129,16 @@ public class OrdemServico extends BaseEntity {
         exigirOrcamentoAberto();
         this.servicos.addAll(servicos);
         this.realizaCalculoServicos(servicos);
+    }
+
+    /** Orçamento recusado: as peças reservadas para a OS voltam a ficar disponíveis no estoque. */
+    public void liberarReservas() {
+        this.itensQuantidade.forEach(item -> item.getItem().liberar(item.getQuantidade()));
+    }
+
+    /** Serviço executado: as peças reservadas para a OS saem do estoque. */
+    public void consumirReservas() {
+        this.itensQuantidade.forEach(item -> item.getItem().consumir(item.getQuantidade()));
     }
 
     /** Depois que o orçamento é enviado ao cliente, serviços e peças não mudam mais o valor aprovado. */
