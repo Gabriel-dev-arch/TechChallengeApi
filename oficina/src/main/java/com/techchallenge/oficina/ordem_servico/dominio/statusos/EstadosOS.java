@@ -26,6 +26,7 @@ public class EstadosOS {
             case NEGADA         -> new AprovarOuNegar       (osCadastrada, repository, eventPublisher);
             case EM_EXECUCAO    -> new ExecutarServico      (osCadastrada, repository, eventPublisher);
             case FINALIZADA     -> new Finalizar            (osCadastrada, repository, eventPublisher);
+            case ENTREGUE       -> new EntregarVeiculo      (osCadastrada, repository, eventPublisher);
             default -> throw new IllegalStateException("Unexpected value: " + osCadastrada.getStatus());
         };
     }

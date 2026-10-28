@@ -103,7 +103,17 @@ public class CadastrarOSService {
     }
 
     @Transactional
-    public OrdemServicoResponse incluiServicosOS(UUID id, @Valid List<ServicosRequest> request) {
+    public OrdemServicoResponse entregaVeiculo(UUID id) {
+
+        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+
+        estadosOS.executa(osCadastrada);
+
+        return OrdemServicoResponse.from(osCadastrada, osCadastrada.getStatus());
+    }
+
+    @Transactional
+    public OrdemServicoResponse incluiServicosOS(UUID id, List<ServicosRequest> request) {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
@@ -121,11 +131,12 @@ public class CadastrarOSService {
     public OrdemServicoResponse cadastrarOrcamento(UUID id) {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-        return OrdemServicoResponse.from(osCadastrada);
+        osCadastrada.atualizaStatus(StatusOS.AGUARDANDO_APROVACAO);
+        return OrdemServicoResponse.from(repository.saveAndFlush(osCadastrada));
     }
 
     @Transactional
-    public OrdemServicoResponse incluiPecasInsumosOS(UUID id, @Valid List<ItemQuantidadeRequest> request) {
+    public OrdemServicoResponse incluiPecasInsumosOS(UUID id, List<ItemQuantidadeRequest> request) {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 

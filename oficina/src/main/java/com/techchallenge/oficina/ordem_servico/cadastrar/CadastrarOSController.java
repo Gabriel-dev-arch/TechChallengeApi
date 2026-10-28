@@ -7,6 +7,7 @@ import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResp
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -36,7 +37,7 @@ public class CadastrarOSController {
 
 	@PostMapping("/{id}/servicos")
 	@Operation(summary = "Inclui serviços a OS", description = "Inclui serviços a OS")
-	public ResponseEntity<OrdemServicoResponse> incluiServicoOS(@Valid @RequestBody List<ServicosRequest> request, @PathVariable("id") UUID id) {
+	public ResponseEntity<OrdemServicoResponse> incluiServicoOS(@NotEmpty @RequestBody List<ServicosRequest> request, @PathVariable("id") UUID id) {
 
 		OrdemServicoResponse servicoResponse = service.incluiServicosOS(id, request);
 		return ResponseEntity.ok(servicoResponse);
@@ -44,7 +45,7 @@ public class CadastrarOSController {
 
 	@PostMapping("/{id}/pecas")
 	@Operation(summary = "Inclui peças ou insumos a OS", description = "Inclui peças ou insumos a OS")
-	public ResponseEntity<OrdemServicoResponse> incluiPecasInsumosOS(@Valid @RequestBody List<ItemQuantidadeRequest> request,
+	public ResponseEntity<OrdemServicoResponse> incluiPecasInsumosOS(@NotEmpty @RequestBody List<ItemQuantidadeRequest> request,
 																 	@PathVariable("id") UUID id) {
 
 		OrdemServicoResponse servicoResponse = service.incluiPecasInsumosOS(id, request);
@@ -81,6 +82,14 @@ public class CadastrarOSController {
 	public ResponseEntity<OrdemServicoResponse> finalizaExecucao(@PathVariable("id") UUID id) {
 
 		var ordemServicoResponse = service.finalizaExecucao(id);
+		return ResponseEntity.ok(ordemServicoResponse);
+	}
+
+	@PostMapping("/{id}/entregar")
+	@Operation(summary = "Finaliza a exeecução do serviço", description = "Finaliza a exeecução do serviço")
+	public ResponseEntity<OrdemServicoResponse> entregarVeiculo(@PathVariable("id") UUID id) {
+
+		var ordemServicoResponse = service.entregaVeiculo(id);
 		return ResponseEntity.ok(ordemServicoResponse);
 	}
 }

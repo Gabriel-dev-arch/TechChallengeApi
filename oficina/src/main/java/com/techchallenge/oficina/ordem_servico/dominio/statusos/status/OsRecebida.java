@@ -20,7 +20,7 @@ public class OsRecebida extends AvancarStatusOSAbstract {
 
     @Override
     public void validarStatus(OrdemServico os) {
-        if(!StatusOS.EM_DIAGNOSTICO.equals(os.getStatus())){
+        if(!StatusOS.RECEBIDA.equals(os.getStatus())){
             throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status EM_DIAGNOSTICO.");
         }
     }
