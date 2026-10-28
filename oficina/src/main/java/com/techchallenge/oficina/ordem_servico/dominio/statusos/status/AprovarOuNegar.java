@@ -33,6 +33,7 @@ public class AprovarOuNegar extends AvancarStatusOSAbstract {
         if (StatusOS.NEGADA.equals(osCadastrada.getStatus())) {
             ordemServico = osCadastrada.atualizaStatus(StatusOS.FINALIZADA);
         }
+        osCadastrada.incluirDiagnostico();
         eventPublisher.publishEvent(OSCriadaEvent.builder().ordemServico(osCadastrada).build());
         return repository.saveAndFlush(ordemServico);
     }
