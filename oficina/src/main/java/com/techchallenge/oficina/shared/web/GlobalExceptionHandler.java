@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,6 +62,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(ServicoNaoEncontradoException.class)
 	ProblemDetail naoEncontrado(ServicoNaoEncontradoException ex) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	/** Lançada pelo ControleDeAcesso quando o recurso pertence a outro cliente (BOLA). */
+	@ExceptionHandler(AccessDeniedException.class)
+	ProblemDetail acessoNegado(AccessDeniedException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
 	}
 
 	@ExceptionHandler(CredenciaisInvalidasException.class)

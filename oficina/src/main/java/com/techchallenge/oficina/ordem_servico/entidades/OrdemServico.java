@@ -3,6 +3,8 @@ package com.techchallenge.oficina.ordem_servico.entidades;
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.OrcamentoFechadoException;
+import com.techchallenge.oficina.pecasinsumos.dominio.QuantidadeInvalidaException;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.entidades.Servico;
 import com.techchallenge.oficina.shared.persistence.BaseEntity;
@@ -30,6 +32,8 @@ import java.util.stream.Collectors;
 @Table(name = "ordem_servico")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrdemServico extends BaseEntity {
+
+    private static final Set<StatusOS> STATUS_COM_ORCAMENTO_ABERTO = EnumSet.of(StatusOS.RECEBIDA, StatusOS.EM_DIAGNOSTICO);
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "cliente_id", nullable = false)
@@ -92,6 +96,9 @@ public class OrdemServico extends BaseEntity {
     }
 
     public void incluirPecaInsumos(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens) {
+        exigirOrcamentoAberto();
+        // valida tudo antes de alterar a OS, para não deixar a inclusão pela metade
+        itens.forEach(item -> exigirQuantidadePositiva(item.quantidade()));
         Map<UUID, PecaInsumo> pecasPorId = pecasInsumos.stream()
                 .collect(Collectors.toMap(PecaInsumo::getId, Function.identity()));
 
@@ -112,8 +119,22 @@ public class OrdemServico extends BaseEntity {
     }
 
     public void incluirServicos(List<Servico> servicos) {
+        exigirOrcamentoAberto();
         this.servicos.addAll(servicos);
         this.realizaCalculoServicos(servicos);
+    }
+
+    /** Depois que o orçamento é enviado ao cliente, serviços e peças não mudam mais o valor aprovado. */
+    private void exigirOrcamentoAberto() {
+        if (!STATUS_COM_ORCAMENTO_ABERTO.contains(this.status)) {
+            throw new OrcamentoFechadoException(getId(), this.status);
+        }
+    }
+
+    private static void exigirQuantidadePositiva(BigDecimal quantidade) {
+        if (quantidade == null || quantidade.signum() <= 0) {
+            throw new QuantidadeInvalidaException("a quantidade deve ser maior que zero");
+        }
     }
 
     private void realizaCalculoItensInsumosOrcamento(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens) {

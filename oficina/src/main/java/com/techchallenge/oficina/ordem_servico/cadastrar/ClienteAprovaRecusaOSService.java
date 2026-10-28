@@ -1,5 +1,6 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
+import com.techchallenge.oficina.autenticacao.dominio.ControleDeAcesso;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
@@ -8,26 +9,29 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+/** Rotas do cliente: o CLIENTE só aprova ou recusa OS do próprio documento. */
 @Service
 public class ClienteAprovaRecusaOSService {
 
     private final OrdemServicoRepository repository;
+    private final ControleDeAcesso controleDeAcesso;
 
-    public ClienteAprovaRecusaOSService(OrdemServicoRepository repository) {
+    public ClienteAprovaRecusaOSService(OrdemServicoRepository repository, ControleDeAcesso controleDeAcesso) {
         this.repository = repository;
+        this.controleDeAcesso = controleDeAcesso;
     }
 
     public void aprovaOS(UUID id) {
-
-        OrdemServico os = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id))
-                .atualizaStatus(StatusOS.APROVADA);
-        repository.saveAndFlush(os);
+        atualizaStatus(id, StatusOS.APROVADA);
     }
 
     public void recusaOS(UUID id) {
+        atualizaStatus(id, StatusOS.NEGADA);
+    }
 
-        OrdemServico os = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id))
-                .atualizaStatus(StatusOS.NEGADA);
-        repository.saveAndFlush(os);
+    private void atualizaStatus(UUID id, StatusOS status) {
+        OrdemServico os = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+        controleDeAcesso.verificarDono(os.getCliente().getDocumento());
+        repository.saveAndFlush(os.atualizaStatus(status));
     }
 }
