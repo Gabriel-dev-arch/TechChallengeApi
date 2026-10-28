@@ -7,6 +7,7 @@ import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResp
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -36,27 +37,24 @@ public class CadastrarOSController {
 
 	@PostMapping("/{id}/servicos")
 	@Operation(summary = "Inclui serviços a OS", description = "Inclui serviços a OS")
-	public ResponseEntity<OrdemServicoResponse> incluiServicoOS(@Valid @RequestBody List<ServicosRequest> request, @PathVariable("id") UUID id) {
+	public ResponseEntity<OrdemServicoResponse> incluiServicoOS(@NotEmpty @RequestBody List<ServicosRequest> request, @PathVariable("id") UUID id) {
 
-		OrdemServicoResponse servicoResponse = service.incluiServicosOS(id, request);
-		return ResponseEntity.ok(servicoResponse);
+		return ResponseEntity.ok(service.incluiServicosOS(id, request));
 	}
 
 	@PostMapping("/{id}/pecas")
 	@Operation(summary = "Inclui peças ou insumos a OS", description = "Inclui peças ou insumos a OS")
-	public ResponseEntity<OrdemServicoResponse> incluiPecasInsumosOS(@Valid @RequestBody List<ItemQuantidadeRequest> request,
+	public ResponseEntity<OrdemServicoResponse> incluiPecasInsumosOS(@NotEmpty @RequestBody List<ItemQuantidadeRequest> request,
 																 	@PathVariable("id") UUID id) {
 
-		OrdemServicoResponse servicoResponse = service.incluiPecasInsumosOS(id, request);
-		return ResponseEntity.ok(servicoResponse);
+		return ResponseEntity.ok(service.incluiPecasInsumosOS(id, request));
 	}
 
 	@PostMapping("/{id}/iniciar-diagnostico")
 	@Operation(summary = "Inicia diagnóstico do veículo", description = "Inicia diagnóstico do veículo")
 	public ResponseEntity<OrdemServicoResponse> iniciaDiagnostico(@PathVariable("id") UUID id) {
 
-		var ordemServicoResponse = service.iniciaDiagnostico(id);
-		return ResponseEntity.ok(ordemServicoResponse);
+		return ResponseEntity.ok(service.iniciaDiagnostico(id));
 	}
 
 
@@ -64,24 +62,27 @@ public class CadastrarOSController {
 	@Operation(summary = "Realiza o orçamento", description = "Realiza o orçamento")
 	public ResponseEntity<OrdemServicoResponse> iniciaOrcamento(@PathVariable("id") UUID id) {
 
-		var ordemServicoResponse = service.cadastrarOrcamento(id);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(id);
-		return ResponseEntity.ok(ordemServicoResponse);
+		return ResponseEntity.ok(service.cadastrarOrcamento(id));
 	}
 
 	@PostMapping("/{id}/iniciar-execucao")
 	@Operation(summary = "Realiza a exeecução do serviço", description = "Realiza a exeecução do serviço")
 	public ResponseEntity<OrdemServicoResponse> iniciaExecucao(@PathVariable("id") UUID id) {
 
-		var ordemServicoResponse = service.iniciaExecucao(id);
-		return ResponseEntity.ok(ordemServicoResponse);
+		return ResponseEntity.ok(service.iniciaExecucao(id));
 	}
 
 	@PostMapping("/{id}/finalizar")
 	@Operation(summary = "Finaliza a exeecução do serviço", description = "Finaliza a exeecução do serviço")
 	public ResponseEntity<OrdemServicoResponse> finalizaExecucao(@PathVariable("id") UUID id) {
 
-		var ordemServicoResponse = service.finalizaExecucao(id);
-		return ResponseEntity.ok(ordemServicoResponse);
+		return ResponseEntity.ok(service.finalizaExecucao(id));
+	}
+
+	@PostMapping("/{id}/entregar")
+	@Operation(summary = "Finaliza a exeecução do serviço", description = "Finaliza a exeecução do serviço")
+	public ResponseEntity<OrdemServicoResponse> entregarVeiculo(@PathVariable("id") UUID id) {
+
+		return ResponseEntity.ok(service.entregaVeiculo(id));
 	}
 }

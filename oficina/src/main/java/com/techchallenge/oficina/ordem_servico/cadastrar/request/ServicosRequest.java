@@ -6,7 +6,5 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record ServicosRequest(
-        @NotNull UUID id,
-        String descricao,
-        BigDecimal valor ){
+        @NotNull UUID id ){
 }

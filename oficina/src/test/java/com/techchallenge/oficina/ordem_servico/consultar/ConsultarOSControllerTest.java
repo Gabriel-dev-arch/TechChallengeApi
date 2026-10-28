@@ -86,6 +86,8 @@ class ConsultarOSControllerTest {
 
         mockMvc.perform(get("/ordens-servico").param("status", "recebida"))
                 .andExpect(status().isOk());
+
+        verify(service).listarOrdemServicoEmAberto(eq(StatusOS.RECEBIDA), any(Pageable.class));
     }
 
     @Test

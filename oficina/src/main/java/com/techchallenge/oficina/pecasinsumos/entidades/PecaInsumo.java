@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Locale;
@@ -17,6 +18,7 @@ import java.util.Objects;
 @Getter
 @Entity
 @Table(name = "pecas_insumos")
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PecaInsumo extends BaseEntity {
 

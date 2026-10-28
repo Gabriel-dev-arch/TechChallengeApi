@@ -1,28 +1,32 @@
 package com.techchallenge.oficina.ordem_servico.dominio.statusos.status;
 
+import com.techchallenge.oficina.ordem_servico.cadastrar.eventos.OSCriadaEvent;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
-import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatus;
+import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatusOSAbstract;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
+import org.springframework.context.ApplicationEventPublisher;
 
-public class AguardandoAprovacao implements AvancarStatus {
+public class AguardandoAprovacao extends AvancarStatusOSAbstract {
 
-    private final OrdemServicoRepository repository;
+    public AguardandoAprovacao(OrdemServico os, OrdemServicoRepository repository,
+                               ApplicationEventPublisher eventPublisher) {
 
-    public AguardandoAprovacao(OrdemServico os, OrdemServicoRepository repository) {
-        this.repository = repository;
-        avancar(os);
+        super(os, repository, eventPublisher);
     }
-
-    public OrdemServico avancar(OrdemServico osCadastrada) {
-
-        if(!StatusOS.EM_DIAGNOSTICO.equals(osCadastrada.getStatus())){
-            throw new TransicaoInvalidaException("Status inválido. A ordem de serviço deve estar com status EM_DIAGNOSTICO.");
-        }
+    @Override
+    public OrdemServico avancar(OrdemServico osCadastrada, OrdemServicoRepository repository, ApplicationEventPublisher eventPublisher) {
 
         OrdemServico ordemServico = osCadastrada.atualizaStatus(StatusOS.AGUARDANDO_APROVACAO);
-
+        eventPublisher.publishEvent(OSCriadaEvent.builder().ordemServico(osCadastrada).build());
         return repository.saveAndFlush(ordemServico);
+    }
+
+    @Override
+    public void validarStatus(OrdemServico osCadastradas) {
+        if(!StatusOS.EM_DIAGNOSTICO.equals(osCadastradas.getStatus())){
+            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status AGUARDANDO_APROVACAO.");
+        }
     }
 }

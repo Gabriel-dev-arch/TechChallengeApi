@@ -166,7 +166,7 @@ public class OrdemServico extends BaseEntity {
                 .map(item -> {
                     return pecasPorId.get(item.itens()).getPrecoUnitario().multiply(item.quantidade());
                 })
-                .reduce(BigDecimal.ZERO, BigDecimal::add).add(this.getOrcamento());
+                .reduce(BigDecimal.ZERO, BigDecimal::add).add(this.getOrcamento() == null ? BigDecimal.ZERO : this.getOrcamento());
 
         this.orcamento = valorTotalPecasInsumos;
     }

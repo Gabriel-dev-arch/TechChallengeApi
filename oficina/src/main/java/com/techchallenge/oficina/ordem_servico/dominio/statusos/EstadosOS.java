@@ -1,31 +1,33 @@
 package com.techchallenge.oficina.ordem_servico.dominio.statusos;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
-import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.status.*;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EstadosOS {
 
     private final OrdemServicoRepository repository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    private EstadosOS(OrdemServicoRepository repository) {
+    public EstadosOS(OrdemServicoRepository repository, ApplicationEventPublisher eventPublisher) {
         this.repository = repository;
+        this.eventPublisher = eventPublisher;
     }
 
-    public AvancarStatus executa(OrdemServico osCadastrada) {
+    public AvancarStatusOSAbstract executa(OrdemServico osCadastrada) {
 
         return switch (osCadastrada.getStatus()) {
-            case RECEBIDA       -> new EmDiagnostico(osCadastrada, repository);
-            case EM_DIAGNOSTICO -> new AguardandoAprovacao(osCadastrada, repository);
-            case APROVADA       -> new AprovarOuNegar(osCadastrada, repository);
-            case NEGADA         -> new AprovarOuNegar(osCadastrada, repository);
-            case EM_EXECUCAO    -> new EmExecucao(osCadastrada, repository);
-            case FINALIZADA     -> new Finalizar(osCadastrada, repository);
-            default -> throw new TransicaoInvalidaException("A ordem de serviço com status "
-                    + osCadastrada.getStatus() + " não tem uma próxima etapa a executar");
+            case RECEBIDA       -> new IniciaDiagnostico    (osCadastrada, repository, eventPublisher);
+            case EM_DIAGNOSTICO -> new AguardandoAprovacao  (osCadastrada, repository, eventPublisher);
+            case APROVADA       -> new AprovarOuNegar       (osCadastrada, repository, eventPublisher);
+            case NEGADA         -> new AprovarOuNegar       (osCadastrada, repository, eventPublisher);
+            case EM_EXECUCAO    -> new ExecutarServico      (osCadastrada, repository, eventPublisher);
+            case FINALIZADA     -> new Finalizar            (osCadastrada, repository, eventPublisher);
+            case ENTREGUE       -> new EntregarVeiculo      (osCadastrada, repository, eventPublisher);
+            default -> throw new IllegalStateException("Unexpected value: " + osCadastrada.getStatus());
         };
     }
 }
