@@ -19,7 +19,7 @@ public class ExecutarServico extends AvancarStatusOSAbstract {
     @Override
     public void validarStatus(OrdemServico os) {
         if(!StatusOS.EM_EXECUCAO.equals(os.getStatus())){
-            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status RECEBIDA.");
+            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status Aprovada.");
         }
     }
 

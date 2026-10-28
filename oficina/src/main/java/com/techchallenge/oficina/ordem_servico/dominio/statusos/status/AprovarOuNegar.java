@@ -19,7 +19,7 @@ public class AprovarOuNegar extends AvancarStatusOSAbstract {
     @Override
     public void validarStatus(OrdemServico os) {
         if(!StatusOS.APROVADA.equals(os.getStatus()) && !StatusOS.NEGADA.equals(os.getStatus())){
-            throw new RuntimeException("Status inválido.");
+            throw new RuntimeException(" A ordem de serviço deve estar com status aguardando aprovação.");
         }
     }
 

@@ -19,7 +19,7 @@ public class Aprovada extends AvancarStatusOSAbstract {
     @Override
     public void validarStatus(OrdemServico os) {
         if(!StatusOS.APROVADA.equals(os.getStatus())){
-            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status EM_DIAGNOSTICO.");
+            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status aguardando aprovação.");
         }
     }
 

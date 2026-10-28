@@ -20,7 +20,7 @@ public class Finalizar extends AvancarStatusOSAbstract {
     @Override
     public void validarStatus(OrdemServico os) {
         if(!StatusOS.FINALIZADA.equals(os.getStatus())){
-            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status RECEBIDA.");
+            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status FINALIZADA.");
         }
     }
 

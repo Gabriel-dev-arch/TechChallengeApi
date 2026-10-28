@@ -23,7 +23,7 @@ public class EntregarVeiculo extends AvancarStatusOSAbstract {
 
     public void validarStatus(OrdemServico os) {
         if(!StatusOS.ENTREGUE.equals(os.getStatus())){
-            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status RECEBIDA.");
+            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status FINALIZADA.");
         }
     }
 
