@@ -1,5 +1,6 @@
 package com.techchallenge.oficina.ordem_servico.consultar;
 
+import com.techchallenge.oficina.autenticacao.dominio.ControleDeAcesso;
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -30,6 +32,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +44,9 @@ class ConsultarOSServiceTest {
 
     @Mock
     private OrdemServicoRepository repository;
+
+    @Mock
+    private ControleDeAcesso controleDeAcesso;
 
     @InjectMocks
     private ConsultarOSService service;
@@ -80,6 +86,17 @@ class ConsultarOSServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.diagnostico()).isEqualTo("Ruído no motor");
         verify(repository).findById(ID);
+        verify(controleDeAcesso).verificarDono("12345678901");
+    }
+
+    @Test
+    @DisplayName("Não deve devolver a OS de outro cliente")
+    void naoDeveConsultarOSDeOutroCliente() {
+        when(repository.findById(ID)).thenReturn(Optional.of(criarOrdem()));
+        doThrow(new AccessDeniedException("Acesso negado")).when(controleDeAcesso).verificarDono("12345678901");
+
+        assertThatThrownBy(() -> service.consultarStatusOS(ID))
+                .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test

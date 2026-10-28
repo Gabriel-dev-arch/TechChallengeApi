@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.ordem_servico.cadastrar;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
+import com.techchallenge.oficina.funcionario.dominio.FuncionarioNaoEncontradoException;
 import com.techchallenge.oficina.funcionario.dominio.FuncionarioRepository;
 import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.CadastrarOSRequest;
@@ -114,7 +115,7 @@ class CadastrarOSServiceTest {
 
         when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
         when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(veiculo));
-        when(funcionarioRepository.getReferenceById(FUNCIONARIO_ID)).thenReturn(funcionario);
+        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.of(funcionario));
         when(repository.save(any(OrdemServico.class))).thenAnswer(i -> i.getArgument(0));
 
         OrdemServicoResponse response = service.cadastrar(request);
@@ -236,6 +237,38 @@ class CadastrarOSServiceTest {
         assertThat(response).isNotNull();
         verify(pecaInsumoRepository).findAllById(List.of(pecaId));
         verify(repository).save(os);
+    }
+
+    @Test
+    @DisplayName("Deve normalizar a placa (minúsculas e hífen) antes de buscar o veículo")
+    void deveNormalizarPlacaNaAbertura() {
+        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), null, " abc-1234 ",
+                new FuncionarioRequest(FUNCIONARIO_ID));
+        Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
+        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
+        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente)));
+        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.of(criarFuncionario()));
+        when(repository.save(any(OrdemServico.class))).thenAnswer(i -> i.getArgument(0));
+
+        OrdemServicoResponse response = service.cadastrar(request);
+
+        assertThat(response.veiculo().placa()).isEqualTo(PLACA);
+    }
+
+    @Test
+    @DisplayName("Deve lançar FuncionarioNaoEncontradoException quando o funcionário não existe")
+    void deveLancarExcecaoQuandoFuncionarioNaoExiste() {
+        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), null, PLACA,
+                new FuncionarioRequest(FUNCIONARIO_ID));
+        Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
+        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
+        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente)));
+        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.cadastrar(request))
+                .isInstanceOf(FuncionarioNaoEncontradoException.class);
+
+        verify(repository, never()).save(any(OrdemServico.class));
     }
 
     private OrdemServico criarOS(StatusOS status) {

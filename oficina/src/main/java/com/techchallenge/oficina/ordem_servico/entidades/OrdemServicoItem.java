@@ -20,7 +20,8 @@ public class OrdemServicoItem {
     @JoinColumn(name = "itens_id", nullable = false)
     private PecaInsumo item;
 
-    @Column(name = "quantidade", nullable = false, precision = 38, scale = 2)
+    // mesma escala do estoque (numeric(12,3)): a reserva e a baixa usam exatamente a quantidade gravada aqui
+    @Column(name = "quantidade", nullable = false, precision = 12, scale = 3)
     private BigDecimal quantidade;
 
     public OrdemServicoItem(PecaInsumo item, BigDecimal quantidade) {
