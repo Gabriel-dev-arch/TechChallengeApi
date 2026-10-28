@@ -1,8 +1,6 @@
 package com.techchallenge.oficina.shared.web;
 
 import com.techchallenge.oficina.autenticacao.login.CredenciaisInvalidasException;
-import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoEmAbertoException;
-import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
 import com.techchallenge.oficina.servicos.dominio.ServicoNaoEncontradoException;
 import com.techchallenge.oficina.shared.excecoes.ConflitoException;
 import com.techchallenge.oficina.shared.excecoes.RecursoNaoEncontradoException;
@@ -11,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -63,19 +62,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
+	/** Lançada pelo ControleDeAcesso quando o recurso pertence a outro cliente (BOLA). */
+	@ExceptionHandler(AccessDeniedException.class)
+	ProblemDetail acessoNegado(AccessDeniedException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+	}
+
 	@ExceptionHandler(CredenciaisInvalidasException.class)
 	ProblemDetail credenciaisInvalidas(CredenciaisInvalidasException ex) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-	}
-
-	@ExceptionHandler(OrdemServicoEmAbertoException.class)
-	ProblemDetail ordemDeServicosEmAberto(OrdemServicoEmAbertoException ex) {
-		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-	}
-
-	@ExceptionHandler(OrdemServicoNaoEncontradaException.class)
-	ProblemDetail ordemDeServicosNaoEncontrada(OrdemServicoNaoEncontradaException ex) {
-		return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
 

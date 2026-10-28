@@ -31,7 +31,7 @@ public class ConsultarOSController {
 												   @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
 												   @RequestParam(required = true) String status) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt"));
-		return new PagedModel<>(service.listarOrdemServicoEmAberto(StatusOS.valueOf(status), pageable));
+		return new PagedModel<>(service.listarOrdemServicoEmAberto(StatusOS.de(status), pageable));
 	}
 
 	@GetMapping("/{id}")

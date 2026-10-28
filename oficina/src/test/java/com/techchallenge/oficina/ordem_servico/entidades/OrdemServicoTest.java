@@ -2,6 +2,11 @@ package com.techchallenge.oficina.ordem_servico.entidades;
 
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.OrcamentoFechadoException;
+import com.techchallenge.oficina.pecasinsumos.dominio.EstoqueInsuficienteException;
+import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoInativoException;
+import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoNaoEncontradoException;
+import com.techchallenge.oficina.pecasinsumos.dominio.QuantidadeInvalidaException;
 import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
 import com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
@@ -10,6 +15,10 @@ import com.techchallenge.oficina.shared.persistence.BaseEntity;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrdemServicoTest {
 
@@ -136,5 +146,155 @@ class OrdemServicoTest {
 
         item.adicionarQuantidade(BigDecimal.valueOf(2));
         assertThat(item.getQuantidade()).isEqualByComparingTo(BigDecimal.valueOf(5));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = StatusOS.class, names = {"RECEBIDA", "EM_DIAGNOSTICO"})
+    @DisplayName("Deve aceitar serviços e peças enquanto o orçamento está aberto")
+    void deveAceitarItensComOrcamentoAberto(StatusOS status) {
+        OrdemServico os = criarOS(status);
+        PecaInsumo peca = criarPeca();
+
+        os.incluirServicos(List.of(new Servico("Alinhamento", BigDecimal.valueOf(80))));
+        os.incluirPecaInsumos(List.of(peca), List.of(new ItemQuantidade(peca.getId(), BigDecimal.ONE)));
+
+        assertThat(os.getOrcamento()).isEqualByComparingTo(BigDecimal.valueOf(105));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = StatusOS.class, names = {"RECEBIDA", "EM_DIAGNOSTICO"}, mode = EnumSource.Mode.EXCLUDE)
+    @DisplayName("Não deve alterar serviços nem peças depois que o orçamento foi enviado ao cliente")
+    void naoDeveAlterarOrcamentoFechado(StatusOS status) {
+        OrdemServico os = criarOS(status);
+        PecaInsumo peca = criarPeca();
+        List<Servico> servicos = List.of(new Servico("Alinhamento", BigDecimal.valueOf(80)));
+        List<ItemQuantidade> itens = List.of(new ItemQuantidade(peca.getId(), BigDecimal.ONE));
+
+        assertThatThrownBy(() -> os.incluirServicos(servicos)).isInstanceOf(OrcamentoFechadoException.class);
+        assertThatThrownBy(() -> os.incluirPecaInsumos(List.of(peca), itens)).isInstanceOf(OrcamentoFechadoException.class);
+
+        assertThat(os.getServicos()).isEmpty();
+        assertThat(os.getItensQuantidade()).isEmpty();
+        assertThat(os.getOrcamento()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"0", "-3", "-0.5"})
+    @DisplayName("Deve rejeitar quantidade nula, zero ou negativa sem alterar a OS")
+    void deveRejeitarQuantidadeInvalida(BigDecimal quantidade) {
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        PecaInsumo peca = criarPeca();
+        List<ItemQuantidade> itens = List.of(
+                new ItemQuantidade(peca.getId(), BigDecimal.ONE),
+                new ItemQuantidade(peca.getId(), quantidade));
+
+        assertThatThrownBy(() -> os.incluirPecaInsumos(List.of(peca), itens))
+                .isInstanceOf(QuantidadeInvalidaException.class);
+
+        assertThat(os.getItensQuantidade()).isEmpty();
+        assertThat(os.getOrcamento()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    @DisplayName("Incluir peça reserva a quantidade no estoque")
+    void deveReservarEstoqueAoIncluirPeca() {
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        PecaInsumo peca = criarPeca();
+
+        os.incluirPecaInsumos(List.of(peca), List.of(new ItemQuantidade(peca.getId(), BigDecimal.valueOf(3))));
+
+        assertThat(peca.getQuantidadeReservada()).isEqualByComparingTo("3");
+        assertThat(peca.getQuantidadeDisponivel()).isEqualByComparingTo("7");
+    }
+
+    @Test
+    @DisplayName("Peça inexistente na inclusão devolve PecaInsumoNaoEncontradoException")
+    void deveRejeitarPecaInexistente() {
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        PecaInsumo peca = criarPeca();
+        List<ItemQuantidade> itens = List.of(
+                new ItemQuantidade(peca.getId(), BigDecimal.ONE),
+                new ItemQuantidade(UUID.randomUUID(), BigDecimal.ONE));
+
+        assertThatThrownBy(() -> os.incluirPecaInsumos(List.of(peca), itens))
+                .isInstanceOf(PecaInsumoNaoEncontradoException.class);
+
+        assertThat(os.getItensQuantidade()).isEmpty();
+        assertThat(peca.getQuantidadeReservada()).isZero();
+    }
+
+    @Test
+    @DisplayName("Não deve incluir quantidade acima do disponível no estoque")
+    void deveRejeitarQuantidadeAcimaDoEstoque() {
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        PecaInsumo peca = criarPeca();
+        List<ItemQuantidade> itens = List.of(new ItemQuantidade(peca.getId(), BigDecimal.valueOf(11)));
+
+        assertThatThrownBy(() -> os.incluirPecaInsumos(List.of(peca), itens))
+                .isInstanceOf(EstoqueInsuficienteException.class);
+    }
+
+    @Test
+    @DisplayName("Não deve incluir peça removida (inativa)")
+    void deveRejeitarPecaInativa() {
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        PecaInsumo peca = criarPeca();
+        peca.desativar();
+        List<ItemQuantidade> itens = List.of(new ItemQuantidade(peca.getId(), BigDecimal.ONE));
+
+        assertThatThrownBy(() -> os.incluirPecaInsumos(List.of(peca), itens))
+                .isInstanceOf(PecaInsumoInativoException.class);
+    }
+
+    @Test
+    @DisplayName("Não deve incluir quantidade fracionada de peça vendida por unidade")
+    void deveRejeitarQuantidadeFracionadaEmUnidade() {
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        PecaInsumo peca = criarPeca();
+        List<ItemQuantidade> itens = List.of(new ItemQuantidade(peca.getId(), new BigDecimal("1.5")));
+
+        assertThatThrownBy(() -> os.incluirPecaInsumos(List.of(peca), itens))
+                .isInstanceOf(QuantidadeInvalidaException.class);
+    }
+
+    @Test
+    @DisplayName("Liberar reservas devolve ao estoque o que estava reservado para a OS")
+    void deveLiberarReservas() {
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        PecaInsumo peca = criarPeca();
+        os.incluirPecaInsumos(List.of(peca), List.of(new ItemQuantidade(peca.getId(), BigDecimal.valueOf(3))));
+
+        os.liberarReservas();
+
+        assertThat(peca.getQuantidadeReservada()).isZero();
+        assertThat(peca.getQuantidadeTotal()).isEqualByComparingTo("10");
+    }
+
+    @Test
+    @DisplayName("Consumir reservas dá baixa no estoque das peças da OS")
+    void deveConsumirReservas() {
+        OrdemServico os = criarOS(StatusOS.RECEBIDA);
+        PecaInsumo peca = criarPeca();
+        os.incluirPecaInsumos(List.of(peca), List.of(new ItemQuantidade(peca.getId(), BigDecimal.valueOf(3))));
+
+        os.consumirReservas();
+
+        assertThat(peca.getQuantidadeReservada()).isZero();
+        assertThat(peca.getQuantidadeTotal()).isEqualByComparingTo("7");
+    }
+
+    private OrdemServico criarOS(StatusOS status) {
+        Cliente cliente = new Cliente("João", "Silva", "joao@email.com", "12345678901", "11999999999");
+        Veiculo veiculo = new Veiculo("ABC1234", "Fiat", "Uno", 2020, cliente);
+        return new OrdemServico(status, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                null, veiculo, cliente, null);
+    }
+
+    private PecaInsumo criarPeca() {
+        PecaInsumo peca = new PecaInsumo(TipoItem.PECA, "VELA", "Vela", "Vela de ignição",
+                UnidadeMedida.UN, BigDecimal.valueOf(25), BigDecimal.TEN);
+        setId(peca, UUID.randomUUID());
+        return peca;
     }
 }

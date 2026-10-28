@@ -25,6 +25,9 @@ public class SecurityConfig {
 	private static final String[] ROTAS_PUBLICAS = {
 			"/autenticacao/login", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/error"};
 
+	/** Rotas do cliente: o service confere o dono do recurso com ControleDeAcesso.verificarDono. */
+	private static final String[] ROTAS_CLIENTE = {"/public/os/**"};
+
 	private final SecretKey chave;
 
 	SecurityConfig(@Value("${seguranca.jwt.secret}") String secret) {
@@ -42,7 +45,7 @@ public class SecurityConfig {
 				.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(a -> a
 						.requestMatchers(ROTAS_PUBLICAS).permitAll()
-						// rotas do cliente: hasAnyRole("ADMIN", "CLIENTE") aqui + ControleDeAcesso.verificarDono no service
+						.requestMatchers(ROTAS_CLIENTE).hasAnyRole(Perfil.ADMIN.name(), Perfil.CLIENTE.name())
 						.anyRequest().hasRole(Perfil.ADMIN.name()))
 				.oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(conversorDePerfis())))
 				.build();

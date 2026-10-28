@@ -3,6 +3,9 @@ package com.techchallenge.oficina.ordem_servico.entidades;
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.funcionario.entidades.Funcionario;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.OrcamentoFechadoException;
+import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoNaoEncontradoException;
+import com.techchallenge.oficina.pecasinsumos.dominio.QuantidadeInvalidaException;
 import com.techchallenge.oficina.pecasinsumos.entidades.PecaInsumo;
 import com.techchallenge.oficina.servicos.entidades.Servico;
 import com.techchallenge.oficina.shared.persistence.BaseEntity;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
 @Table(name = "ordem_servico")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrdemServico extends BaseEntity {
+
+    private static final Set<StatusOS> STATUS_COM_ORCAMENTO_ABERTO = EnumSet.of(StatusOS.RECEBIDA, StatusOS.EM_DIAGNOSTICO);
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "cliente_id", nullable = false)
@@ -92,12 +97,21 @@ public class OrdemServico extends BaseEntity {
     }
 
     public void incluirPecaInsumos(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens) {
+        exigirOrcamentoAberto();
         Map<UUID, PecaInsumo> pecasPorId = pecasInsumos.stream()
                 .collect(Collectors.toMap(PecaInsumo::getId, Function.identity()));
+        // valida tudo antes de alterar a OS, para não deixar a inclusão pela metade
+        for (ItemQuantidade item : itens) {
+            exigirQuantidadePositiva(item.quantidade());
+            if (!pecasPorId.containsKey(item.itens())) {
+                throw new PecaInsumoNaoEncontradoException(item.itens());
+            }
+        }
 
         for (ItemQuantidade itemQuantidade : itens) {
-            PecaInsumo peca = Objects.requireNonNull(pecasPorId.get(itemQuantidade.itens()),
-                    "Peça ou insumo não encontrado: " + itemQuantidade.itens());
+            PecaInsumo peca = pecasPorId.get(itemQuantidade.itens());
+            // a reserva confere se o item está ativo, se há saldo disponível e se a unidade aceita a quantidade
+            peca.reservar(itemQuantidade.quantidade());
             OrdemServicoItem itemExistente = this.itensQuantidade.stream()
                     .filter(item -> item.getItem().getId().equals(itemQuantidade.itens()))
                     .findFirst()
@@ -112,8 +126,32 @@ public class OrdemServico extends BaseEntity {
     }
 
     public void incluirServicos(List<Servico> servicos) {
+        exigirOrcamentoAberto();
         this.servicos.addAll(servicos);
         this.realizaCalculoServicos(servicos);
+    }
+
+    /** Orçamento recusado: as peças reservadas para a OS voltam a ficar disponíveis no estoque. */
+    public void liberarReservas() {
+        this.itensQuantidade.forEach(item -> item.getItem().liberar(item.getQuantidade()));
+    }
+
+    /** Serviço executado: as peças reservadas para a OS saem do estoque. */
+    public void consumirReservas() {
+        this.itensQuantidade.forEach(item -> item.getItem().consumir(item.getQuantidade()));
+    }
+
+    /** Depois que o orçamento é enviado ao cliente, serviços e peças não mudam mais o valor aprovado. */
+    private void exigirOrcamentoAberto() {
+        if (!STATUS_COM_ORCAMENTO_ABERTO.contains(this.status)) {
+            throw new OrcamentoFechadoException(getId(), this.status);
+        }
+    }
+
+    private static void exigirQuantidadePositiva(BigDecimal quantidade) {
+        if (quantidade == null || quantidade.signum() <= 0) {
+            throw new QuantidadeInvalidaException("a quantidade deve ser maior que zero");
+        }
     }
 
     private void realizaCalculoItensInsumosOrcamento(List<PecaInsumo> pecasInsumos, List<ItemQuantidade> itens) {

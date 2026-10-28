@@ -51,6 +51,12 @@ class ConsultarServicoControllerTest {
     }
 
     @Test
+    void deveRejeitarIdQueNaoEUuid() throws Exception {
+        mockMvc.perform(get("/servicos/{id}", "abc"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void deveListarTodosOsServicos() throws Exception {
         when(service.listarTodos()).thenReturn(List.of(
                 new ServicoResponse(ID, "Revisão geral", new BigDecimal("250.00")),
