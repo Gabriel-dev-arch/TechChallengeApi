@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 public class SecurityConfig {
 
 	private static final String[] ROTAS_PUBLICAS = {
-			"/autenticacao/login", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/error"};
+			"/autenticacao/login", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/error", "/actuator/prometheus", "/actuator/health", "/actuator/info"};
 
 	/** Rotas do cliente: o service confere o dono do recurso com ControleDeAcesso.verificarDono. */
 	private static final String[] ROTAS_CLIENTE = {"/public/os/**"};
