@@ -24,10 +24,8 @@ class RequestsTest {
     @DisplayName("Testa criação de ServicosRequest")
     void testServicosRequest() {
         UUID id = UUID.randomUUID();
-        ServicosRequest req = new ServicosRequest(id, "Troca de filtro", BigDecimal.valueOf(45));
+        ServicosRequest req = new ServicosRequest(id);
 
         assertThat(req.id()).isEqualTo(id);
-        assertThat(req.descricao()).isEqualTo("Troca de filtro");
-        assertThat(req.valor()).isEqualTo(BigDecimal.valueOf(45));
     }
 }

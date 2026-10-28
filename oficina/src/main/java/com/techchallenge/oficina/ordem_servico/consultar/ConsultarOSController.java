@@ -31,7 +31,7 @@ public class ConsultarOSController {
 	public PagedModel<OrdemServicoResponse> listar(@RequestParam(defaultValue = "0") @Min(0) int page,
 												   @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
 												   @RequestParam(required = true) String status) {
-		return new PagedModel<>(service.listarOrdemServicoEmAberto(StatusOS.valueOf(status), PageRequest.of(page, size, Sort.by("createdAt"))));
+		return new PagedModel<>(service.listarOrdemServicoEmAberto(StatusOS.de(status), PageRequest.of(page, size, Sort.by("createdAt"))));
 	}
 
 	@GetMapping("/{id}")
