@@ -21,6 +21,8 @@ import com.techchallenge.oficina.servicos.entidades.Servico;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +48,7 @@ public class CadastrarOSService {
         this.pecaInsumoRepository = pecaInsumoRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.estadosOS = estadosOS;
-    }
+        }
 
     @Transactional
     public OrdemServicoResponse cadastrar(CadastrarOSRequest request) {
@@ -119,9 +121,6 @@ public class CadastrarOSService {
     public OrdemServicoResponse cadastrarOrcamento(UUID id) {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-
-        estadosOS.executa(osCadastrada);
-
         return OrdemServicoResponse.from(osCadastrada);
     }
 

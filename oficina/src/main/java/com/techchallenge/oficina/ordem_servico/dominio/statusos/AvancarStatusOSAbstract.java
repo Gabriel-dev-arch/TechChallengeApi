@@ -2,12 +2,15 @@ package com.techchallenge.oficina.ordem_servico.dominio.statusos;
 
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
+import org.springframework.context.ApplicationEventPublisher;
 
 public abstract class AvancarStatusOSAbstract {
 
-    public AvancarStatusOSAbstract(OrdemServico os,OrdemServicoRepository repository){
-        avancar(os, repository);
+    protected AvancarStatusOSAbstract(OrdemServico os, OrdemServicoRepository repository, ApplicationEventPublisher eventPublisher){
+        validarStatus(os);
+        avancar(os, repository, eventPublisher);
     }
 
-    public abstract OrdemServico avancar(OrdemServico os, OrdemServicoRepository repository);
+    public abstract void validarStatus(OrdemServico os);
+    public abstract OrdemServico avancar(OrdemServico os, OrdemServicoRepository repository, ApplicationEventPublisher eventPublisher);
 }
