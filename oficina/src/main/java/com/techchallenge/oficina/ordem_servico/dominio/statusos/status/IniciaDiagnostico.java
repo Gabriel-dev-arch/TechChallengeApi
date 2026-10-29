@@ -9,7 +9,8 @@ import org.springframework.context.ApplicationEventPublisher;
 
 public class IniciaDiagnostico extends AvancarStatusOSAbstract {
 
-    public IniciaDiagnostico(OrdemServico os, OrdemServicoRepository repository,
+    public IniciaDiagnostico(OrdemServico os,
+                             OrdemServicoRepository repository,
                              ApplicationEventPublisher eventPublisher) {
 
         super(os, repository, eventPublisher);
@@ -21,9 +22,9 @@ public class IniciaDiagnostico extends AvancarStatusOSAbstract {
         return repository.save(ordemServico);
     }
 
-    public void validarStatus(OrdemServico os) {
-        if(!StatusOS.RECEBIDA.equals(os.getStatus())){
-            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status RECEBIDA.");
+    public void validarStatus(OrdemServico osCadastrada) {
+        if(!StatusOS.RECEBIDA.equals(osCadastrada.getStatus())){
+            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status Recebida.");
         }
     }
 

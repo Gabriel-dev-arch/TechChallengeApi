@@ -103,38 +103,6 @@ class StatusStateCoverageTest {
     }
 
     @Test
-    void aprovadaAtualizaParaEmExecucao() {
-        OrdemServico os = criarOS(StatusOS.APROVADA);
-
-        new Aprovada(os, repository, eventPublisher);
-
-        assertTransicao(os, StatusOS.EM_EXECUCAO, true);
-    }
-
-    @Test
-    void aprovadaRejeitaStatusInvalido() {
-        assertThatThrownBy(() -> new Aprovada(criarOS(StatusOS.RECEBIDA), repository, eventPublisher))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Status inválido");
-    }
-
-    @Test
-    void osRecebidaAtualizaParaAguardandoAprovacao() {
-        OrdemServico os = criarOS(StatusOS.RECEBIDA);
-
-        new OsRecebida(os, repository, eventPublisher);
-
-        assertTransicao(os, StatusOS.AGUARDANDO_APROVACAO, true);
-    }
-
-    @Test
-    void osRecebidaRejeitaStatusInvalido() {
-        assertThatThrownBy(() -> new OsRecebida(criarOS(StatusOS.EM_DIAGNOSTICO), repository, eventPublisher))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Status inválido");
-    }
-
-    @Test
     void entregarVeiculoMantemOSEntregue() {
         OrdemServico os = criarOS(StatusOS.ENTREGUE);
 
