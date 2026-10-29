@@ -55,7 +55,6 @@ public class CadastrarOSService {
     @Transactional
     public OrdemServicoResponse cadastrar(CadastrarOSRequest request) {
 
-        // mesma normalização do cadastro de veículos: aceita minúsculas e hífen
         String placa = PlacaValidator.normalizar(request.placa());
         var veiculoComOSEmAberto = repository.buscarPorPlacaComOSEmAberto(placa);
 
@@ -82,7 +81,7 @@ public class CadastrarOSService {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
-        estadosOS.executa(osCadastrada);
+        estadosOS.executa(osCadastrada, StatusOS.RECEBIDA);
 
         return OrdemServicoResponse.from(osCadastrada);
     }
@@ -92,7 +91,7 @@ public class CadastrarOSService {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
-        estadosOS.executa(osCadastrada);
+        estadosOS.executa(osCadastrada, StatusOS.EM_EXECUCAO);
 
         return OrdemServicoResponse.from(osCadastrada);
     }
@@ -102,7 +101,7 @@ public class CadastrarOSService {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
-        estadosOS.executa(osCadastrada);
+        estadosOS.executa(osCadastrada, StatusOS.FINALIZADA);
 
         return OrdemServicoResponse.from(osCadastrada, osCadastrada.getStatus());
     }
@@ -112,7 +111,7 @@ public class CadastrarOSService {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
-        estadosOS.executa(osCadastrada);
+        estadosOS.executa(osCadastrada, StatusOS.ENTREGUE);
 
         return OrdemServicoResponse.from(osCadastrada, osCadastrada.getStatus());
     }

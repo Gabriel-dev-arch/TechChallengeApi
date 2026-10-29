@@ -77,6 +77,28 @@ class ResponseDTOTest {
     }
 
     @Test
+    @DisplayName("ClienteResponse.from deve identificar CPF e CNPJ")
+    void testClienteResponse() throws Exception {
+        Cliente cpf = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
+        ClienteResponse cpfResponse = ClienteResponse.from(cpf);
+        assertThat(cpfResponse.fullName()).isEqualTo("Ana Silva");
+        assertThat(cpfResponse.email()).isEqualTo("ana@email.com");
+        assertThat(cpfResponse.documento()).isEqualTo("12345678901");
+        assertThat(cpfResponse.tipoDocumento()).isEqualTo("CPF");
+        assertThat(cpfResponse.telefone()).isEqualTo("11999999999");
+
+        Cliente cnpj = new Cliente("Oficina", "Central", "oficina@email.com", "12345678000199", "1133334444");
+        assertThat(ClienteResponse.from(cnpj).tipoDocumento()).isEqualTo("CNPJ");
+
+        Method paraFuso = ClienteResponse.class.getDeclaredMethod("paraFusoLocal", Instant.class);
+        paraFuso.setAccessible(true);
+        assertThat(paraFuso.invoke(null, (Instant) null)).isNull();
+        Instant instante = Instant.parse("2024-01-01T12:00:00Z");
+        OffsetDateTime dataLocal = (OffsetDateTime) paraFuso.invoke(null, instante);
+        assertThat(dataLocal).isEqualTo(OffsetDateTime.parse("2024-01-01T09:00:00-03:00"));
+    }
+
+    @Test
     @DisplayName("OrdemServicoResponse deve mapear a entidade com e sem status explícito")
     void testOrdemServicoResponse() {
         Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");

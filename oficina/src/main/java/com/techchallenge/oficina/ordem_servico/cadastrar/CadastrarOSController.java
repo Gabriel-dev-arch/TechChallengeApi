@@ -66,7 +66,7 @@ public class CadastrarOSController {
 	}
 
 	@PostMapping("/{id}/iniciar-execucao")
-	@Operation(summary = "Realiza a exeecução do serviço", description = "Realiza a exeecução do serviço")
+	@Operation(summary = "Realiza a execução do serviço", description = "Realiza a execução do serviço")
 	public ResponseEntity<OrdemServicoResponse> iniciaExecucao(@PathVariable("id") UUID id) {
 
 		return ResponseEntity.ok(service.iniciaExecucao(id));

@@ -25,7 +25,6 @@ import com.techchallenge.oficina.servicos.entidades.Servico;
 import com.techchallenge.oficina.shared.persistence.BaseEntity;
 import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
 import com.techchallenge.oficina.veiculos.entidades.Veiculo;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,26 +45,20 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CadastrarOSServiceTest {
 
-    /*
     private static final String PLACA = "ABC1234";
     private static final UUID OS_ID = UUID.randomUUID();
     private static final UUID FUNCIONARIO_ID = UUID.randomUUID();
 
     @Mock
     private OrdemServicoRepository repository;
-
     @Mock
     private VeiculoRepository veiculoRepository;
-
     @Mock
     private ServicoRepository servicoRepository;
-
     @Mock
     private PecaInsumoRepository pecaInsumoRepository;
-
     @Mock
     private FuncionarioRepository funcionarioRepository;
-
     @Mock
     private EstadosOS estadosOS;
 
@@ -73,73 +66,79 @@ class CadastrarOSServiceTest {
     private CadastrarOSService service;
 
     @Test
-    @DisplayName("Deve impedir cadastro quando veículo já tem ordem em aberto")
-    void deveImpedirCadastroQuandoVeiculoJaTemOrdemEmAberto() {
-        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA,
-            new FuncionarioRequest(FUNCIONARIO_ID));
-        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of(
-                new OrdemServico(StatusOS.RECEBIDA, BigDecimal.ZERO, List.of(), List.of(), List.of(),
-                "Aberta", null, null, null)));
+    void naoCadastraQuandoVeiculoJaTemOSAberta() {
+        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of(criarOS(StatusOS.RECEBIDA)));
 
-        assertThatThrownBy(() -> service.cadastrar(request))
-                .isInstanceOf(OrdemServicoEmAbertoException.class)
-                .hasMessage("Veículo com ordem de serviço em aberto: " + PLACA);
+        assertThatThrownBy(() -> service.cadastrar(criarRequest(PLACA)))
+                .isInstanceOf(OrdemServicoEmAbertoException.class);
 
-        verify(veiculoRepository, never()).findByPlaca(any());
+        verifyNoInteractions(veiculoRepository, funcionarioRepository);
         verify(repository, never()).save(any(OrdemServico.class));
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando veículo não existe")
-    void deveLancarExcecaoQuandoVeiculoNaoExiste() {
-        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA,
-            new FuncionarioRequest(FUNCIONARIO_ID));
+    void naoCadastraQuandoVeiculoNaoExiste() {
         when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
         when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.cadastrar(request))
-                .isInstanceOf(VeiculoNaoEncontradoException.class)
-                .hasMessage("Veículo não encontrado: " + PLACA);
+        assertThatThrownBy(() -> service.cadastrar(criarRequest(PLACA)))
+                .isInstanceOf(VeiculoNaoEncontradoException.class);
+
+        verifyNoInteractions(funcionarioRepository);
+        verify(repository, never()).save(any(OrdemServico.class));
+    }
+
+    @Test
+    void naoCadastraQuandoFuncionarioNaoExiste() {
+        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
+        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(criarVeiculo()));
+        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.cadastrar(criarRequest(PLACA)))
+                .isInstanceOf(FuncionarioNaoEncontradoException.class);
 
         verify(repository, never()).save(any(OrdemServico.class));
     }
 
     @Test
-    @DisplayName("Deve cadastrar ordem de serviço com sucesso")
-    void deveCadastrarComSucesso() {
-        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", PLACA,
-            new FuncionarioRequest(FUNCIONARIO_ID));
-        Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
-        Veiculo veiculo = new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente);
-        Funcionario funcionario = criarFuncionario();
-
+    void cadastraOSComSucesso() {
         when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
-        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(veiculo));
-        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.of(funcionario));
-        when(repository.save(any(OrdemServico.class))).thenAnswer(i -> i.getArgument(0));
+        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(criarVeiculo()));
+        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.of(criarFuncionario()));
+        when(repository.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        OrdemServicoResponse response = service.cadastrar(request);
+        OrdemServicoResponse response = service.cadastrar(criarRequest(PLACA));
 
-        assertThat(response).isNotNull();
         assertThat(response.veiculo().placa()).isEqualTo(PLACA);
-        verify(repository).save(any(OrdemServico.class));
+        verify(repository).save(argThat(os -> os.getStatus() == StatusOS.RECEBIDA));
     }
 
     @Test
-    @DisplayName("Deve iniciar diagnóstico com sucesso")
-    void deveIniciarDiagnostico() {
+    void normalizaPlacaAntesDeBuscarVeiculo() {
+        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
+        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(criarVeiculo()));
+        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.of(criarFuncionario()));
+        when(repository.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        OrdemServicoResponse response = service.cadastrar(criarRequest(" abc-1234 "));
+
+        assertThat(response.veiculo().placa()).isEqualTo(PLACA);
+        verify(repository).buscarPorPlacaComOSEmAberto(PLACA);
+        verify(veiculoRepository).findByPlaca(PLACA);
+    }
+
+    @Test
+    void iniciaDiagnosticoOSExistente() {
         OrdemServico os = criarOS(StatusOS.RECEBIDA);
         when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
 
-        OrdemServicoResponse response = service.iniciaDiagnostico(OS_ID);
+        assertThat(service.iniciaDiagnostico(OS_ID)).isNotNull();
 
-        assertThat(response).isNotNull();
-        verify(estadosOS).executa(os);
+        verify(estadosOS).executa(os, StatusOS.RECEBIDA);
     }
 
     @Test
-    @DisplayName("Deve lançar exceção ao iniciar diagnóstico de OS inexistente")
-    void deveLancarExcecaoAoIniciarDiagnosticoInexistente() {
+    void iniciaDiagnosticoOSInexistente() {
         when(repository.findById(OS_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.iniciaDiagnostico(OS_ID))
@@ -147,20 +146,17 @@ class CadastrarOSServiceTest {
     }
 
     @Test
-    @DisplayName("Deve iniciar execução com sucesso")
-    void deveIniciarExecucao() {
+    void iniciaExecucaoOSExistente() {
         OrdemServico os = criarOS(StatusOS.APROVADA);
         when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
 
-        OrdemServicoResponse response = service.iniciaExecucao(OS_ID);
+        assertThat(service.iniciaExecucao(OS_ID)).isNotNull();
 
-        assertThat(response).isNotNull();
-        verify(estadosOS).executa(os);
+        verify(estadosOS).executa(os, StatusOS.EM_EXECUCAO);
     }
 
     @Test
-    @DisplayName("Deve lançar exceção ao iniciar execução de OS inexistente")
-    void deveLancarExcecaoAoIniciarExecucaoInexistente() {
+    void iniciaExecucaoOSInexistente() {
         when(repository.findById(OS_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.iniciaExecucao(OS_ID))
@@ -168,20 +164,17 @@ class CadastrarOSServiceTest {
     }
 
     @Test
-    @DisplayName("Deve finalizar execução com sucesso")
-    void deveFinalizarExecucao() {
+    void finalizaExecucaoOSExistente() {
         OrdemServico os = criarOS(StatusOS.EM_EXECUCAO);
         when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
 
-        OrdemServicoResponse response = service.finalizaExecucao(OS_ID);
+        assertThat(service.finalizaExecucao(OS_ID)).isNotNull();
 
-        assertThat(response).isNotNull();
-        verify(estadosOS).executa(os);
+        verify(estadosOS).executa(os, StatusOS.FINALIZADA);
     }
 
     @Test
-    @DisplayName("Deve lançar exceção ao finalizar execução de OS inexistente")
-    void deveLancarExcecaoAoFinalizarExecucaoInexistente() {
+    void finalizaExecucaoOSInexistente() {
         when(repository.findById(OS_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.finalizaExecucao(OS_ID))
@@ -189,86 +182,103 @@ class CadastrarOSServiceTest {
     }
 
     @Test
-    @DisplayName("Deve cadastrar orçamento com sucesso")
-    void deveCadastrarOrcamento() {
-        OrdemServico os = criarOS(StatusOS.EM_DIAGNOSTICO);
+    void entregaVeiculoOSExistente() {
+        OrdemServico os = criarOS(StatusOS.ENTREGUE);
         when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
 
-        OrdemServicoResponse response = service.cadastrarOrcamento(OS_ID);
+        assertThat(service.entregaVeiculo(OS_ID)).isNotNull();
 
-        assertThat(response).isNotNull();
-        verify(estadosOS).executa(os);
+        verify(estadosOS).executa(os, StatusOS.ENTREGUE);
     }
 
     @Test
-    @DisplayName("Deve incluir serviços na OS com sucesso")
-    void deveIncluirServicosOS() {
+    void entregaVeiculoOSInexistente() {
+        when(repository.findById(OS_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.entregaVeiculo(OS_ID))
+                .isInstanceOf(OrdemServicoNaoEncontradaException.class);
+    }
+
+    @Test
+    void incluiServicosNaOS() throws ReflectiveOperationException {
         OrdemServico os = criarOS(StatusOS.RECEBIDA);
         UUID servicoId = UUID.randomUUID();
         Servico servico = new Servico("Troca de óleo", new BigDecimal("50.00"));
         setId(servico, servicoId);
-
         when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
         when(servicoRepository.findAllById(List.of(servicoId))).thenReturn(List.of(servico));
         when(repository.saveAndFlush(os)).thenReturn(os);
 
-        OrdemServicoResponse response = service.incluiServicosOS(OS_ID, List.of(new ServicosRequest(servicoId, "Troca de óleo", new BigDecimal("50.00"))));
+        assertThat(service.incluiServicosOS(OS_ID, List.of(new ServicosRequest(servicoId)))).isNotNull();
 
-        assertThat(response).isNotNull();
-        verify(servicoRepository).findAllById(List.of(servicoId));
+        assertThat(os.getOrcamento()).isEqualByComparingTo("50.00");
         verify(repository).saveAndFlush(os);
     }
 
     @Test
-    @DisplayName("Deve incluir peças e insumos na OS com sucesso")
-    void deveIncluirPecasInsumosOS() {
+    void incluiServicosEmOSInexistente() {
+        when(repository.findById(OS_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.incluiServicosOS(OS_ID, List.of()))
+                .isInstanceOf(OrdemServicoNaoEncontradaException.class);
+
+        verifyNoInteractions(servicoRepository);
+    }
+
+    @Test
+    void cadastraOrcamentoDaOS() {
+        OrdemServico os = criarOS(StatusOS.EM_DIAGNOSTICO);
+        when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
+        when(repository.saveAndFlush(os)).thenReturn(os);
+
+        OrdemServicoResponse response = service.cadastrarOrcamento(OS_ID);
+
+        assertThat(response).isNotNull();
+        assertThat(os.getStatus()).isEqualTo(StatusOS.AGUARDANDO_APROVACAO);
+        verify(repository).saveAndFlush(os);
+    }
+
+    @Test
+    void cadastraOrcamentoParaOSInexistente() {
+        when(repository.findById(OS_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.cadastrarOrcamento(OS_ID))
+                .isInstanceOf(OrdemServicoNaoEncontradaException.class);
+
+        verify(repository, never()).saveAndFlush(any(OrdemServico.class));
+    }
+
+    @Test
+    void incluiPecasEInsumosNaOS() throws ReflectiveOperationException {
         OrdemServico os = criarOS(StatusOS.RECEBIDA);
         UUID pecaId = UUID.randomUUID();
-        PecaInsumo peca = new PecaInsumo(TipoItem.PECA, "FILTRO", "Filtro", "Filtro óleo",
-                UnidadeMedida.UN, new BigDecimal("30.00"), new BigDecimal("10"));
+        PecaInsumo peca = new PecaInsumo(TipoItem.PECA, "FILTRO", "Filtro", "Filtro de óleo",
+                UnidadeMedida.UN, new BigDecimal("30.00"), BigDecimal.TEN);
         setId(peca, pecaId);
-
         when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
         when(pecaInsumoRepository.findAllById(List.of(pecaId))).thenReturn(List.of(peca));
         when(repository.save(os)).thenReturn(os);
 
-        OrdemServicoResponse response = service.incluiPecasInsumosOS(OS_ID, List.of(new ItemQuantidadeRequest(pecaId, new BigDecimal("2"))));
+        assertThat(service.incluiPecasInsumosOS(OS_ID,
+                List.of(new ItemQuantidadeRequest(pecaId, BigDecimal.valueOf(2))))).isNotNull();
 
-        assertThat(response).isNotNull();
-        verify(pecaInsumoRepository).findAllById(List.of(pecaId));
+        assertThat(os.getOrcamento()).isEqualByComparingTo("60.00");
         verify(repository).save(os);
     }
 
     @Test
-    @DisplayName("Deve normalizar a placa (minúsculas e hífen) antes de buscar o veículo")
-    void deveNormalizarPlacaNaAbertura() {
-        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), null, " abc-1234 ",
-                new FuncionarioRequest(FUNCIONARIO_ID));
-        Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
-        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
-        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente)));
-        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.of(criarFuncionario()));
-        when(repository.save(any(OrdemServico.class))).thenAnswer(i -> i.getArgument(0));
+    void incluiPecasEmOSInexistente() {
+        when(repository.findById(OS_ID)).thenReturn(Optional.empty());
 
-        OrdemServicoResponse response = service.cadastrar(request);
+        assertThatThrownBy(() -> service.incluiPecasInsumosOS(OS_ID, List.of()))
+                .isInstanceOf(OrdemServicoNaoEncontradaException.class);
 
-        assertThat(response.veiculo().placa()).isEqualTo(PLACA);
+        verifyNoInteractions(pecaInsumoRepository);
     }
 
-    @Test
-    @DisplayName("Deve lançar FuncionarioNaoEncontradoException quando o funcionário não existe")
-    void deveLancarExcecaoQuandoFuncionarioNaoExiste() {
-        CadastrarOSRequest request = new CadastrarOSRequest(List.of(), List.of(), null, PLACA,
+    private CadastrarOSRequest criarRequest(String placa) {
+        return new CadastrarOSRequest(List.of(), List.of(), "Diagnóstico", placa,
                 new FuncionarioRequest(FUNCIONARIO_ID));
-        Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
-        when(repository.buscarPorPlacaComOSEmAberto(PLACA)).thenReturn(List.of());
-        when(veiculoRepository.findByPlaca(PLACA)).thenReturn(Optional.of(new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente)));
-        when(funcionarioRepository.findById(FUNCIONARIO_ID)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.cadastrar(request))
-                .isInstanceOf(FuncionarioNaoEncontradoException.class);
-
-        verify(repository, never()).save(any(OrdemServico.class));
     }
 
     private OrdemServico criarOS(StatusOS status) {
@@ -278,17 +288,18 @@ class CadastrarOSServiceTest {
                 "Diagnóstico", veiculo, cliente, criarFuncionario());
     }
 
+    private Veiculo criarVeiculo() {
+        Cliente cliente = new Cliente("Ana", "Silva", "ana@email.com", "12345678901", "11999999999");
+        return new Veiculo(PLACA, "Fiat", "Uno", 2020, cliente);
+    }
+
     private Funcionario criarFuncionario() {
         return new Funcionario("Ana Silva", "ana.silva@empresa.com", (short) 1234, false, true);
     }
 
-    private void setId(Object entity, UUID id) {
-        try {
-            var field = BaseEntity.class.getDeclaredField("id");
-            field.setAccessible(true);
-            field.set(entity, id);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError("Não foi possível configurar id", e);
-        }
-    }*/
+    private void setId(Object entity, UUID id) throws ReflectiveOperationException {
+        var field = BaseEntity.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(entity, id);
+    }
 }

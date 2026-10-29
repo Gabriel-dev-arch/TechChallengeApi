@@ -2,6 +2,7 @@ package com.techchallenge.oficina.ordem_servico.dominio.statusos.status;
 
 import com.techchallenge.oficina.ordem_servico.cadastrar.eventos.OSCriadaEvent;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatusOSAbstract;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
@@ -9,8 +10,10 @@ import org.springframework.context.ApplicationEventPublisher;
 
 public class EntregarVeiculo extends AvancarStatusOSAbstract {
 
-    public EntregarVeiculo(OrdemServico os, OrdemServicoRepository repository,
-                           ApplicationEventPublisher eventPublisher) {
+
+    public EntregarVeiculo(OrdemServico os,
+                          OrdemServicoRepository repository,
+                          ApplicationEventPublisher eventPublisher) {
 
         super(os, repository, eventPublisher);
     }
@@ -21,10 +24,9 @@ public class EntregarVeiculo extends AvancarStatusOSAbstract {
         return repository.save(ordemServico);
     }
 
-    public void validarStatus(OrdemServico os) {
-        if(!StatusOS.ENTREGUE.equals(os.getStatus())){
-            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status FINALIZADA.");
+    public void validarStatus(OrdemServico osCadastrada) {
+        if(!StatusOS.ENTREGUE.equals(osCadastrada.getStatus())){
+            throw new TransicaoInvalidaException("Status inválido. A ordem de serviço deve estar com status FINALIZADA.");
         }
     }
-
 }

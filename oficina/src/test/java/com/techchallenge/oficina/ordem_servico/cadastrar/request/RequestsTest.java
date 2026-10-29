@@ -28,4 +28,13 @@ class RequestsTest {
 
         assertThat(req.id()).isEqualTo(id);
     }
+
+    @Test
+    @DisplayName("Testa criação de FuncionarioRequest")
+    void testFuncionarioRequest() {
+        UUID id = UUID.randomUUID();
+        FuncionarioRequest req = new FuncionarioRequest(id);
+
+        assertThat(req.id()).isEqualTo(id);
+    }
 }
