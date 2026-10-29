@@ -11,6 +11,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -37,6 +38,9 @@ class ClienteApiIntegrationTest {
 	@Autowired
 	VeiculoRepository veiculoRepository;
 
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
 	@BeforeEach
 	void limparBanco() {
 		veiculoRepository.deleteAll();
@@ -46,7 +50,7 @@ class ClienteApiIntegrationTest {
 	private static String json(String firstName, String lastName, String email, String documento, String telefone) {
 		String tel = telefone == null ? "null" : "\"" + telefone + "\"";
 		return """
-				{"firstName":"%s","lastName":"%s","email":"%s","documento":"%s","telefone":%s}"""
+				{"firstName":"%s","lastName":"%s","email":"%s","documento":"%s","telefone":%s,"senha":"SenhaSegura123"}"""
 				.formatted(firstName, lastName, email, documento, tel);
 	}
 
@@ -177,5 +181,59 @@ class ClienteApiIntegrationTest {
 				.andExpect(status().isNotFound());
 		mockMvc.perform(delete(inexistente)).andExpect(status().isNotFound());
 		mockMvc.perform(get("/clientes/abc")).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void armazenaSomenteHashBcryptComSaltESemExporSenha() throws Exception {
+		String location = criar(json("Maria", "Silva", "maria@email.com", CPF, null));
+		criar(json("Joao", "Souza", "joao@email.com", "11144477735", null));
+		var maria = repository.findByDocumento("52998224725").orElseThrow();
+		var joao = repository.findByDocumento("11144477735").orElseThrow();
+		assertThat(maria.getSenhaHash()).startsWith("$2a$").hasSize(60);
+		assertThat(passwordEncoder.matches("SenhaSegura123", maria.getSenhaHash())).isTrue();
+		assertThat(maria.getSenhaHash()).isNotEqualTo(joao.getSenhaHash());
+		mockMvc.perform(get(location)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.senha").doesNotExist()).andExpect(jsonPath("$.senhaHash").doesNotExist());
+		mockMvc.perform(get("/clientes")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].senha").doesNotExist())
+				.andExpect(jsonPath("$.content[0].senhaHash").doesNotExist());
+		mockMvc.perform(post("/autenticacao/login").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"username\":\"529.982.247-25\",\"password\":\"SenhaSegura123\"}"))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.accessToken").isString());
+	}
+
+	@Test
+	void atualizaSenhaOuPreservaQuandoOmitida() throws Exception {
+		String location = criar(json("Maria", "Silva", "maria@email.com", CPF, null));
+		String hashAnterior = repository.findByDocumento("52998224725").orElseThrow().getSenhaHash();
+		String semSenha = json("Maria", "Santos", "maria@email.com", CPF, null)
+				.replace(",\"senha\":\"SenhaSegura123\"", "");
+		mockMvc.perform(put(location).contentType(MediaType.APPLICATION_JSON).content(semSenha))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.senhaHash").doesNotExist());
+		assertThat(repository.findByDocumento("52998224725").orElseThrow().getSenhaHash()).isEqualTo(hashAnterior);
+		mockMvc.perform(put(location).contentType(MediaType.APPLICATION_JSON)
+				.content(json("Maria", "Santos", "maria@email.com", CPF, null).replace("SenhaSegura123", "NovaSenha123")))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.senha").doesNotExist());
+		String novoHash = repository.findByDocumento("52998224725").orElseThrow().getSenhaHash();
+		assertThat(passwordEncoder.matches("NovaSenha123", novoHash)).isTrue();
+		assertThat(passwordEncoder.matches("SenhaSegura123", novoHash)).isFalse();
+		mockMvc.perform(post("/autenticacao/login").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"username\":\"52998224725\",\"password\":\"SenhaSegura123\"}"))
+				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void senhaObrigatoriaEValidaLimitesSemTruncamento() throws Exception {
+		String body = json("Maria", "Silva", "maria@email.com", CPF, null);
+		for (String senha : java.util.List.of("", "curta", "        ", "a".repeat(73), "á".repeat(37))) {
+			mockMvc.perform(post("/clientes").contentType(MediaType.APPLICATION_JSON)
+					.content(body.replace("SenhaSegura123", senha))).andExpect(status().isBadRequest())
+					.andExpect(jsonPath("$.errors[?(@.campo=='senha')]").exists());
+		}
+		mockMvc.perform(post("/clientes").contentType(MediaType.APPLICATION_JSON)
+				.content(body.replace(",\"senha\":\"SenhaSegura123\"", ""))).andExpect(status().isBadRequest());
+		mockMvc.perform(post("/clientes").contentType(MediaType.APPLICATION_JSON)
+				.content(body.replace("\"senha\":\"SenhaSegura123\"", "\"senha\":null"))).andExpect(status().isBadRequest());
+		assertThat(repository.count()).isZero();
 	}
 }

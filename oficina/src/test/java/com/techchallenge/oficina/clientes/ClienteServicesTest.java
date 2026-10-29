@@ -17,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +36,9 @@ class ClienteServicesTest {
 	@Mock
 	ClienteRepository repository;
 
+	@Mock
+	PasswordEncoder passwordEncoder;
+
 	@InjectMocks
 	CadastrarClienteService cadastrar;
 
@@ -48,15 +53,19 @@ class ClienteServicesTest {
 
 	@Test
 	void cadastraNormalizandoDocumentoEMontandoFullName() {
+		when(passwordEncoder.encode("SenhaSegura123")).thenReturn("hash-seguro");
 		when(repository.existsByDocumento(CPF)).thenReturn(false);
 		when(repository.saveAndFlush(any(Cliente.class))).thenAnswer(i -> i.getArgument(0));
 
 		ClienteResponse resposta = cadastrar.cadastrar(
-				new CadastrarClienteRequest(" Maria ", "Silva", "maria@email.com", "529.982.247-25", "11999990000"));
+				new CadastrarClienteRequest(" Maria ", "Silva", "maria@email.com", "529.982.247-25", "11999990000", "SenhaSegura123"));
 
 		assertThat(resposta.documento()).isEqualTo(CPF);
 		assertThat(resposta.tipoDocumento()).isEqualTo("CPF");
 		assertThat(resposta.fullName()).isEqualTo("Maria Silva");
+		var captor = ArgumentCaptor.forClass(Cliente.class);
+		verify(repository).saveAndFlush(captor.capture());
+		assertThat(captor.getValue().getSenhaHash()).isEqualTo("hash-seguro");
 	}
 
 	@Test
@@ -64,9 +73,10 @@ class ClienteServicesTest {
 		when(repository.existsByDocumento(CPF)).thenReturn(true);
 
 		assertThatThrownBy(() -> cadastrar.cadastrar(
-				new CadastrarClienteRequest("Maria", "Silva", "maria@email.com", CPF, null)))
+				new CadastrarClienteRequest("Maria", "Silva", "maria@email.com", CPF, null, "SenhaSegura123")))
 				.isInstanceOf(DocumentoJaCadastradoException.class);
 		verify(repository, never()).saveAndFlush(any());
+		verifyNoInteractions(passwordEncoder);
 	}
 
 	@Test
@@ -78,7 +88,7 @@ class ClienteServicesTest {
 		when(repository.saveAndFlush(existente)).thenReturn(existente);
 
 		ClienteResponse resposta = atualizar.atualizar(id,
-				new AtualizarClienteRequest("Empresa", "LTDA", "contato@empresa.com", "11.222.333/0001-81", "1133334444"));
+				new AtualizarClienteRequest("Empresa", "LTDA", "contato@empresa.com", "11.222.333/0001-81", "1133334444", null));
 
 		assertThat(resposta.fullName()).isEqualTo("Empresa LTDA");
 		assertThat(resposta.tipoDocumento()).isEqualTo("CNPJ");
@@ -91,7 +101,7 @@ class ClienteServicesTest {
 		when(repository.findById(id)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> atualizar.atualizar(id,
-				new AtualizarClienteRequest("A", "B", "a@b.com", CPF, null)))
+				new AtualizarClienteRequest("A", "B", "a@b.com", CPF, null, null)))
 				.isInstanceOf(ClienteNaoEncontradoException.class);
 	}
 
@@ -102,7 +112,7 @@ class ClienteServicesTest {
 		when(repository.existsByDocumentoAndIdNot(CPF, id)).thenReturn(true);
 
 		assertThatThrownBy(() -> atualizar.atualizar(id,
-				new AtualizarClienteRequest("A", "B", "a@b.com", CPF, null)))
+				new AtualizarClienteRequest("A", "B", "a@b.com", CPF, null, null)))
 				.isInstanceOf(DocumentoJaCadastradoException.class);
 	}
 
@@ -142,5 +152,19 @@ class ClienteServicesTest {
 
 		assertThatThrownBy(() -> remover.remover(id)).isInstanceOf(ClienteNaoEncontradoException.class);
 		verify(repository, never()).deleteById(any());
+	}
+
+	@Test
+	void atualizaSenhaComHashSemAlterarSenhaQuandoOmitida() {
+		UUID id = UUID.randomUUID();
+		Cliente cliente = new Cliente("Maria", "Silva", "maria@email.com", CPF, null, "hash-anterior");
+		when(repository.findById(id)).thenReturn(Optional.of(cliente));
+		when(repository.saveAndFlush(cliente)).thenReturn(cliente);
+		atualizar.atualizar(id, new AtualizarClienteRequest("Maria", "Silva", "maria@email.com", CPF, null, null));
+		assertThat(cliente.getSenhaHash()).isEqualTo("hash-anterior");
+		verifyNoInteractions(passwordEncoder);
+		when(passwordEncoder.encode("NovaSenha123")).thenReturn("novo-hash");
+		atualizar.atualizar(id, new AtualizarClienteRequest("Maria", "Silva", "maria@email.com", CPF, null, "NovaSenha123"));
+		assertThat(cliente.getSenhaHash()).isEqualTo("novo-hash");
 	}
 }

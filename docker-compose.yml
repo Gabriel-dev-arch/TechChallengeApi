@@ -5,8 +5,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-oficina}
-      POSTGRES_USER: ${DB_USER:?defina DB_USER no .env}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "${DB_PORT:-5432}:5432"
     networks:
@@ -33,13 +33,13 @@ services:
       DB_NAME: ${DB_NAME:-oficina}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRACAO_MINUTOS: ${JWT_EXPIRACAO_MINUTOS:-60}
-      ADMIN_USERNAME: ${ADMIN_USERNAME:?defina ADMIN_USERNAME no .env}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD no .env}
-      CLIENTE_USERNAME: ${CLIENTE_USERNAME:?defina CLIENTE_USERNAME no .env}
-      CLIENTE_PASSWORD: ${CLIENTE_PASSWORD:?defina CLIENTE_PASSWORD no .env}
-      CLIENTE_DOCUMENTO: ${CLIENTE_DOCUMENTO:?defina CLIENTE_DOCUMENTO no .env}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      CLIENTE_USERNAME: ${CLIENTE_USERNAME}
+      CLIENTE_PASSWORD: ${CLIENTE_PASSWORD}
+      CLIENTE_DOCUMENTO: ${CLIENTE_DOCUMENTO}
     ports:
       - "${APP_PORT:-8080}:8080"
     networks:

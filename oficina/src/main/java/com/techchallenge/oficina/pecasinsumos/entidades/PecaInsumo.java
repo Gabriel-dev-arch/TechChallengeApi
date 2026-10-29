@@ -127,8 +127,17 @@ public class PecaInsumo extends BaseEntity {
     }
 
     public void consumir(BigDecimal quantidade){
-        liberar(quantidade);
+        validarConsumo(quantidade);
+        this.quantidadeReservada = quantidadeReservada.subtract(quantidade);
         this.quantidadeTotal = this.quantidadeTotal.subtract(quantidade);
+    }
+
+    public void validarConsumo(BigDecimal quantidade) {
+        validarQuantidade(quantidade);
+        if (quantidadeTotal.compareTo(quantidade) < 0) {
+            throw new EstoqueInsuficienteException(getId(), quantidade, quantidadeTotal);
+        }
+        exigirReservado(quantidade);
     }
 
     public void desativar(){

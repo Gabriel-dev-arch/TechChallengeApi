@@ -3,6 +3,7 @@ package com.techchallenge.oficina.clientes.atualizar;
 import com.techchallenge.oficina.clientes.dominio.*;
 import com.techchallenge.oficina.clientes.entidades.Cliente;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -11,9 +12,11 @@ import java.util.UUID;
 public class AtualizarClienteService {
 
 	private final ClienteRepository repository;
+	private final PasswordEncoder passwordEncoder;
 
-	public AtualizarClienteService(ClienteRepository repository) {
+	public AtualizarClienteService(ClienteRepository repository, PasswordEncoder passwordEncoder) {
 		this.repository = repository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Transactional
@@ -25,6 +28,9 @@ public class AtualizarClienteService {
 		}
 		cliente.atualizar(request.firstName().trim(), request.lastName().trim(), request.email().trim(),
 				documento, request.telefone());
+		if (request.senha() != null) {
+			cliente.alterarSenha(passwordEncoder.encode(request.senha()));
+		}
 		return ClienteResponse.from(repository.saveAndFlush(cliente));
 	}
 }
