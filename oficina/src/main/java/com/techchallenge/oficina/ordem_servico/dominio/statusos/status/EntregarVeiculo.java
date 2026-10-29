@@ -2,6 +2,7 @@ package com.techchallenge.oficina.ordem_servico.dominio.statusos.status;
 
 import com.techchallenge.oficina.ordem_servico.cadastrar.eventos.OSCriadaEvent;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.AvancarStatusOSAbstract;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
@@ -25,7 +26,7 @@ public class EntregarVeiculo extends AvancarStatusOSAbstract {
 
     public void validarStatus(OrdemServico osCadastrada) {
         if(!StatusOS.ENTREGUE.equals(osCadastrada.getStatus())){
-            throw new RuntimeException("Status inválido. A ordem de serviço deve estar com status FINALIZADA.");
+            throw new TransicaoInvalidaException("Status inválido. A ordem de serviço deve estar com status FINALIZADA.");
         }
     }
 }

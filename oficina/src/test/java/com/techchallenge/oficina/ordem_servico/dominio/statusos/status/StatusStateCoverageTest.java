@@ -6,6 +6,8 @@ import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
@@ -77,27 +79,10 @@ class StatusStateCoverageTest {
                 .hasMessageContaining("Status inválido");
     }
 
-    @Test
-    void aprovarOrdemAtualizaParaEmExecucao() {
-        OrdemServico os = criarOS(StatusOS.APROVADA);
-
-        new AprovarOuNegar(os, repository, eventPublisher);
-
-        assertTransicao(os, StatusOS.EM_EXECUCAO, true);
-    }
-
-    @Test
-    void negarOrdemAtualizaParaFinalizada() {
-        OrdemServico os = criarOS(StatusOS.NEGADA);
-
-        new AprovarOuNegar(os, repository, eventPublisher);
-
-        assertTransicao(os, StatusOS.FINALIZADA, true);
-    }
-
-    @Test
-    void aprovarOuNegarRejeitaStatusInvalido() {
-        assertThatThrownBy(() -> new AprovarOuNegar(criarOS(StatusOS.RECEBIDA), repository, eventPublisher))
+    @ParameterizedTest
+    @EnumSource(value = StatusOS.class, names = {"RECEBIDA", "APROVADA", "NEGADA"})
+    void aprovarOuNegarRejeitaStatusSemAprovacaoPendente(StatusOS status) {
+        assertThatThrownBy(() -> new AprovarOuNegar(criarOS(status), repository, eventPublisher))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("aguardando aprovação");
     }

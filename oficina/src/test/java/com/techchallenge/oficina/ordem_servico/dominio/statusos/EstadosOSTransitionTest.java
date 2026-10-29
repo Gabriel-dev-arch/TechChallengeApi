@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -34,12 +35,13 @@ class EstadosOSTransitionTest {
 
     @ParameterizedTest
     @MethodSource("transicoes")
-    void deveSelecionarEstadoEAvancar(StatusOS status, Class<? extends AvancarStatusOSAbstract> tipoEsperado,
+    void deveSelecionarEstadoEAvancar(StatusOS status, StatusOS step,
+                                      Class<? extends AvancarStatusOSAbstract> tipoEsperado,
                                       StatusOS statusEsperado, boolean usaSave) {
         OrdemServico os = new OrdemServico(status, BigDecimal.ZERO,
                 List.of(), List.of(), List.of(), "Diagnóstico", null, null, null);
 
-        AvancarStatusOSAbstract resultado = estadosOS.executa(os);
+        AvancarStatusOSAbstract resultado = estadosOS.executa(os, step);
 
         assertThat(resultado).isInstanceOf(tipoEsperado);
         assertThat(os.getStatus()).isEqualTo(statusEsperado);
@@ -51,14 +53,27 @@ class EstadosOSTransitionTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("stepsDeAprovacao")
+    void deveRejeitarTransicaoDeAprovacaoQuandoOSAindaNaoAguardaAprovacao(StatusOS step) {
+        OrdemServico os = new OrdemServico(step, BigDecimal.ZERO,
+                List.of(), List.of(), List.of(), "Diagnóstico", null, null, null);
+
+        assertThatThrownBy(() -> estadosOS.executa(os, step))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("status aguardando aprovação");
+    }
+
     private static Stream<org.junit.jupiter.params.provider.Arguments> transicoes() {
         return Stream.of(
-                org.junit.jupiter.params.provider.Arguments.of(StatusOS.RECEBIDA, IniciaDiagnostico.class, StatusOS.EM_DIAGNOSTICO, true),
-                org.junit.jupiter.params.provider.Arguments.of(StatusOS.EM_DIAGNOSTICO, AguardandoAprovacao.class, StatusOS.AGUARDANDO_APROVACAO, false),
-                org.junit.jupiter.params.provider.Arguments.of(StatusOS.APROVADA, AprovarOuNegar.class, StatusOS.EM_EXECUCAO, false),
-                org.junit.jupiter.params.provider.Arguments.of(StatusOS.NEGADA, AprovarOuNegar.class, StatusOS.FINALIZADA, false),
-                org.junit.jupiter.params.provider.Arguments.of(StatusOS.EM_EXECUCAO, ExecutarServico.class, StatusOS.FINALIZADA, false),
-                org.junit.jupiter.params.provider.Arguments.of(StatusOS.FINALIZADA, Finalizar.class, StatusOS.ENTREGUE, false),
-                org.junit.jupiter.params.provider.Arguments.of(StatusOS.ENTREGUE, EntregarVeiculo.class, StatusOS.ENTREGUE, true));
+                org.junit.jupiter.params.provider.Arguments.of(StatusOS.RECEBIDA, StatusOS.RECEBIDA, IniciaDiagnostico.class, StatusOS.EM_DIAGNOSTICO, true),
+                org.junit.jupiter.params.provider.Arguments.of(StatusOS.EM_DIAGNOSTICO, StatusOS.EM_DIAGNOSTICO, AguardandoAprovacao.class, StatusOS.AGUARDANDO_APROVACAO, false),
+                org.junit.jupiter.params.provider.Arguments.of(StatusOS.EM_EXECUCAO, StatusOS.EM_EXECUCAO, ExecutarServico.class, StatusOS.FINALIZADA, false),
+                org.junit.jupiter.params.provider.Arguments.of(StatusOS.FINALIZADA, StatusOS.FINALIZADA, Finalizar.class, StatusOS.ENTREGUE, false),
+                org.junit.jupiter.params.provider.Arguments.of(StatusOS.ENTREGUE, StatusOS.ENTREGUE, EntregarVeiculo.class, StatusOS.ENTREGUE, true));
+    }
+
+    private static Stream<StatusOS> stepsDeAprovacao() {
+        return Stream.of(StatusOS.APROVADA, StatusOS.NEGADA);
     }
 }

@@ -134,7 +134,7 @@ class CadastrarOSServiceTest {
 
         assertThat(service.iniciaDiagnostico(OS_ID)).isNotNull();
 
-        verify(estadosOS).executa(os);
+        verify(estadosOS).executa(os, StatusOS.RECEBIDA);
     }
 
     @Test
@@ -152,7 +152,7 @@ class CadastrarOSServiceTest {
 
         assertThat(service.iniciaExecucao(OS_ID)).isNotNull();
 
-        verify(estadosOS).executa(os);
+        verify(estadosOS).executa(os, StatusOS.EM_EXECUCAO);
     }
 
     @Test
@@ -170,7 +170,7 @@ class CadastrarOSServiceTest {
 
         assertThat(service.finalizaExecucao(OS_ID)).isNotNull();
 
-        verify(estadosOS).executa(os);
+        verify(estadosOS).executa(os, StatusOS.FINALIZADA);
     }
 
     @Test
@@ -188,7 +188,7 @@ class CadastrarOSServiceTest {
 
         assertThat(service.entregaVeiculo(OS_ID)).isNotNull();
 
-        verify(estadosOS).executa(os);
+        verify(estadosOS).executa(os, StatusOS.ENTREGUE);
     }
 
     @Test
