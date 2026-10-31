@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
@@ -43,5 +44,15 @@ class IniciaDiagnosticoTest {
         assertThat(os.getStatus()).isEqualTo(StatusOS.EM_DIAGNOSTICO);
         verify(eventPublisher).publishEvent(any(OSCriadaEvent.class));
         verify(repository).save(os);
+    }
+
+    @Test
+    void deveRejeitarStatusDiferenteDeRecebida() {
+        OrdemServico os = new OrdemServico(StatusOS.EM_DIAGNOSTICO, BigDecimal.ZERO,
+                List.of(), List.of(), List.of(), "Diagnostico", null, null, null);
+
+        assertThatThrownBy(() -> new IniciaDiagnostico(os, repository, eventPublisher))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Status inválido");
     }
 }

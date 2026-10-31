@@ -1,5 +1,6 @@
 package com.techchallenge.oficina.ordem_servico.dominio.exception;
 
+import com.techchallenge.oficina.funcionario.dominio.FuncionarioNaoEncontradoException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -40,5 +41,21 @@ class ExceptionsTest {
 
         OrdemServicoEmAbertoException ex2 = new OrdemServicoEmAbertoException("ABC1234");
         assertThat(ex2.getMessage()).contains("ABC1234");
+    }
+
+    @Test
+    @DisplayName("FuncionarioNaoEncontradoException informa o UUID")
+    void testFuncionarioNaoEncontradoException() {
+        UUID id = UUID.randomUUID();
+
+        assertThat(new FuncionarioNaoEncontradoException(id).getMessage())
+                .isEqualTo("Funcionario não encontrado: " + id);
+    }
+
+    @Test
+    @DisplayName("TransicaoInvalidaException preserva a mensagem")
+    void testTransicaoInvalidaException() {
+        assertThat(new TransicaoInvalidaException("Status não permite a transição").getMessage())
+                .isEqualTo("Status não permite a transição");
     }
 }

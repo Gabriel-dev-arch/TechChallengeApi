@@ -174,4 +174,28 @@ class CadastrarOSControllerTest {
 
         verify(service).iniciaExecucao(ID);
     }
+
+    @Test
+    @DisplayName("Deve finalizar execução")
+    void deveFinalizarExecucao() throws Exception {
+        when(service.finalizaExecucao(ID)).thenReturn(criarResponse());
+
+        mockMvc.perform(post("/ordens-servico/{id}/finalizar", ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(ID.toString()));
+
+        verify(service).finalizaExecucao(ID);
+    }
+
+    @Test
+    @DisplayName("Deve entregar o veículo")
+    void deveEntregarVeiculo() throws Exception {
+        when(service.entregaVeiculo(ID)).thenReturn(criarResponse());
+
+        mockMvc.perform(post("/ordens-servico/{id}/entregar", ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(ID.toString()));
+
+        verify(service).entregaVeiculo(ID);
+    }
 }

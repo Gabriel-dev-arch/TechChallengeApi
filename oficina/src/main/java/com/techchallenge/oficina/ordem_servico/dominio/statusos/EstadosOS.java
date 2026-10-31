@@ -3,6 +3,7 @@ package com.techchallenge.oficina.ordem_servico.dominio.statusos;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.status.*;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
+import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +19,15 @@ public class EstadosOS {
     }
 
     public AvancarStatusOSAbstract executa(OrdemServico osCadastrada) {
+        if (osCadastrada.getStatus() == StatusOS.APROVADA) {
+            return new Aprovada(osCadastrada, repository, eventPublisher);
+        }
+        return executa(osCadastrada, osCadastrada.getStatus());
+    }
 
-        return switch (osCadastrada.getStatus()) {
+    public AvancarStatusOSAbstract executa(OrdemServico osCadastrada, StatusOS step) {
+
+        return switch (step) {
             case RECEBIDA       -> new IniciaDiagnostico    (osCadastrada, repository, eventPublisher);
             case EM_DIAGNOSTICO -> new AguardandoAprovacao  (osCadastrada, repository, eventPublisher);
             case APROVADA       -> new AprovarOuNegar       (osCadastrada, repository, eventPublisher);
