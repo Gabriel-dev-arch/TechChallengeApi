@@ -1,0 +1,182 @@
+package com.techchallenge.oficina.veiculos;
+
+import com.techchallenge.oficina.clientes.dominio.ClienteNaoEncontradoException;
+import com.techchallenge.oficina.clientes.dominio.ClienteRepository;
+import com.techchallenge.oficina.clientes.entidades.Cliente;
+import com.techchallenge.oficina.veiculos.atualizar.AtualizarVeiculoRequest;
+import com.techchallenge.oficina.veiculos.atualizar.AtualizarVeiculoService;
+import com.techchallenge.oficina.veiculos.cadastrar.CadastrarVeiculoRequest;
+import com.techchallenge.oficina.veiculos.cadastrar.CadastrarVeiculoService;
+import com.techchallenge.oficina.veiculos.consultar.ConsultarVeiculosService;
+import com.techchallenge.oficina.veiculos.dominio.PlacaJaCadastradaException;
+import com.techchallenge.oficina.veiculos.dominio.VeiculoNaoEncontradoException;
+import com.techchallenge.oficina.veiculos.dominio.VeiculoRepository;
+import com.techchallenge.oficina.veiculos.entidades.Veiculo;
+import com.techchallenge.oficina.veiculos.remover.RemoverVeiculoService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class VeiculoServicesTest {
+
+	private static final UUID CLIENTE_ID = UUID.randomUUID();
+
+	private final Cliente cliente = new Cliente("Maria", "Silva", "maria@email.com", "52998224725", null);
+
+	@Mock
+	ClienteRepository clienteRepository;
+
+	@Mock
+	VeiculoRepository repository;
+
+	@InjectMocks
+	CadastrarVeiculoService cadastrar;
+
+	@InjectMocks
+	AtualizarVeiculoService atualizar;
+
+	@InjectMocks
+	ConsultarVeiculosService consultar;
+
+	@InjectMocks
+	RemoverVeiculoService remover;
+
+	@BeforeEach
+	void prepararCliente() {
+		ReflectionTestUtils.setField(cliente, "id", CLIENTE_ID);
+	}
+
+	@Test
+	void cadastraNormalizandoPlacaEMarcaEModelo() {
+		when(clienteRepository.findById(CLIENTE_ID)).thenReturn(Optional.of(cliente));
+		when(repository.saveAndFlush(any(Veiculo.class))).thenAnswer(i -> i.getArgument(0));
+
+		var resposta = cadastrar.cadastrar(new CadastrarVeiculoRequest(" abc-1234 ", " Fiat ", " Uno ", 2010, CLIENTE_ID));
+
+		assertThat(resposta.placa()).isEqualTo("ABC1234");
+		assertThat(resposta.marca()).isEqualTo("Fiat");
+		assertThat(resposta.modelo()).isEqualTo("Uno");
+		assertThat(resposta.ano()).isEqualTo(2010);
+		assertThat(resposta.clienteId()).isEqualTo(CLIENTE_ID);
+		verify(repository).existsByPlaca("ABC1234");
+	}
+
+	@Test
+	void cadastroDuplicadoNaoSalva() {
+		when(repository.existsByPlaca("ABC1234")).thenReturn(true);
+
+		assertThatThrownBy(() -> cadastrar.cadastrar(new CadastrarVeiculoRequest("abc-1234", "Fiat", "Uno", 2010, CLIENTE_ID)))
+				.isInstanceOf(PlacaJaCadastradaException.class);
+		verify(repository, never()).saveAndFlush(any());
+	}
+
+	@Test
+	void cadastroComClienteInexistenteNaoSalva() {
+		assertThatThrownBy(() -> cadastrar.cadastrar(
+				new CadastrarVeiculoRequest("ABC1234", "Fiat", "Uno", 2010, CLIENTE_ID)))
+				.isInstanceOf(ClienteNaoEncontradoException.class);
+		verify(clienteRepository).findById(CLIENTE_ID);
+		verify(repository, never()).saveAndFlush(any());
+	}
+
+	@Test
+	void atualizaVeiculoExistente() {
+		UUID id = UUID.randomUUID();
+		Veiculo existente = new Veiculo("ABC1234", "Fiat", "Uno", 2010, cliente);
+		when(repository.findById(id)).thenReturn(Optional.of(existente));
+		when(repository.saveAndFlush(existente)).thenReturn(existente);
+
+		var resposta = atualizar.atualizar(id, new AtualizarVeiculoRequest("abc1d23", " Ford ", " Ka ", 2020));
+
+		assertThat(resposta.placa()).isEqualTo("ABC1D23");
+		assertThat(resposta.marca()).isEqualTo("Ford");
+		assertThat(resposta.modelo()).isEqualTo("Ka");
+		assertThat(resposta.ano()).isEqualTo(2020);
+		assertThat(resposta.clienteId()).isEqualTo(CLIENTE_ID);
+		assertThat(existente.getCliente()).isSameAs(cliente);
+		verify(repository).existsByPlacaAndIdNot("ABC1D23", id);
+	}
+
+	@Test
+	void atualizarInexistenteLanca404() {
+		UUID id = UUID.randomUUID();
+		assertThatThrownBy(() -> atualizar.atualizar(id, new AtualizarVeiculoRequest("ABC1234", "Fiat", "Uno", 2010)))
+				.isInstanceOf(VeiculoNaoEncontradoException.class);
+		verify(repository, never()).saveAndFlush(any());
+	}
+
+	@Test
+	void atualizarComPlacaDeOutroVeiculoNaoAlteraEntidade() {
+		UUID id = UUID.randomUUID();
+		Veiculo existente = new Veiculo("DEF5678", "Fiat", "Uno", 2010, cliente);
+		when(repository.findById(id)).thenReturn(Optional.of(existente));
+		when(repository.existsByPlacaAndIdNot("ABC1234", id)).thenReturn(true);
+
+		assertThatThrownBy(() -> atualizar.atualizar(id, new AtualizarVeiculoRequest("abc-1234", "Ford", "Ka", 2020)))
+				.isInstanceOf(PlacaJaCadastradaException.class);
+		assertThat(existente.getPlaca()).isEqualTo("DEF5678");
+		verify(repository, never()).saveAndFlush(any());
+	}
+
+	@Test
+	void buscaPorId() {
+		UUID id = UUID.randomUUID();
+		when(repository.findById(id)).thenReturn(Optional.of(new Veiculo("ABC1234", "Fiat", "Uno", 2010, cliente)));
+		assertThat(consultar.buscar(id).placa()).isEqualTo("ABC1234");
+		assertThat(consultar.buscar(id).clienteId()).isEqualTo(CLIENTE_ID);
+	}
+
+	@Test
+	void buscaInexistenteLanca404() {
+		assertThatThrownBy(() -> consultar.buscar(UUID.randomUUID())).isInstanceOf(VeiculoNaoEncontradoException.class);
+	}
+
+	@Test
+	void listaFiltrandoPorPlacaNormalizada() {
+		when(repository.findByPlaca("ABC1234")).thenReturn(Optional.of(new Veiculo("ABC1234", "Fiat", "Uno", 2010, cliente)));
+		var pagina = consultar.listar("abc-1234", PageRequest.of(0, 20));
+		assertThat(pagina.getContent()).hasSize(1);
+		assertThat(pagina.getContent().get(0).placa()).isEqualTo("ABC1234");
+		assertThat(pagina.getContent().get(0).clienteId()).isEqualTo(CLIENTE_ID);
+	}
+
+	@Test
+	void listaSemFiltro() {
+		var pageable = PageRequest.of(0, 20);
+		when(repository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(new Veiculo("ABC1234", "Fiat", "Uno", 2010, cliente))));
+		var pagina = consultar.listar(null, pageable);
+		assertThat(pagina.getContent()).hasSize(1);
+		assertThat(pagina.getContent().get(0).clienteId()).isEqualTo(CLIENTE_ID);
+	}
+
+	@Test
+	void removeVeiculoExistente() {
+		UUID id = UUID.randomUUID();
+		when(repository.existsById(id)).thenReturn(true);
+		remover.remover(id);
+		verify(repository).deleteById(id);
+		verify(repository).flush();
+	}
+
+	@Test
+	void removerInexistenteLanca404() {
+		assertThatThrownBy(() -> remover.remover(UUID.randomUUID())).isInstanceOf(VeiculoNaoEncontradoException.class);
+		verify(repository, never()).deleteById(any());
+	}
+}

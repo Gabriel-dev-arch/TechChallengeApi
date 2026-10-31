@@ -1,0 +1,8 @@
+-- Baseline do schema da aplicação.
+--
+-- Convenções para as próximas migrations (criadas junto com cada feature):
+--   * Nome: V<n>__<descricao_em_snake_case>.sql (ex.: V2__criar_tabela_clientes.sql)
+--   * Nunca editar uma migration já aplicada; crie uma nova.
+--   * Chaves primárias UUID: usar `id uuid PRIMARY KEY DEFAULT gen_random_uuid()`.
+--   * Tabelas de entidades que estendem BaseEntity devem ter as colunas:
+--       created_at timestamptz NOT NULL, updated_at timestamptz NOT NULL, version bigint NOT NULL

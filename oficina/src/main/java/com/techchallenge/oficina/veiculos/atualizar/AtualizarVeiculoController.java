@@ -1,0 +1,30 @@
+package com.techchallenge.oficina.veiculos.atualizar;
+
+import com.techchallenge.oficina.veiculos.dominio.VeiculoResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@Tag(name = "Veiculos", description = "Atualizar Veiculos")
+@RestController
+@RequestMapping("/veiculos")
+public class AtualizarVeiculoController {
+
+	private final AtualizarVeiculoService service;
+
+	public AtualizarVeiculoController(AtualizarVeiculoService service) {
+		this.service = service;
+	}
+
+	@PutMapping("/{id}")
+    @Operation(
+            summary = "Atualizar veiculos",
+            description = "Atualizar veiculos"
+    )
+	public VeiculoResponse atualizar(@PathVariable UUID id, @Valid @RequestBody AtualizarVeiculoRequest request) {
+		return service.atualizar(id, request);
+	}
+}
