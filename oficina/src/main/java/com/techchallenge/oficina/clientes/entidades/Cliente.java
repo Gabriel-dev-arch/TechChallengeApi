@@ -1,6 +1,7 @@
 package com.techchallenge.oficina.clientes.entidades;
 
 import com.techchallenge.oficina.shared.persistence.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -24,6 +25,18 @@ public class Cliente extends BaseEntity {
 	private String documento;
 
 	private String telefone;
+
+	@JsonIgnore
+	private String senhaHash;
+
+	public Cliente(String firstName, String lastName, String email, String documento, String telefone, String senhaHash) {
+		this(firstName, lastName, email, documento, telefone);
+		alterarSenha(senhaHash);
+	}
+
+	public void alterarSenha(String senhaHash) {
+		this.senhaHash = senhaHash;
+	}
 
 	public Cliente(String firstName, String lastName, String email, String documento, String telefone) {
 		atualizar(firstName, lastName, email, documento, telefone);

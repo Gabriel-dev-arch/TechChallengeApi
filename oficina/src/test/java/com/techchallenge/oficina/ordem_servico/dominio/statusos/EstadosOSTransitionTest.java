@@ -5,6 +5,7 @@ import com.techchallenge.oficina.ordem_servico.dominio.statusos.status.*;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.ApplicationEventPublisher;
@@ -62,6 +63,21 @@ class EstadosOSTransitionTest {
         assertThatThrownBy(() -> estadosOS.executa(os, step))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("status aguardando aprovação");
+    }
+
+    @Test
+    void deveIniciarFinalizarEEntregarPeloStatusAtual() {
+        OrdemServico os = new OrdemServico(StatusOS.APROVADA, BigDecimal.ZERO,
+                List.of(), List.of(), List.of(), "Diagnóstico", null, null, null);
+
+        assertThat(estadosOS.executa(os)).isInstanceOf(Aprovada.class);
+        assertThat(os.getStatus()).isEqualTo(StatusOS.EM_EXECUCAO);
+        assertThat(estadosOS.executa(os)).isInstanceOf(ExecutarServico.class);
+        assertThat(os.getStatus()).isEqualTo(StatusOS.FINALIZADA);
+        assertThat(estadosOS.executa(os)).isInstanceOf(Finalizar.class);
+        assertThat(os.getStatus()).isEqualTo(StatusOS.ENTREGUE);
+        verify(repository, times(3)).saveAndFlush(os);
+        verify(eventPublisher, times(3)).publishEvent(any(Object.class));
     }
 
     private static Stream<org.junit.jupiter.params.provider.Arguments> transicoes() {

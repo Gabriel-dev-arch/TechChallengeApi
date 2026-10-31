@@ -16,6 +16,7 @@ import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResp
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.EstadosOS;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
+import com.techchallenge.oficina.ordem_servico.finalizar.FinalizarOSService;
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoRepository;
 import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
 import com.techchallenge.oficina.pecasinsumos.dominio.UnidadeMedida;
@@ -61,6 +62,8 @@ class CadastrarOSServiceTest {
     private FuncionarioRepository funcionarioRepository;
     @Mock
     private EstadosOS estadosOS;
+    @Mock
+    private FinalizarOSService finalizarOSService;
 
     @InjectMocks
     private CadastrarOSService service;
@@ -134,7 +137,7 @@ class CadastrarOSServiceTest {
 
         assertThat(service.iniciaDiagnostico(OS_ID)).isNotNull();
 
-        verify(estadosOS).executa(os, StatusOS.RECEBIDA);
+        verify(estadosOS).executa(os);
     }
 
     @Test
@@ -152,7 +155,7 @@ class CadastrarOSServiceTest {
 
         assertThat(service.iniciaExecucao(OS_ID)).isNotNull();
 
-        verify(estadosOS).executa(os, StatusOS.EM_EXECUCAO);
+        verify(estadosOS).executa(os);
     }
 
     @Test
@@ -166,16 +169,18 @@ class CadastrarOSServiceTest {
     @Test
     void finalizaExecucaoOSExistente() {
         OrdemServico os = criarOS(StatusOS.EM_EXECUCAO);
-        when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
+        OrdemServicoResponse response = OrdemServicoResponse.from(os);
+        when(finalizarOSService.finalizar(OS_ID)).thenReturn(response);
 
-        assertThat(service.finalizaExecucao(OS_ID)).isNotNull();
+        assertThat(service.finalizaExecucao(OS_ID)).isSameAs(response);
 
-        verify(estadosOS).executa(os, StatusOS.FINALIZADA);
+        verify(finalizarOSService).finalizar(OS_ID);
+        verifyNoInteractions(estadosOS, repository);
     }
 
     @Test
     void finalizaExecucaoOSInexistente() {
-        when(repository.findById(OS_ID)).thenReturn(Optional.empty());
+        when(finalizarOSService.finalizar(OS_ID)).thenThrow(new OrdemServicoNaoEncontradaException(OS_ID));
 
         assertThatThrownBy(() -> service.finalizaExecucao(OS_ID))
                 .isInstanceOf(OrdemServicoNaoEncontradaException.class);
@@ -183,12 +188,12 @@ class CadastrarOSServiceTest {
 
     @Test
     void entregaVeiculoOSExistente() {
-        OrdemServico os = criarOS(StatusOS.ENTREGUE);
+        OrdemServico os = criarOS(StatusOS.FINALIZADA);
         when(repository.findById(OS_ID)).thenReturn(Optional.of(os));
 
         assertThat(service.entregaVeiculo(OS_ID)).isNotNull();
 
-        verify(estadosOS).executa(os, StatusOS.ENTREGUE);
+        verify(estadosOS).executa(os);
     }
 
     @Test

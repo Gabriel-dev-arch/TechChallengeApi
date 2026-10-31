@@ -18,6 +18,13 @@ public class EstadosOS {
         this.eventPublisher = eventPublisher;
     }
 
+    public AvancarStatusOSAbstract executa(OrdemServico osCadastrada) {
+        if (osCadastrada.getStatus() == StatusOS.APROVADA) {
+            return new Aprovada(osCadastrada, repository, eventPublisher);
+        }
+        return executa(osCadastrada, osCadastrada.getStatus());
+    }
+
     public AvancarStatusOSAbstract executa(OrdemServico osCadastrada, StatusOS step) {
 
         return switch (step) {

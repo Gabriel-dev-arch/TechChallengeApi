@@ -3,6 +3,7 @@ package com.techchallenge.oficina.ordem_servico.cadastrar;
 import com.techchallenge.oficina.autenticacao.dominio.ControleDeAcesso;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,9 @@ public class ClienteAprovaRecusaOSService {
     private OrdemServico buscarOSDoCliente(UUID id) {
         OrdemServico os = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
         controleDeAcesso.verificarDono(os.getCliente().getDocumento());
+        if (os.getStatus() != StatusOS.AGUARDANDO_APROVACAO) {
+            throw new TransicaoInvalidaException("A ordem de serviço deve estar aguardando aprovação");
+        }
         return os;
     }
 }

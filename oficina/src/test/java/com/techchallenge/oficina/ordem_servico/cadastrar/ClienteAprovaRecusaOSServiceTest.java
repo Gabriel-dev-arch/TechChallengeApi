@@ -5,6 +5,9 @@ import com.techchallenge.oficina.clientes.entidades.Cliente;
 import com.techchallenge.oficina.ordem_servico.cadastrar.request.ItemQuantidade;
 import com.techchallenge.oficina.ordem_servico.dominio.OrdemServicoRepository;
 import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNaoEncontradaException;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import com.techchallenge.oficina.pecasinsumos.dominio.TipoItem;
@@ -30,6 +33,17 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ClienteAprovaRecusaOSServiceTest {
+
+    @ParameterizedTest
+    @EnumSource(value = StatusOS.class, names = "AGUARDANDO_APROVACAO", mode = EnumSource.Mode.EXCLUDE)
+    void naoReabreOuRecusaUmaOrdemForaDaEtapaDeAprovacao(StatusOS status) {
+        var os = criarOS(status);
+        when(repository.findById(id)).thenReturn(Optional.of(os));
+        assertThatThrownBy(() -> service.aprovaOS(id)).isInstanceOf(TransicaoInvalidaException.class);
+        assertThatThrownBy(() -> service.recusaOS(id)).isInstanceOf(TransicaoInvalidaException.class);
+        assertThat(os.getStatus()).isEqualTo(status);
+        verify(repository, never()).saveAndFlush(any());
+    }
 
     private static final String DOCUMENTO = "52998224725";
 

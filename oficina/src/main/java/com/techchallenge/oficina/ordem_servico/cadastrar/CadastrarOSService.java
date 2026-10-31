@@ -13,6 +13,8 @@ import com.techchallenge.oficina.ordem_servico.dominio.exception.OrdemServicoNao
 import com.techchallenge.oficina.ordem_servico.dominio.exception.VeiculoNaoEncontradoException;
 import com.techchallenge.oficina.ordem_servico.dominio.response.OrdemServicoResponse;
 import com.techchallenge.oficina.ordem_servico.dominio.statusos.EstadosOS;
+import com.techchallenge.oficina.ordem_servico.finalizar.FinalizarOSService;
+import com.techchallenge.oficina.ordem_servico.dominio.exception.TransicaoInvalidaException;
 import com.techchallenge.oficina.ordem_servico.entidades.OrdemServico;
 import com.techchallenge.oficina.ordem_servico.entidades.StatusOS;
 import com.techchallenge.oficina.pecasinsumos.dominio.PecaInsumoRepository;
@@ -41,20 +43,23 @@ public class CadastrarOSService {
     private final PecaInsumoRepository pecaInsumoRepository;
     private final FuncionarioRepository funcionarioRepository;
     private final EstadosOS estadosOS;
+    private final FinalizarOSService finalizarOSService;
 
     public CadastrarOSService(OrdemServicoRepository repository, VeiculoRepository veiculoRepository,
-                              ServicoRepository servicoRepository, PecaInsumoRepository pecaInsumoRepository, FuncionarioRepository funcionarioRepository, EstadosOS estadosOS) {
+                              ServicoRepository servicoRepository, PecaInsumoRepository pecaInsumoRepository, FuncionarioRepository funcionarioRepository, EstadosOS estadosOS, FinalizarOSService finalizarOSService) {
         this.repository = repository;
         this.veiculoRepository = veiculoRepository;
         this.servicoRepository = servicoRepository;
         this.pecaInsumoRepository = pecaInsumoRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.estadosOS = estadosOS;
+        this.finalizarOSService = finalizarOSService;
         }
 
     @Transactional
     public OrdemServicoResponse cadastrar(CadastrarOSRequest request) {
 
+        // mesma normalização do cadastro de veículos: aceita minúsculas e hífen
         String placa = PlacaValidator.normalizar(request.placa());
         var veiculoComOSEmAberto = repository.buscarPorPlacaComOSEmAberto(placa);
 
@@ -81,7 +86,9 @@ public class CadastrarOSService {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
-        estadosOS.executa(osCadastrada, StatusOS.RECEBIDA);
+        exigirStatus(osCadastrada, StatusOS.RECEBIDA);
+
+        estadosOS.executa(osCadastrada);
 
         return OrdemServicoResponse.from(osCadastrada);
     }
@@ -91,19 +98,16 @@ public class CadastrarOSService {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
-        estadosOS.executa(osCadastrada, StatusOS.EM_EXECUCAO);
+        exigirStatus(osCadastrada, StatusOS.APROVADA);
+
+        estadosOS.executa(osCadastrada);
 
         return OrdemServicoResponse.from(osCadastrada);
     }
 
     @Transactional
     public OrdemServicoResponse finalizaExecucao(UUID id) {
-
-        OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
-
-        estadosOS.executa(osCadastrada, StatusOS.FINALIZADA);
-
-        return OrdemServicoResponse.from(osCadastrada, osCadastrada.getStatus());
+        return finalizarOSService.finalizar(id);
     }
 
     @Transactional
@@ -111,7 +115,9 @@ public class CadastrarOSService {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
 
-        estadosOS.executa(osCadastrada, StatusOS.ENTREGUE);
+        exigirStatus(osCadastrada, StatusOS.FINALIZADA);
+
+        estadosOS.executa(osCadastrada);
 
         return OrdemServicoResponse.from(osCadastrada, osCadastrada.getStatus());
     }
@@ -135,6 +141,9 @@ public class CadastrarOSService {
     public OrdemServicoResponse cadastrarOrcamento(UUID id) {
 
         OrdemServico osCadastrada = repository.findById(id).orElseThrow(() -> new OrdemServicoNaoEncontradaException(id));
+        if (osCadastrada.getStatus() != StatusOS.RECEBIDA && osCadastrada.getStatus() != StatusOS.EM_DIAGNOSTICO) {
+            throw new TransicaoInvalidaException("O orçamento só pode ser enviado durante o diagnóstico");
+        }
         osCadastrada.incluirDiagnostico();
         osCadastrada.atualizaStatus(StatusOS.AGUARDANDO_APROVACAO);
         return OrdemServicoResponse.from(repository.saveAndFlush(osCadastrada));
@@ -154,5 +163,11 @@ public class CadastrarOSService {
         osCadastrada.incluirPecaInsumos(itens, itensQuantidade);
 
         return OrdemServicoResponse.from(repository.save(osCadastrada));
+    }
+
+    private void exigirStatus(OrdemServico os, StatusOS esperado) {
+        if (os.getStatus() != esperado) {
+            throw new TransicaoInvalidaException("A ordem de serviço deve estar com status " + esperado);
+        }
     }
 }
