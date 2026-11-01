@@ -2,6 +2,8 @@
 
 Back-end monolítico (MVP) do sistema de atendimento e execução de serviços da oficina — FIAP SOAT, Tech Challenge Fase 1.
 
+Link para o vídeo da entrega: https://youtu.be/8qXBd_--2aU
+
 ## Sumário
 
 - [Objetivo do projeto](#objetivo-do-projeto)
